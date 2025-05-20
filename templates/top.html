@@ -1,33 +1,16 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <title>チャレンジクエスト</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/top.css') }}">
+  <meta charset="UTF-8">
+  <title>チャレンジクエスト</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/top.css') }}">
 </head>
-
 <body>
-
-    <div class="overlay">
-        <div class="nav"></div>
-        <div class="cards">
-            <div class="card">文字が入ります</div>
-            <div class="card">文字が入ります</div>
-            <div class="card">文字が入ります</div>
-        </div>
-        <button class="start-button">始める！</button>
-    </div>
+  <div class="overlay">
+    <div class="nav"></div>
+    <div class="logo"></div>
+    <button class="start-button">始める！</button>
+  </div>
 </body>
-<script>
-    function setOverlayHeight() {
-        const vh = window.innerHeight;
-        document.querySelector('.overlay').style.height = vh + 'px';
-    }
-    window.addEventListener('resize', setOverlayHeight);
-    window.addEventListener('load', setOverlayHeight);
-</script>
-
-
 </html>

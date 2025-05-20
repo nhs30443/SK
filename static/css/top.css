@@ -3,50 +3,51 @@ body {
   margin: 0;
   padding: 0;
   width: 100vw;
-  height: 100dvh; /* ← ここ重要！ */
+  height: 100dvh; /* デバイスの高さに対応 */
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: black;
-  font-family: "sans-serif";
+  font-family: sans-serif;
 }
 
 .overlay {
   width: 100%;
-  height: auto;
   aspect-ratio: 16 / 9;
   background: url('../images/top.png') no-repeat center center;
   background-size: cover;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   color: #333;
   text-align: center;
-  padding-top: 120px;
   box-sizing: border-box;
 }
 
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 50px;
-  margin: 80px 0 40px 0;
+.nav {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  width: 100%;
+  height: 100px;
+  background: url('../images/nav.png') no-repeat center center;
+  background-size: contain;
+  z-index: 999;
 }
 
-.card {
-  background-color: #fffaf0cc;
-  padding: 30px;
-  border-radius: 20px;
-  width: 280px;
-  height: 380px;
-  font-size: 18px;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+.logo {
+  width: 60%;
+  height: auto;
+  margin: 45px 0 0 0;
+  background: url('../images/logo.png') no-repeat center center;
+  background-size: contain;
+  aspect-ratio: 1472 / 832; /* 任意の比率（例：横長） */
 }
 
 .start-button {
+  margin: 50px 0 0 0;
   background-color: #4f48ec;
   color: white;
   font-size: 18px;
@@ -54,16 +55,4 @@ body {
   padding: 10px 40px;
   border-radius: 25px;
   cursor: pointer;
-}
-
-.nav {
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: -10px 0 0 0;
-  width: 100%;
-  height: 100px;
-  background: url('../images/nav.png') no-repeat center center;
-  background-size: contain;
-  z-index: 999;
 }
