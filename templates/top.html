@@ -4,86 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
-    <style>
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        body {
-            font-family: "sans-serif";
-            background: url('/static/images/top.png') no-repeat center center fixed;
-            background-size: cover;
-        }
-
-        .overlay {
-            width: 100%;
-            height: 100%;
-            color: #333;
-            text-align: center;
-            padding-top: 50px;
-            box-sizing: border-box;
-        }
-
-        .cards {
-            display: flex;
-            justify-content: center;
-            gap: 50px;
-            margin: 80px 0 40px 0;
-        }
-
-        .card {
-            background-color: #fffaf0cc;
-            padding: 30px;
-            border-radius: 20px;
-            width: 280px;
-            height: 380px;
-            font-size: 18px;
-            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-        }
-
-        .start-button {
-            background-color: #4f48ec;
-            color: white;
-            font-size: 18px;
-            border: none;
-            padding: 10px 40px;
-            border-radius: 25px;
-            cursor: pointer;
-        }
-
-        .nav {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 70px;
-            background: linear-gradient(90deg, #4f48ec, #9161ff);
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 30px;
-            font-weight: bold;
-            font-size: 1.5rem;
-            letter-spacing: 1.2px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
-            transition: background 0.3s ease;
-            cursor: default;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/top.css') }}">
 </head>
 
 <body>
 
     <div class="overlay">
-        <div class="nav">チャレンジクエスト</div>
+        <div class="nav"></div>
         <div class="cards">
             <div class="card">文字が入ります</div>
             <div class="card">文字が入ります</div>
@@ -92,5 +20,14 @@
         <button class="start-button">始める！</button>
     </div>
 </body>
+<script>
+    function setOverlayHeight() {
+        const vh = window.innerHeight;
+        document.querySelector('.overlay').style.height = vh + 'px';
+    }
+    window.addEventListener('resize', setOverlayHeight);
+    window.addEventListener('load', setOverlayHeight);
+</script>
+
 
 </html>
