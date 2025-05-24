@@ -1,16 +1,71 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-  <meta charset="UTF-8">
-  <title>チャレンジクエスト</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/top.css') }}">
+    <meta charset="UTF-8">
+    <title>チャレンジクエスト</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/top.css') }}">
 </head>
+
 <body>
-  <div class="overlay">
-    <div class="nav"></div>
-    <div class="logo"></div>
-    <button class="start-button">始める！</button>
-  </div>
+    <div class="container">
+        <a href="/" class="click-area">
+            <div class="content">
+                <div class="background"></div> <!-- 背景用の要素 -->
+                <div class="logo"></div>
+                <div class="tap-to-start">Tap to Start</div>
+            </div>
+        </a>
+        <div class="nav">
+            <img src="static/images/nav.png" alt="ナビゲーション">
+        </div>
+    </div>
+
+    <script>
+        const text = document.querySelector('.tap-to-start');
+
+        let angle = 0;
+
+        function animate() {
+            const offset = Math.sin(angle) * 5; // 上下5pxで揺らす
+            text.style.transform = `translateY(${offset}px)`;
+            angle += 0.03;
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        const clickArea = document.querySelector('.click-area');
+        const background = document.querySelector('.background');
+
+        clickArea.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            // Tap to Start をフェードアウト
+            text.classList.add('fade-out');
+
+            // 1回目の拡大
+            background.style.transform = 'scale(1.05)';
+
+            setTimeout(() => {
+                // 縮小に戻す
+                background.style.transform = 'scale(1.02)';
+
+                setTimeout(() => {
+                    // 2回目の拡大
+                    background.classList.add('slow-zoom');
+                    background.style.transform = 'scale(1.5)';
+                    background.classList.add('blur');
+
+                    setTimeout(() => {
+                        // 画面遷移
+                        window.location.href = clickArea.href;
+                    }, 800); // 最後の拡大が見える時間
+                }, 300); // 縮小している時間
+            }, 300); // 最初の拡大の時間
+        });
+    </script>
 </body>
+
 </html>
