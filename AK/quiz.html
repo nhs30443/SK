@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>算数クイズ</title>
+    <style>
+        body { font-family: sans-serif; padding: 30px; }
+        .question { font-size: 24px; margin-bottom: 20px; }
+        .choice { margin: 10px 0; }
+        #result { font-weight: bold; font-size: 20px; margin-top: 20px; }
+        .correct { color: green; }
+        .wrong { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🎲 算数クイズ 🎲</h1>
+    <div class="question">3 × 4 = ?</div>
+    <form id="quizForm">
+
+        <div class="choice">
+            <label>
+                <input type="radio" name="answer" value="2"> A. 2
+            </label>
+        </div>
+        <div class="choice">
+            <label>
+                <input type="radio" name="answer" value="12"> B. 12
+            </label>
+        </div>
+        <div class="choice">
+            <label>
+                <input type="radio" name="answer" value="14"> C. 14
+            </label>
+        </div>
+        <div class="choice">
+            <label>
+                <input type="radio" name="answer" value="5"> D. 5
+            </label>
+        </div>
+        <button type="button" onclick="checkAnswer()">答え合わせ</button>
+        <div id="result"></div>
+    </form>
+
+    <script>
+    function checkAnswer() {
+        const radios = document.getElementsByName("answer");
+        let selected = null;
+        for (const r of radios) {
+            if (r.checked) {
+                selected = parseInt(r.value);
+                break;
+            }
+        }
+
+        const resultDiv = document.getElementById("result");
+
+        if (selected === null) {
+            resultDiv.textContent = "選択肢を選んでください。";
+            resultDiv.className = "";
+        } else if (selected === 12) {
+            resultDiv.textContent = "⭕ 正解です！";
+            resultDiv.className = "correct";
+        } else {
+            resultDiv.textContent = "❌ 不正解です。";
+            resultDiv.className = "wrong";
+        }
+    }
+    </script>
+</body>
+</html>

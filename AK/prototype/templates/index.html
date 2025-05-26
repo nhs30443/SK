@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クイズアプリ</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        #question {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 5px;
+        }
+        .option-button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .option-button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>クイズアプリ</h1>
+    <div>
+        <label for="grade">学年:</label>
+        <select id="grade">
+            <option value="1">1年生</option>
+            <option value="2">2年生</option>
+            <option value="3">3年生</option>
+        </select>
+        <button id="start-button">クイズ開始</button>
+    </div>
+
+    <div id="question"></div>
+    <div id="options">
+        <button class="option-button" data-answer=""></button>
+        <button class="option-button" data-answer=""></button>
+        <button class="option-button" data-answer=""></button>
+    </div>
+    <div id="result"></div>
+    <div id="correct-answer" style="display:none;"></div>
+
+    <script>
+    $(document).ready(function() {
+        console.log("ドキュメント準備完了");
+
+        // クイズ開始ボタン
+        $('#start-button').on('click', function() {
+            console.log("開始ボタンクリック");
+            var grade = $('#grade').val();
+
+            $.ajax({
+                url: '/get_question',
+                type: 'POST',
+                dataType: 'json',
+                data: { grade: grade },
+                success: function(data) {
+                    console.log("問題取得成功:", data);
+
+                    // 問題文表示
+                    $('#question').text(data.question);
+
+                    // 選択肢設定
+                    $('.option-button').each(function(index) {
+                        if(data.options && data.options[index]) {
+                            $(this)
+                                .text(data.options[index])
+                                .data('answer', data.options[index])
+                                .prop('disabled', false)
+                                .show();
+                        }
+                    });
+
+                    // 正解データ保存
+                    if(data.correct_answer) {
+                        $('#correct-answer')
+                            .data('correct-answer', data.correct_answer)
+                            .attr('data-correct', data.correct_answer);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error("問題取得エラー:", status, error);
+                    alert('問題の取得に失敗しました: ' + error);
+                }
+            });
+        });
+
+        // 解答ボタン
+        $(document).on('click', '.option-button', function() {
+            console.log("解答ボタンクリック");
+            var $btn = $(this);
+            $btn.prop('disabled', true);
+
+            // 正解データ取得
+            var correctAnswer = $('#correct-answer').data('correct-answer') ||
+                               $('#correct-answer').attr('data-correct');
+
+            if(!correctAnswer) {
+                alert('正解データが読み込まれていません');
+                $btn.prop('disabled', false);
+                return;
+            }
+
+            $.ajax({
+                url: '/check_answer',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    user_answer: $btn.data('answer'),
+                    correct_answer: correctAnswer
+                },
+                success: function(data) {
+                    console.log("判定結果:", data);
+
+                    var resultHtml = data.correct ?
+                        '<span style="color:green">✅ 正解!</span>' :
+                        '<span style="color:red">❌ 不正解! 正解は ' + correctAnswer + '</span>';
+
+                    $('#result')
+                        .html(resultHtml)
+                        .css({display: 'block', opacity: 0})
+                        .animate({opacity: 1}, 500);
+                },
+                error: function(xhr, status, error) {
+                    console.error("判定エラー:", status, error);
+                    alert('判定に失敗しました: ' + error);
+                    $btn.prop('disabled', false);
+                }
+            });
+        });
+    });
+    </script>
+</body>
+</html>
