@@ -27,6 +27,10 @@ def conn_db():
 def index():
     return render_template("top.html")
 
+@app.route('/main')
+def main():
+    return render_template("main.html")
+
 
 
 
