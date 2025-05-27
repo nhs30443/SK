@@ -4,3 +4,9 @@ document.querySelectorAll('.choice').forEach(choice => {
     alert(`「${choice.textContent}」が選ばれました`);
     });
 });
+
+// ハンバーガーメニュー開閉
+document.getElementById("hamburger").addEventListener("click", () => {
+    const menu = document.getElementById("menu");
+    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+});
