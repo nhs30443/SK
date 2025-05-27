@@ -5,8 +5,9 @@ document.querySelectorAll('.choice').forEach(choice => {
     });
 });
 
-// ハンバーガーメニュー開閉
-document.getElementById("hamburger").addEventListener("click", () => {
-    const menu = document.getElementById("menu");
-    menu.style.display = (menu.style.display === "block") ? "none" : "block";
+$(function(){
+  $('#hamburger').on('click',function(){
+    $('#hamburger').toggleClass("open");
+    $('#header-menu').slideToggle();
+  });
 });
