@@ -68,14 +68,64 @@
     .choice:hover {
         background-color: #ffe680;
     }
+
+    .hamburger {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 30px;
+        color: white;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    .menu {
+        position: absolute;
+        top: 60px;
+        right: 20px;
+        background-color: rgba(0, 0, 0, 0.9);
+        border-radius: 10px;
+        padding: 10px 20px;
+        display: none;
+        z-index: 2;
+    }
+
+    .menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu li {
+        margin: 10px 0;
+    }
+
+    .menu a {
+        color: white;
+        text-decoration: none;
+        font-size: 18px;
+    }
+
+    .menu a:hover {
+        color: yellow;
+    }
     </style>
 </head>
 <body>
     <header>
-        <img src="../../../../3年/SK/images/nav.png" class="navi">
+         <div class="hamburger" id="hamburger">
+            &#9776; <!-- ハンバーガーアイコン（Unicode） -->
+        </div>
+        <nav class="menu" id="menu">
+            <ul>
+                <li><a href="#">ホーム</a></li>
+                <li><a href="#">設定</a></li>
+                <li><a href="#">ヘルプ</a></li>
+            </ul>
+        </nav>
     </header>
     <div class="game-container">
-    <img src="../../../../3年/SK/images/back.png" class="background" alt="背景画像">
+    <img src="{{ url_for('static', filename='images/back.png') }}" alt="背景です" class="background">
 
 
     <div class="question-box">
