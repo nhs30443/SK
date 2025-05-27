@@ -1,0 +1,133 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: sans-serif;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  background-color: white;
+  overflow: hidden;
+}
+
+/* 背景画像だけの要素 */
+.background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../images/top.png') no-repeat center center;
+  background-size: cover;
+  z-index: 0;
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+  filter: blur(5px);
+}
+
+.board {
+  position: absolute;
+  top: 10%;
+  left: 5%;
+  right: 5%;
+  bottom: 10%;
+  max-width: 1000px;
+  max-height: 500px;
+  margin: auto;
+  padding: 1.5em 2em;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(230, 230, 250, 0.85));
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #222;
+  backdrop-filter: saturate(180%) blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.board > p {
+  font-size: clamp(12px, 3vw, 40px);
+  margin-bottom: 1em;
+  font-weight: bold;
+  text-align: center;
+  margin: 2% 0 5% 0;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+  width: 100%;
+  font-size: clamp(10px, 2vw, 30px);
+  align-items: center;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0 1.5em;
+  box-sizing: border-box;
+}
+
+label {
+  margin-left: 0;
+  white-space: nowrap;
+  font-size: inherit;
+  flex-basis: 40%;
+  font-weight: 600;
+  color: #444;
+}
+
+input {
+  margin-right: 0;
+  flex-basis: 55%;
+  min-width: 150px;
+  padding: 0.6em 0.8em;
+  font-size: inherit;
+  border: 2px solid #6a11cb;
+  border-radius: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+  font-size: clamp(8px, 1.6vw, 24px);
+}
+
+input:focus {
+  outline: none;
+  border-color: #2575fc;
+  box-shadow: 0 0 8px #2575fc;
+  background-color: #f0f4ff;
+}
+
+button[type="submit"] {
+  width: 20%;  /* ここで横幅を指定 */
+  margin-top: 1.2em;
+  padding: 0.6em 1.5em;
+  font-size: clamp(10px, 2vw, 20px);
+  font-weight: 700;
+  color: white;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(38, 115, 253, 0.6);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+button[type="submit"]:hover {
+  background: linear-gradient(90deg, #2575fc, #6a11cb);
+  box-shadow: 0 8px 20px rgba(38, 115, 253, 0.9);
+}

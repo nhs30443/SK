@@ -22,15 +22,25 @@ def conn_db():
 ### パスの定義
 ############################################################################
 
-# TOP画面
+# トップページ
 @app.route('/')
 def index():
     return render_template("top.html")
 
+
+# 新規登録ページ
+@app.route('/register')
+def register():
+    return render_template("register.html")
+
+
+# メインページ
 @app.route('/main')
 def main():
     return render_template("main.html")
 
+
+# 問題画面
 @app.route('/question')
 def question():
     return render_template("question.html")

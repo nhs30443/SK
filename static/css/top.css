@@ -79,7 +79,7 @@ html, body {
   position: relative;
   z-index: 1;
   color: white;
-  font-size: 3rem;
+  font-size: clamp(20px, 4vw, 100px);
   transition: opacity 1s ease; /* 1.5秒かけてフェードアウト */
 }
 
