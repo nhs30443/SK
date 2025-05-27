@@ -136,3 +136,13 @@ body {
         top: 22px;
         transform: translateY(-6px) rotate(33deg);
     }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.4); /* 半透明の黒 */
+        z-index: 5; /* メニューより下、背景より上に */
+        display: none;
+    }
