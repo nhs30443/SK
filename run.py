@@ -10,8 +10,8 @@ def conn_db():
     conn = mysql.connector.connect(
         host="127.0.0.1",
         user="root",
-        password="ngr256256",
-        db="2024py23db",
+        password="root",
+        db="cqDB",
         charset="utf8"
     )
     return conn
