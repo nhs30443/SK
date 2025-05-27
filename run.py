@@ -31,6 +31,10 @@ def index():
 def main():
     return render_template("main.html")
 
+@app.route('/question')
+def question():
+    return render_template("question.html")
+
 
 
 
