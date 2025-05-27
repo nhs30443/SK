@@ -3,113 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>クイズ画面</title>
-    <style>
-    body {
-        margin: 0;
-        font-family: sans-serif;
-        background-color: #000;
-    }
-
-    .game-container {
-        position: relative;
-        width: 100vw;
-        height: 100vh;
-    }
-
-    .background {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        object-fit: cover; /* 引き伸ばさない */
-        z-index: 0;
-    }
-
-    .question-box {
-        position: absolute;
-        top: 100px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 900px;
-        height: 80px;
-        padding: 20px;
-        background: rgba(255, 255, 204, 0.9);
-        border-radius: 20px;
-        text-align: center;
-        font-size: 28px;
-        font-weight: bold;
-        z-index: 1;
-    }
-
-    .choices {
-        position: absolute;
-        bottom: 50px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 1200px;
-        display: flex;
-        justify-content: space-between;
-        z-index: 1;
-    }
-
-    .choice {
-        width: 22%;
-        height: 200px; /* ← 縦長にしたい場合ここで調整 */
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 15px;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-weight: bold;
-        cursor: pointer;
-        transition: 0.2s;
-    }
-
-    .choice:hover {
-        background-color: #ffe680;
-    }
-
-    .hamburger {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 30px;
-        color: white;
-        cursor: pointer;
-        z-index: 2;
-    }
-
-    .menu {
-        position: absolute;
-        top: 60px;
-        right: 20px;
-        background-color: rgba(0, 0, 0, 0.9);
-        border-radius: 10px;
-        padding: 10px 20px;
-        display: none;
-        z-index: 2;
-    }
-
-    .menu ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .menu li {
-        margin: 10px 0;
-    }
-
-    .menu a {
-        color: white;
-        text-decoration: none;
-        font-size: 18px;
-    }
-
-    .menu a:hover {
-        color: yellow;
-    }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/question.css') }}">
 </head>
 <body>
     <header>
@@ -140,6 +34,6 @@
     </div>
     </div>
 
-    <script src="../../../../3年/SK/js/question.js"></script>
+    <script src="{{ url_for('static', filename='js/question.js') }}"></script>
 </body>
 </html>
