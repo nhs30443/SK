@@ -1,0 +1,148 @@
+body {
+        margin: 0;
+        font-family: sans-serif;
+        background-color: #000;
+    }
+
+    .game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+    }
+
+    .background {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* 引き伸ばさない */
+        z-index: 0;
+    }
+
+    .question-box {
+        position: absolute;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 900px;
+        height: 80px;
+        padding: 20px;
+        background: rgba(255, 255, 204, 0.9);
+        border-radius: 20px;
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        z-index: 1;
+    }
+
+    .choices {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 1200px;
+        display: flex;
+        justify-content: space-between;
+        z-index: 1;
+    }
+
+    .choice {
+        width: 22%;
+        height: 200px; /* ← 縦長にしたい場合ここで調整 */
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .choice:hover {
+        background-color: #ffe680;
+    }
+
+    .hamburger {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 50px;
+        color: white;
+        cursor: pointer;
+        z-index: 2;
+    }
+
+    nav {
+        position: fixed;
+        top: 24px;
+        width: 100%;
+          z-index: 10;
+    }
+    ul {
+        /*最初はナビゲーションボタンは非表示*/
+        display: none;
+        list-style:none;
+    }
+    li a{
+        padding: 8px;
+        font-size: 60px;
+        color: #ededf5;
+        display: block;
+        text-align: center;
+        text-decoration: none;
+    }
+    .hamburger {
+        position: absolute;
+        top: 32px;
+        right:32px;
+        cursor: pointer;
+        width: 32px;
+        height: 24px;
+        z-index: 10;
+    }
+    .hamburger span {
+        /*3本の線を作る*/
+        transition: all .3s;
+        position: absolute;
+        height: 2px;
+        background-color: #333;
+        width:100%;
+        z-index: 10;
+    }
+    .hamburger span:nth-of-type(1) {
+        /*上の線の位置*/
+        top: 4px;
+    }
+    .hamburger span:nth-of-type(2) {
+        /*真ん中の線の位置*/
+        top: 12px;
+    }
+    .hamburger span:nth-of-type(3) {
+        /*下の線の位置*/
+        top: 20px;
+    }
+    .hamburger.open span:nth-of-type(1) {
+        /*openのとき、上の線を右斜めにする*/
+        top: 10px;
+        transform: translateY(6px) rotate(-33deg);
+    }
+    .hamburger.open span:nth-of-type(2) {
+        /*真ん中の線を消す*/
+        opacity: 0;
+    }
+    .hamburger.open span:nth-of-type(3) {
+        /*下の線を左斜めにする*/
+        top: 22px;
+        transform: translateY(-6px) rotate(33deg);
+    }
+    .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.7); /* 半透明の黒 */
+        z-index: 5; /* メニューより下、背景より上に */
+        display: none;
+    }
