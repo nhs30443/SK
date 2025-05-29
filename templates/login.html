@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ログイン</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="background"></div> <!-- 背景用の要素 -->
+        <div class="board">
+            <p>ログイン</p>
+            <form action="/register" method="post">
+                <div class="form-row">
+                    <label for="emailAddress">メールアドレス：</label>
+                    <input type="email" id="emailAddress" name="emailAddress" required>
+                </div>
+
+                <div class="form-row">
+                    <label for="password">パスワード：</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+
+                <button type="submit">ログイン</button>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

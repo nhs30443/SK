@@ -34,6 +34,12 @@ def register():
     return render_template("register.html")
 
 
+# ログインページ
+@app.route('/login')
+def login():
+    return render_template("login.html")
+
+
 # メインページ
 @app.route('/main')
 def main():
