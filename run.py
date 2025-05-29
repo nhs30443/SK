@@ -40,6 +40,12 @@ def login():
     return render_template("login.html")
 
 
+# 設定画面
+@app.route('/config')
+def config():
+    return render_template("config.html")
+
+
 # メインページ
 @app.route('/main')
 def main():
