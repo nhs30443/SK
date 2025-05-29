@@ -34,10 +34,47 @@
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
                 </div>
 
+                <div class="form-row">
+                    <label>性別：</label>
+                    <div id="gender-buttons">
+                        <button type="button" onclick="selectGender('male', this)">男</button>
+                        <button type="button" onclick="selectGender('female', this)">女</button>
+                    </div>
+                    <input type="hidden" name="gender" id="gender" required>
+                </div>
+
+                <div class="form-row">
+                    <label for="grade">学年：</label>
+                    <select id="grade" name="grade" required>
+                        <option value="" disabled selected>選択してください</option>
+                        <option value="1">1年生</option>
+                        <option value="2">2年生</option>
+                        <option value="3">3年生</option>
+                        <option value="4">4年生</option>
+                        <option value="5">5年生</option>
+                        <option value="6">6年生</option>
+                    </select>
+                </div>
+
                 <button type="submit">登録</button>
             </form>
+
+            <button type="button" class="btn-back" onclick="history.back()">◀ 戻る</button>
+
         </div>
     </div>
+
+
+
+    <script>
+        function selectGender(value, button) {
+            document.getElementById('gender').value = value;
+            const buttons = document.querySelectorAll('#gender-buttons button');
+            buttons.forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+        }
+    </script>
+    
 </body>
 
 </html>

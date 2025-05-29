@@ -35,10 +35,10 @@ html, body {
 
 .board {
   position: absolute;
-  top: 8%;
+  top: 10%;
   left: 5%;
   right: 5%;
-  bottom: 8%;
+  bottom: 10%;
   max-width: 1000px;
   max-height: 600px;
   margin: auto;
@@ -113,7 +113,7 @@ input:focus {
 
 button[type="submit"] {
   width: 20%;  /* ここで横幅を指定 */
-  margin-top: 1.2em;
+  margin: 1.2em 0 1.2em 0;
   padding: 0.6em 1.5em;
   font-size: clamp(10px, 2vw, 20px);
   font-weight: 700;
@@ -129,4 +129,84 @@ button[type="submit"] {
 button[type="submit"]:hover {
   background: linear-gradient(90deg, #2575fc, #6a11cb);
   box-shadow: 0 8px 20px rgba(38, 115, 253, 0.9);
+}
+
+
+
+#gender-buttons button {
+  padding: 0.4em 1.2em;
+  font-size: clamp(8px, 1.4vw, 20px);
+  font-weight: 600;
+  color: #444;
+  background: white;        /* 未選択は白背景 */
+  border: 2px solid #6a11cb; /* 薄いボーダーで囲む */
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+  min-width: 80px;
+  box-shadow: none;
+}
+
+#gender-buttons button:hover {
+  background: #f0f4ff; /* ホバーは淡い色 */
+  border-color: #2575fc;
+}
+
+#gender-buttons button.selected {
+  background: linear-gradient(90deg, #6ca0ff, #99bbff); /* 少し濃いめの水色～明るい青 */
+  color: #003366; /* 文字色も濃くしてはっきり見えるように */
+  box-shadow: 0 2px 6px rgba(0, 86, 179, 0.5); /* 影も濃く */
+}
+
+/* 学年選択用セレクトボックス */
+select {
+  flex-basis: 55%;
+  min-width: 150px;
+  padding: 0.6em 0.8em;
+  font-size: inherit;
+  border: 2px solid #6a11cb;
+  border-radius: 12px;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-size: clamp(8px, 1.6vw, 24px);
+  background-color: white;
+  color: #444;
+  cursor: pointer;
+  appearance: none; /* デフォルトの矢印非表示（必要に応じて） */
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236a11cb' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75em center;
+  background-size: 10px 6px;
+}
+
+select:focus {
+  outline: none;
+  border-color: #2575fc;
+  box-shadow: 0 0 8px #2575fc;
+  background-color: #f0f4ff;
+}
+
+/* フォーム行全体の調整（labelとselectのバランス） */
+.form-row select {
+  flex-grow: 1;
+}
+
+.btn-back {
+  position: absolute;
+  top: 2em;
+  left: 2em;
+  padding: 0.3em 0.7em;
+  font-size: clamp(10px, 1.5vw, 18px);
+  font-weight: 600;
+  color: #444;
+  background-color: #eee;
+  border: 2px solid #6a11cb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  z-index: 10;
+}
+
+.btn-back:hover {
+  background-color: #d1d7ff;
 }
