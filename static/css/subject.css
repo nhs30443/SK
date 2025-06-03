@@ -45,8 +45,8 @@ html, body {
 
 /* ボタンスタイル */
 .subject-button {
-    width: 120px;
-    height: 60px;
+    width: 350px;
+    height: 200px;
     border: 3px solid #333;
     border-radius: 15px;
     font-size: 20px;
