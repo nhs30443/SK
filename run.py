@@ -58,6 +58,11 @@ def question():
     return render_template("question.html")
 
 
+# マップ画面
+@app.route('/map')
+def map():
+    return render_template("map.html")
+
 
 
 
