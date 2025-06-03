@@ -44,8 +44,7 @@ html, body {
   max-height: 500px;
   margin: auto;
   padding: 1.5em 2em;
-  /* 背景を透明にする */
-  background: transparent url('../images/map.png') no-repeat center center;
+  background: url('../images/map.png') no-repeat center center;
   background-size: contain; /* または cover、どちらが適切かは画像のアスペクト比による */
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
