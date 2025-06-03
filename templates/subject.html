@@ -1,37 +1,18 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>冒険の始まり - 科目を選ぼう！</title>
-    <link rel="stylesheet" href="style.css">
+    <title>ログイン</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css') }}">
 </head>
+
 <body>
-    <div class="game-container">
+    <div class="container">
         <div class="background"></div> <!-- 背景用の要素 -->
 
-        <!-- 科目選択ボタン -->
-        <div class="subject-container">
-            <button class="subject-btn math-btn" onclick="selectSubject('算数')">
-                📊 算数
-                <div class="sound-wave"></div>
-            </button>
-            <button class="subject-btn kanji-btn" onclick="selectSubject('漢字')">
-                📝 漢字
-                <div class="sound-wave"></div>
-            </button>
-            <button class="subject-btn english-btn" onclick="selectSubject('英語')">
-                🌍 英語
-                <div class="sound-wave"></div>
-            </button>
-        </div>
-
-
     </div>
-
-
-    </div>
-
-    <script src="subject.js"></script>
 </body>
+
 </html>
