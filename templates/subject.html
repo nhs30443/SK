@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>冒険の始まり - 科目を選ぼう！</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- タイトル -->
+        <div class="title">
+            <h1>🎮 学習の冒険を始めよう！</h1>
+            <p>どの科目で冒険する？</p>
+        </div>
+
+        <!-- 科目選択ボタン -->
+        <div class="subject-container">
+            <button class="subject-btn math-btn" onclick="selectSubject('算数')">
+                📊 算数
+                <div class="sound-wave"></div>
+            </button>
+            <button class="subject-btn kanji-btn" onclick="selectSubject('漢字')">
+                📝 漢字
+                <div class="sound-wave"></div>
+            </button>
+            <button class="subject-btn english-btn" onclick="selectSubject('英語')">
+                🌍 英語
+                <div class="sound-wave"></div>
+            </button>
+        </div>
+    </div>
+
+    <script src="subject.js"></script>
+</body>
+</html>
