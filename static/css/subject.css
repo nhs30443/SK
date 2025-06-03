@@ -27,8 +27,5 @@ html, body {
   top: 0; left: 0; right: 0; bottom: 0;
   background: url('../images/top.png') no-repeat center center;
   background-size: cover;
-  z-index: 0;
-  transition: transform 0.5s ease;
-  transform-origin: center center;
-  filter: blur(5px);
+
 }
