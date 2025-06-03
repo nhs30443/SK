@@ -37,8 +37,8 @@ html, body {
 .board {
   position: absolute;
   top: 10%;
-  left: 5%;
-  right: 5%;
+  /*left: 5%;*/
+  /*right: 5%;*/
   bottom: 10%;
   max-width: 1000px;
   max-height: 500px;
