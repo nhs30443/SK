@@ -1,58 +1,39 @@
-/* 基本リセット */
-body, html {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    font-family: 'Meiryo', sans-serif;
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: sans-serif;
 }
 
-/* ぼかし背景コンテナ */
-.blur-container {
-    position: relative;
-    height: 100vh;
-    overflow: hidden;
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  background-color: white;
+  overflow: hidden;
 }
 
-/* 背景画像設定 */
-.blur-background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-
-    /* url()関数で画像パスを指定 */
-    background-image: url('./images/top.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    /* ぼかし効果 */
-    filter: blur(10px);
-
-    /* パフォーマンス最適化 */
-    transform: translate3d(0, 0, 0);
-    backface-visibility: hidden;
-    z-index: -1;
+/* 背景画像だけの要素 */
+.background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../images/top.png') no-repeat center center;
+  background-size: cover;
+  z-index: 0;
+  transition: transform 0.5s ease;
+  transform-origin: center center;
+  filter: blur(5px);
 }
 
-/* コンテンツスタイリング */
-.content {
-    position: relative;
-    color: white;
-    padding: 2rem;
-    background-color: rgba(0, 0, 0, 0.6);
-    border-radius: 12px;
-    max-width: 800px;
-    margin: 2rem auto;
-    backdrop-filter: blur(2px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
-}
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
-    .content {
-        padding: 1rem;
-        margin: 1rem;
-    }
-}
+
+
+
