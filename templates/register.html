@@ -13,46 +13,58 @@
         <div class="background"></div> <!-- 背景用の要素 -->
         <div class="board">
             <p>新規登録</p>
-            <form action="/register" method="post">
+            <form action="/registerDB" method="post">
                 <div class="form-row">
                     <label for="username">ユーザー名：</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" name="username" required value="{{ username or '' }}">
                 </div>
 
                 <div class="form-row">
                     <label for="emailAddress">メールアドレス：</label>
-                    <input type="email" id="emailAddress" name="emailAddress" required>
+                    <input type="email" id="emailAddress" name="emailAddress" required value="{{ emailAddress or '' }}">
                 </div>
+                {% if errors and errors.get('emailAddress') %}
+                <div class="error-message">
+                    {{ errors['emailAddress'] }}
+                </div>
+                {% endif %}
 
                 <div class="form-row">
                     <label for="password">パスワード：</label>
                     <input type="password" id="password" name="password" required>
                 </div>
+                {% if errors and errors.get('password') %}
+                <div class="error-message">
+                    {{ errors['password'] }}
+                </div>
+                {% endif %}
 
                 <div class="form-row">
-                    <label for="confirm_password">パスワード（確認）：</label>
+                    <label for="confirmPassword">パスワード（確認）：</label>
                     <input type="password" id="confirmPassword" name="confirmPassword" required>
                 </div>
+                {% if errors and errors.get('confirmPassword') %}
+                <div class="error-message">
+                    {{ errors['confirmPassword'] }}
+                </div>
+                {% endif %}
 
                 <div class="form-row">
                     <label>性別：</label>
                     <div id="gender-buttons">
-                        <button type="button" onclick="selectGender('male', this)">男</button>
-                        <button type="button" onclick="selectGender('female', this)">女</button>
+                        <button type="button" onclick="selectGender('male', this)" class="{{ 'selected' if gender == 'male' else '' }}">男</button>
+                        <button type="button" onclick="selectGender('female', this)" class="{{ 'selected' if gender == 'female' else '' }}">女</button>
                     </div>
-                    <input type="hidden" name="gender" id="gender" required>
+                    <input type="hidden" name="gender" id="gender" value="{{ gender or '' }}" required>
                 </div>
 
                 <div class="form-row">
-                    <label for="grade">学年：</label>
-                    <select id="grade" name="grade" required>
-                        <option value="" disabled selected>選択してください</option>
-                        <option value="1">1年生</option>
-                        <option value="2">2年生</option>
-                        <option value="3">3年生</option>
-                        <option value="4">4年生</option>
-                        <option value="5">5年生</option>
-                        <option value="6">6年生</option>
+                    <label for="gradeSetting">学年：</label>
+                    <select id="gradeSetting" name="gradeSetting" required>
+                        <option value="" disabled {% if not gradeSetting %}selected{% endif %}>選択してください</option>
+                        {% for i in range(1, 7) %}
+                            <option value="{{ i }}" {% if gradeSetting == i|string %}selected{% endif %}>{{ i }}年生</option>
+                        {% endfor %}
                     </select>
                 </div>
 
@@ -64,8 +76,6 @@
         </div>
     </div>
 
-
-
     <script>
         function selectGender(value, button) {
             document.getElementById('gender').value = value;
@@ -74,7 +84,7 @@
             button.classList.add('selected');
         }
     </script>
-    
+
 </body>
 
 </html>
