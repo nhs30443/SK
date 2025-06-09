@@ -3,16 +3,273 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ログイン</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/map.css') }}">
+    <title>ステージ選択</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100dvh;
+            background-color: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 100vw;
+            max-height: 100vh;
+            aspect-ratio: 16 / 9;
+            background-color: white;
+            overflow: hidden;
+        }
+
+        /* 背景画像だけの要素 */
+        .background {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #87CEEB 0%, #98FB98 50%, #F0E68C 100%);
+            background-size: cover;
+            z-index: 0;
+            transition: transform 0.5s ease;
+            transform-origin: center center;
+            filter: blur(3px);
+        }
+
+        /* 中心に表示するmap.png */
+        .map-image {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            max-width: 80%;
+            max-height: 80%;
+            object-fit: contain;
+            transition: opacity 0.3s ease;
+            /* 実際のmap.pngを使用する場合は以下のコメントアウトを解除 */
+            /* background: url('{{ url_for("static", filename="images/map.png") }}') no-repeat center center; */
+            /* background-size: contain; */
+
+            /* デモ用のマップ背景 */
+            background: linear-gradient(45deg, #90EE90, #FFE4B5, #DDA0DD, #F0E68C);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 800px;
+            height: 600px;
+        }
+
+        /* ステージボタンのコンテナ */
+        .stage-buttons {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            width: 800px;
+            height: 600px;
+            pointer-events: none;
+        }
+
+        /* ステージボタン */
+        .stage-button {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 4px solid #ffffff;
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            pointer-events: auto;
+        }
+
+        .stage-button:hover {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #ff5252, #ff9800);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .stage-button:active {
+            transform: scale(0.95);
+        }
+
+        /* クリア済みステージ */
+        .stage-button.cleared {
+            background: linear-gradient(135deg, #4CAF50, #8BC34A);
+            border-color: #2E7D32;
+        }
+
+        .stage-button.cleared:hover {
+            background: linear-gradient(135deg, #45a049, #7CB342);
+        }
+
+        /* ロック済みステージ */
+        .stage-button.locked {
+            background: linear-gradient(135deg, #9E9E9E, #757575);
+            border-color: #424242;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .stage-button.locked:hover {
+            transform: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        /* 星のアイコン（クリア済み） */
+        .star-icon {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #FFD700;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* 鍵のアイコン（ロック済み） */
+        .lock-icon {
+            font-size: 24px;
+            color: #424242;
+        }
+
+        /* 戻るボタン */
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 3;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #1976D2, #1565C0);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        /* タイトル */
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+    </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="background"></div> <!-- 背景用の要素 -->
-        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Map" class="map-image"> <!-- 中心に表示するマップ -->
+        <div class="background"></div>
+        <div class="map-image"></div>
+
+        <div class="title">ステージを選ぼう！</div>
+        <button class="back-button" onclick="goBack()">← 戻る</button>
+
+        <div class="stage-buttons">
+            <!-- ステージボタンを20個配置 -->
+        </div>
     </div>
+
+    <script>
+        // ステージボタンの配置座標（マップ上の位置）
+        const stagePositions = [
+            {x: 100, y: 100}, {x: 200, y: 80}, {x: 320, y: 120}, {x: 450, y: 90}, {x: 580, y: 110},
+            {x: 680, y: 140}, {x: 750, y: 200}, {x: 700, y: 280}, {x: 600, y: 320}, {x: 480, y: 300},
+            {x: 360, y: 280}, {x: 240, y: 320}, {x: 120, y: 300}, {x: 50, y: 380}, {x: 150, y: 450},
+            {x: 280, y: 480}, {x: 420, y: 460}, {x: 560, y: 480}, {x: 680, y: 450}, {x: 720, y: 380}
+        ];
+
+        // ステージの状態（0: ロック, 1: 解放, 2: クリア済み）
+        const stageStatus = [
+            2, 2, 2, 1, 1, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        ];
+
+        // ステージボタンを生成
+        function createStageButtons() {
+            const container = document.querySelector('.stage-buttons');
+
+            for (let i = 0; i < 20; i++) {
+                const stageNum = i + 1;
+                const button = document.createElement('div');
+                button.className = 'stage-button';
+                button.style.left = stagePositions[i].x + 'px';
+                button.style.top = stagePositions[i].y + 'px';
+
+                // ステージの状態に応じてスタイルを設定
+                if (stageStatus[i] === 0) {
+                    // ロック済み
+                    button.classList.add('locked');
+                    button.innerHTML = '<span class="lock-icon">🔒</span>';
+                } else if (stageStatus[i] === 2) {
+                    // クリア済み
+                    button.classList.add('cleared');
+                    button.innerHTML = stageNum + '<div class="star-icon">⭐</div>';
+                } else {
+                    // 解放済み
+                    button.innerHTML = stageNum;
+                }
+
+                // クリックイベントを追加
+                if (stageStatus[i] > 0) {
+                    button.onclick = () => selectStage(stageNum);
+                }
+
+                container.appendChild(button);
+            }
+        }
+
+        // ステージ選択時の処理
+        function selectStage(stageNum) {
+            if (confirm(`ステージ ${stageNum} を始めますか？`)) {
+                // 実際のFlaskアプリケーションでは以下のようにリダイレクト
+                window.location.href = `/question?stage=${stageNum}`;
+                // alert(`ステージ ${stageNum} を開始します！`);
+            }
+        }
+
+        // 戻るボタンの処理
+        function goBack() {
+            // 実際のFlaskアプリケーションでは以下のようにリダイレクト
+            window.location.href = '/main';
+            // alert('メイン画面に戻ります');
+        }
+
+        // ページ読み込み時にステージボタンを生成
+        document.addEventListener('DOMContentLoaded', createStageButtons);
+    </script>
 </body>
 
 </html>
