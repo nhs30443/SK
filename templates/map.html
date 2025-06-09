@@ -72,27 +72,27 @@
         /* ステージボタン */
         .stage-button {
             position: absolute;
-            width: 60px;
-            height: 60px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            border: 4px solid #ffffff;
+            border: 3px solid #ffffff;
             background: linear-gradient(135deg, #ff6b6b, #ffa500);
             color: white;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
             pointer-events: auto;
         }
 
         .stage-button:hover {
-            transform: scale(1.1);
+            transform: scale(1.15);
             background: linear-gradient(135deg, #ff5252, #ff9800);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
         }
 
         .stage-button:active {
@@ -125,26 +125,78 @@
         /* 星のアイコン（クリア済み） */
         .star-icon {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            width: 20px;
-            height: 20px;
+            top: -6px;
+            right: -6px;
+            width: 16px;
+            height: 16px;
             background: #FFD700;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 12px;
+            font-size: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
 
         /* 鍵のアイコン（ロック済み） */
         .lock-icon {
-            font-size: 24px;
+            font-size: 18px;
             color: #424242;
         }
 
-        /* 戻るボタン */
+        /* 設定パネル（開発用） */
+        .config-panel {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 4;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 12px;
+            max-width: 250px;
+            display: none;
+        }
+
+        .config-panel.show {
+            display: block;
+        }
+
+        .config-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 3;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #9C27B0, #673AB7);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .config-toggle:hover {
+            background: linear-gradient(135deg, #8E24AA, #5E35B1);
+        }
+
+        .position-input {
+            margin: 5px 0;
+            padding: 4px;
+            width: 60px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .stage-selector {
+            margin: 10px 0;
+            padding: 4px;
+            width: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
         .back-button {
             position: absolute;
             top: 20px;
@@ -190,6 +242,24 @@
 
         <div class="title">ステージを選ぼう！</div>
         <button class="back-button" onclick="goBack()">← 戻る</button>
+        <button class="config-toggle" onclick="toggleConfig()">位置調整</button>
+
+        <div class="config-panel" id="configPanel">
+            <h4>ボタン位置調整</h4>
+            <div>
+                <label>ステージ: </label>
+                <select class="stage-selector" id="stageSelector" onchange="selectStageForEdit()">
+                    <option value="0">ステージ 1</option>
+                </select>
+            </div>
+            <div>
+                <label>X: </label>
+                <input type="number" class="position-input" id="xInput" onchange="updatePosition()">
+                <label>Y: </label>
+                <input type="number" class="position-input" id="yInput" onchange="updatePosition()">
+            </div>
+            <button onclick="exportPositions()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">座標をコピー</button>
+        </div>
 
         <div class="stage-buttons">
             <!-- ステージボタンを20個配置 -->
@@ -197,12 +267,16 @@
     </div>
 
     <script>
-        // ステージボタンの配置座標（マップ上の位置）
+        // ステージボタンの配置座標（マップ上の位置）- より細かく調整
         const stagePositions = [
-            {x: 100, y: 100}, {x: 200, y: 80}, {x: 320, y: 120}, {x: 450, y: 90}, {x: 580, y: 110},
-            {x: 680, y: 140}, {x: 750, y: 200}, {x: 700, y: 280}, {x: 600, y: 320}, {x: 480, y: 300},
-            {x: 360, y: 280}, {x: 240, y: 320}, {x: 120, y: 300}, {x: 50, y: 380}, {x: 150, y: 450},
-            {x: 280, y: 480}, {x: 420, y: 460}, {x: 560, y: 480}, {x: 680, y: 450}, {x: 720, y: 380}
+            // 第1エリア（左上）
+            {x: 80, y: 90}, {x: 140, y: 70}, {x: 200, y: 85}, {x: 260, y: 105}, {x: 320, y: 80},
+            // 第2エリア（右上）
+            {x: 380, y: 95}, {x: 450, y: 75}, {x: 520, y: 90}, {x: 590, y: 110}, {x: 660, y: 85},
+            // 第3エリア（中央）
+            {x: 720, y: 150}, {x: 680, y: 220}, {x: 620, y: 280}, {x: 540, y: 320}, {x: 460, y: 340},
+            // 第4エリア（左下）
+            {x: 380, y: 380}, {x: 300, y: 420}, {x: 220, y: 460}, {x: 140, y: 440}, {x: 60, y: 410}
         ];
 
         // ステージの状態（0: ロック, 1: 解放, 2: クリア済み）
@@ -211,9 +285,18 @@
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         ];
 
+        let selectedStageIndex = 0;
+        let stageButtons = [];
+
         // ステージボタンを生成
         function createStageButtons() {
             const container = document.querySelector('.stage-buttons');
+            container.innerHTML = ''; // 既存のボタンをクリア
+            stageButtons = [];
+
+            // ステージセレクターのオプションを生成
+            const selector = document.getElementById('stageSelector');
+            selector.innerHTML = '';
 
             for (let i = 0; i < 20; i++) {
                 const stageNum = i + 1;
@@ -221,6 +304,7 @@
                 button.className = 'stage-button';
                 button.style.left = stagePositions[i].x + 'px';
                 button.style.top = stagePositions[i].y + 'px';
+                button.dataset.index = i;
 
                 // ステージの状態に応じてスタイルを設定
                 if (stageStatus[i] === 0) {
@@ -242,7 +326,56 @@
                 }
 
                 container.appendChild(button);
+                stageButtons.push(button);
+
+                // セレクターにオプション追加
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `ステージ ${stageNum}`;
+                selector.appendChild(option);
             }
+        }
+
+        // 設定パネルの表示切替
+        function toggleConfig() {
+            const panel = document.getElementById('configPanel');
+            panel.classList.toggle('show');
+        }
+
+        // 編集するステージを選択
+        function selectStageForEdit() {
+            selectedStageIndex = parseInt(document.getElementById('stageSelector').value);
+            const position = stagePositions[selectedStageIndex];
+            document.getElementById('xInput').value = position.x;
+            document.getElementById('yInput').value = position.y;
+        }
+
+        // ボタンの位置を更新
+        function updatePosition() {
+            const x = parseInt(document.getElementById('xInput').value);
+            const y = parseInt(document.getElementById('yInput').value);
+
+            if (!isNaN(x) && !isNaN(y)) {
+                stagePositions[selectedStageIndex].x = x;
+                stagePositions[selectedStageIndex].y = y;
+
+                const button = stageButtons[selectedStageIndex];
+                button.style.left = x + 'px';
+                button.style.top = y + 'px';
+            }
+        }
+
+        // 座標をコンソールにエクスポート
+        function exportPositions() {
+            const positionsStr = JSON.stringify(stagePositions, null, 2);
+            console.log('座標データ:', positionsStr);
+
+            // クリップボードにコピー
+            navigator.clipboard.writeText(positionsStr).then(() => {
+                alert('座標データがクリップボードにコピーされました！\nコンソールでも確認できます。');
+            }).catch(() => {
+                alert('座標データがコンソールに出力されました！');
+            });
         }
 
         // ステージ選択時の処理
@@ -262,7 +395,10 @@
         }
 
         // ページ読み込み時にステージボタンを生成
-        document.addEventListener('DOMContentLoaded', createStageButtons);
+        document.addEventListener('DOMContentLoaded', () => {
+            createStageButtons();
+            selectStageForEdit(); // 初期値を設定
+        });
     </script>
 </body>
 
