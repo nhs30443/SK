@@ -52,8 +52,8 @@
             object-fit: contain;
             transition: opacity 0.3s ease;
             /* 実際のmap.pngを使用する場合は以下のコメントアウトを解除 */
-            /* background: url('{{ url_for("static", filename="images/map.png") }}') no-repeat center center; */
-            /* background-size: contain; */
+            background: url('{{ url_for("static", filename="images/map.png") }}') no-repeat center center;
+            background-size: contain;
 
             /* デモ用のマップ背景 */
             background: linear-gradient(45deg, #90EE90, #FFE4B5, #DDA0DD, #F0E68C);
