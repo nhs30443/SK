@@ -20,10 +20,8 @@
 
         .container {
             position: relative;
-            width: 100%;
-            max-width: 100vw;
-            max-height: 100vh;
-            aspect-ratio: 16 / 9;
+            width: 800px;
+            height: 600px;
             background-color: white;
             overflow: hidden;
             border-radius: 10px;
@@ -45,15 +43,12 @@
         /* 中心に表示するmap.png */
         .map-image {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
             z-index: 1;
-            max-width: 80%;
-            max-height: 80%;
-            width: 800px;
-            height: 600px;
-            object-fit: contain; /* coverからcontainに戻す */
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             transition: opacity 0.3s ease;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             /* 半透明の余白を排除する追加設定 */
@@ -64,12 +59,11 @@
         /* ステージボタンのコンテナ */
         .stage-buttons {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            top: 0;
+            left: 0;
             z-index: 2;
-            width: 800px;
-            height: 600px;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             overflow: hidden;
         }
@@ -190,7 +184,7 @@
 <body>
     <div class="container">
         <div class="background"></div>
-        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Map" class="map-image">
+        <img src="https://via.placeholder.com/800x600/4CAF50/FFFFFF?text=MAP" alt="Map" class="map-image">
 
         <div class="title">ステージを選ぼう！</div>
         <button class="back-button" onclick="goBack()">← 戻る</button>
