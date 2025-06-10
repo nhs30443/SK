@@ -171,12 +171,4 @@ html, body {
 /* タイトル */
 .title {
     position: absolute;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 3;
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-}
+    top: 20px
