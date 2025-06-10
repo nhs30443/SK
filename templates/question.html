@@ -10,11 +10,11 @@
     <header class="header">
         <nav>
             <ul id="header-menu">
-                <li><a href="">HOME</a></li>
-                <li><a href="">HOME</a></li>
-                <li><a href="">HOME</a></li>
-                <li><a href="">HOME</a></li>
-                <li><a href="">EXIT</a></li>
+                <li><a href="{{ url_for('top') }}">HOME</a></li>
+                <li><a href="#">HOME</a></li>
+                <li><a href="#">HOME</a></li>
+                <li><a href="#">HOME</a></li>
+                <li><a href="#">EXIT</a></li>
             </ul>
         </nav>
         <div id="hamburger" class="hamburger">
@@ -36,7 +36,9 @@
             <div class="choice">選択肢 4</div>
         </div>
     </div>
-     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/question.js') }}"></script>
 </body>
 </html>
+
