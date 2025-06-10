@@ -1,4 +1,4 @@
-from flask import Flask , render_template , request
+from flask import Flask, render_template, request, session, json
 import mysql.connector
 import re
 
@@ -6,6 +6,8 @@ import re
 
 
 app = Flask(__name__)
+app.secret_key = "qawsedrftgyhujikolp"
+
 
 # db接続用関数
 def conn_db():
@@ -27,7 +29,15 @@ def conn_db():
 # トップページ
 @app.route('/')
 def index():
+    
     return render_template("top.html")
+
+# セッションクリア
+@app.route('/clear')
+def clear():
+    session.clear()
+    
+    return render_template("login.html")
 
 
 
@@ -124,8 +134,8 @@ def registerDB():
     con.close()
     cur.close()
     
-    # ログインページへリダイレクト
-    return render_template("login.html")
+    # 登録完了ページへへリダイレクト
+    return render_template("register_complete.html")
 
 
 
@@ -134,19 +144,55 @@ def registerDB():
 def login():
     return render_template("login.html")
 
+# ログイン認証
+@app.route('/login_check', methods = ['POST'])
+def login_check():
+    ary = []
+    #login_form.htmlから渡された情報を格納
+    emailAddress = request.form.get('emailAddress')
+    password = request.form.get('password')
 
+    con = conn_db()
+    cur = con.cursor()
+    sql = "select accountId from t_account where emailAddress = %s and password = %s"
+    cur.execute(sql,[emailAddress , password])
+    rows = cur.fetchall()
+    for row in rows:
+        ary.append(row)
+        session["login_id"] = row[0]
 
-# 設定画面
-@app.route('/config')
-def config():
-    return render_template("config.html")
+    # aryDataをセッションに保存
+    session["aryData"] = json.dumps(ary)  # リストをJSON形式で保存
+    
+    cur.close()
+    con.close()
+    
+    
+    if not ary :
+        errors = {}
+        errors["login"] = "ユーザーIDとパスワードが一致しません。"
+        return render_template("login.html", errors=errors)
+    
+    return render_template("main.html", aryData=ary)
 
 
 
 # メインページ
 @app.route('/main')
 def main():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+    
     return render_template("main.html")
+
+
+
+# 設定画面
+@app.route('/config')
+def config():
+    return render_template("config.html")
 
 
 
@@ -164,7 +210,7 @@ def map():
 
 
 
-# 科目選択
+# 科目選択画面
 @app.route('/subject')
 def subject():
     return render_template("subject.html")

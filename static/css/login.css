@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   width: 100vw;
@@ -24,7 +25,10 @@ html, body {
 /* 背景画像だけの要素 */
 .background {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background: url('../images/top.png') no-repeat center center;
   background-size: cover;
   z-index: 0;
@@ -58,7 +62,7 @@ html, body {
   scrollbar-width: thin;
 }
 
-.board > p {
+.board>p {
   font-size: clamp(12px, 3vw, 40px);
   font-weight: bold;
   text-align: center;
@@ -112,8 +116,9 @@ input:focus {
 }
 
 button[type="submit"] {
-  width: 20%;  /* ここで横幅を指定 */
-  margin-top: 3em;
+  width: 20%;
+  /* ここで横幅を指定 */
+  margin-top: 2em;
   padding: 0.6em 1.5em;
   font-size: clamp(10px, 2vw, 20px);
   font-weight: 700;
@@ -131,24 +136,48 @@ button[type="submit"]:hover {
   box-shadow: 0 8px 20px rgba(38, 115, 253, 0.9);
 }
 
-
-
-.btn-back {
-  position: absolute;
-  top: 2em;
-  left: 2em;
-  padding: 0.3em 0.7em;
-  font-size: clamp(10px, 1.5vw, 18px);
-  font-weight: 600;
-  color: #444;
-  background-color: #eee;
-  border: 2px solid #6a11cb;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  z-index: 10;
+.register-link {
+  margin-top: 1.2rem !important;
+  margin-bottom: -10rem !important;
+  text-align: center;
+  font-size: clamp(9px, 1.8vw, 27px) !important;
 }
 
-.btn-back:hover {
-  background-color: #d1d7ff;
+.register-link a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.7em;
+  width: 100%;
+  text-align: left;
+  padding-left: calc(40% + 1em);
+  /* labelの幅 + form-rowのpadding */
+  box-sizing: border-box;
+  margin: -1em 0 0 0;
+}
+
+.complete {
+  margin: 10% 0 12% 0 !important;
+  font-size: clamp(20px, 5vw, 70px) !important;
+}
+
+.login-link {
+  text-align: center;
+  font-size: clamp(10px, 2.5vw, 40px) !important;
+}
+
+.login-link a {
+  color: #007BFF;
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
 }
