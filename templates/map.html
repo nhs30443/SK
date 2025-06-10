@@ -26,7 +26,7 @@
             aspect-ratio: 16 / 9;
             background-color: white;
             overflow: hidden;
-
+            border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
@@ -55,7 +55,6 @@
             height: 600px;
             object-fit: cover; /* containからcoverに変更 */
             transition: opacity 0.3s ease;
-            border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             /* 半透明の余白を排除する追加設定 */
             image-rendering: crisp-edges; /* エッジを鮮明に */
@@ -73,9 +72,6 @@
             height: 600px;
             pointer-events: none;
             overflow: hidden;
-            border-radius: 20px; /* マップ画像と同じ角丸 */
-            /* マップ画像の境界でクリッピング */
-            clip-path: inset(0 round 20px);
         }
 
         /* ステージボタン */
