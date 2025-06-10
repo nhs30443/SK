@@ -164,10 +164,12 @@ def map():
 
 
 
-# マップ画面
+# 科目選択
 @app.route('/subject')
 def subject():
     return render_template("subject.html")
+
+
 
 
 
