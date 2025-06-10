@@ -239,6 +239,8 @@ def subject():
 
 
 
+
+
 #実行制御
 if __name__ ==  "__main__":
     app.run(debug=True)
