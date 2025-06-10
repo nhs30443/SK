@@ -20,6 +20,10 @@
         </div>
     </div>
 
+    <script>
+        // 背景画像のURLをJavaScriptに渡す
+        window.backgroundImageUrl = "{{ url_for('static', filename='images/top.png') }}";
+    </script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>
 

@@ -62,4 +62,13 @@ function goBack() {
 }
 
 // ページ読み込み時にステージボタンを生成
-document.addEventListener('DOMContentLoaded', createStageButtons);
+document.addEventListener('DOMContentLoaded', function() {
+    // 背景画像を設定
+    if (window.backgroundImageUrl) {
+        const background = document.querySelector('.background');
+        background.style.backgroundImage = `url('${window.backgroundImageUrl}')`;
+    }
+
+    // ステージボタンを生成
+    createStageButtons();
+});
