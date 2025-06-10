@@ -52,8 +52,8 @@
                 <div class="form-row">
                     <label>性別：</label>
                     <div id="gender-buttons">
-                        <button type="button" onclick="selectGender('male', this)" class="{{ 'selected' if gender == 'male' else '' }}">男</button>
-                        <button type="button" onclick="selectGender('female', this)" class="{{ 'selected' if gender == 'female' else '' }}">女</button>
+                        <button type="button" onclick="selectGender('man', this)" class="{{ 'selected' if gender == 'male' else '' }}">男</button>
+                        <button type="button" onclick="selectGender('woman', this)" class="{{ 'selected' if gender == 'female' else '' }}">女</button>
                     </div>
                     <input type="hidden" name="gender" id="gender" value="{{ gender or '' }}" required>
                 </div>

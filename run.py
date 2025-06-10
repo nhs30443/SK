@@ -170,7 +170,7 @@ def login_check():
     
     if not ary :
         errors = {}
-        errors["login"] = "ユーザーIDとパスワードが一致しません。"
+        errors["login"] = "メールアドレスとパスワードが一致しません。"
         return render_template("login.html", errors=errors)
     
     return render_template("main.html", aryData=ary)
@@ -248,14 +248,11 @@ def subject():
 
 
 
-
-
-
-
-
-
-
-
+# デバッグ用
+@app.route('/test')
+def test():
+    
+    return render_template("xxx.html")
 
 
 
