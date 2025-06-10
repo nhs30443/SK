@@ -150,13 +150,14 @@
             top: 80px;
             right: 20px;
             z-index: 4;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.9);
             color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             font-size: 12px;
-            max-width: 250px;
+            max-width: 280px;
             display: none;
+            border: 2px solid #9C27B0;
         }
 
         .config-panel.show {
@@ -182,20 +183,84 @@
             background: linear-gradient(135deg, #8E24AA, #5E35B1);
         }
 
+        /* 編集モード時のスタイル */
+        .edit-mode .stage-button {
+            cursor: move;
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .edit-mode .stage-button:hover {
+            transform: scale(1.05);
+            border-color: #FFA000;
+        }
+
+        .stage-button.dragging {
+            transform: scale(1.2);
+            z-index: 1000;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.6);
+        }
+
         .position-input {
             margin: 5px 0;
-            padding: 4px;
-            width: 60px;
+            padding: 6px;
+            width: 70px;
             border: 1px solid #ccc;
             border-radius: 4px;
+            background: #f5f5f5;
         }
 
         .stage-selector {
             margin: 10px 0;
-            padding: 4px;
-            width: 100px;
+            padding: 6px;
+            width: 100%;
             border: 1px solid #ccc;
             border-radius: 4px;
+            background: #f5f5f5;
+        }
+
+        .control-button {
+            margin: 8px 5px 5px 0;
+            padding: 8px 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: background 0.3s;
+        }
+
+        .control-button:hover {
+            background: #45a049;
+        }
+
+        .control-button.edit {
+            background: #FF9800;
+        }
+
+        .control-button.edit:hover {
+            background: #F57C00;
+        }
+
+        .control-button.export {
+            background: #2196F3;
+        }
+
+        .control-button.export:hover {
+            background: #1976D2;
+        }
+
+        .coordinates-display {
+            background: #333;
+            color: #0f0;
+            padding: 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 10px;
+            margin-top: 10px;
+            max-height: 100px;
+            overflow-y: auto;
         }
         .back-button {
             position: absolute;
@@ -245,48 +310,74 @@
         <button class="config-toggle" onclick="toggleConfig()">位置調整</button>
 
         <div class="config-panel" id="configPanel">
-            <h4>ボタン位置調整</h4>
+            <h4>🎯 ボタン位置調整ツール</h4>
+
+            <button class="control-button edit" onclick="toggleEditMode()" id="editModeBtn">
+                📝 編集モード ON
+            </button>
+
+            <div style="margin: 15px 0;">
+                <strong>💡 操作方法:</strong><br>
+                • 編集モード中はボタンをドラッグ可能<br>
+                • 数値入力で精密調整も可能
+            </div>
+
             <div>
-                <label>ステージ: </label>
+                <label><strong>📍 選択ステージ:</strong></label>
                 <select class="stage-selector" id="stageSelector" onchange="selectStageForEdit()">
                     <option value="0">ステージ 1</option>
                 </select>
             </div>
-            <div>
-                <label>X: </label>
-                <input type="number" class="position-input" id="xInput" onchange="updatePosition()">
-                <label>Y: </label>
-                <input type="number" class="position-input" id="yInput" onchange="updatePosition()">
+
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div>
+                    <label>X:</label>
+                    <input type="number" class="position-input" id="xInput" onchange="updatePosition()">
+                </div>
+                <div>
+                    <label>Y:</label>
+                    <input type="number" class="position-input" id="yInput" onchange="updatePosition()">
+                </div>
             </div>
-            <button onclick="exportPositions()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">座標をコピー</button>
+
+            <div style="margin-top: 15px;">
+                <button class="control-button export" onclick="exportPositions()">
+                    📋 座標をコピー
+                </button>
+                <button class="control-button" onclick="resetPositions()">
+                    🔄 リセット
+                </button>
+            </div>
+
+            <div class="coordinates-display" id="coordsDisplay">
+                座標がここに表示されます
+            </div>
         </div>
 
         <div class="stage-buttons">
-            <!-- ステージボタンを20個配置 -->
+            <!-- ステージボタンを10個配置 -->
         </div>
     </div>
 
     <script>
-        // ステージボタンの配置座標（マップ上の位置）- より細かく調整
+        // ステージボタンの配置座標（マップ上の位置）- 10個に調整
         const stagePositions = [
-            // 第1エリア（左上）
-            {x: 80, y: 90}, {x: 140, y: 70}, {x: 200, y: 85}, {x: 260, y: 105}, {x: 320, y: 80},
-            // 第2エリア（右上）
-            {x: 380, y: 95}, {x: 450, y: 75}, {x: 520, y: 90}, {x: 590, y: 110}, {x: 660, y: 85},
-            // 第3エリア（中央）
-            {x: 720, y: 150}, {x: 680, y: 220}, {x: 620, y: 280}, {x: 540, y: 320}, {x: 460, y: 340},
-            // 第4エリア（左下）
-            {x: 380, y: 380}, {x: 300, y: 420}, {x: 220, y: 460}, {x: 140, y: 440}, {x: 60, y: 410}
+            // 第1エリア（左上から右上へ）
+            {x: 100, y: 80}, {x: 200, y: 70}, {x: 300, y: 85}, {x: 400, y: 75}, {x: 500, y: 90},
+            // 第2エリア（右から左下へ）
+            {x: 600, y: 150}, {x: 520, y: 220}, {x: 420, y: 280}, {x: 300, y: 350}, {x: 180, y: 400}
         ];
 
-        // ステージの状態（0: ロック, 1: 解放, 2: クリア済み）
+        // ステージの状態（0: ロック, 1: 解放, 2: クリア済み）- 10個に調整
         const stageStatus = [
-            2, 2, 2, 1, 1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            2, 2, 1, 1, 0, 0, 0, 0, 0, 0
         ];
 
         let selectedStageIndex = 0;
         let stageButtons = [];
+        let isEditMode = false;
+        let isDragging = false;
+        let dragOffset = { x: 0, y: 0 };
 
         // ステージボタンを生成
         function createStageButtons() {
@@ -298,7 +389,7 @@
             const selector = document.getElementById('stageSelector');
             selector.innerHTML = '';
 
-            for (let i = 0; i < 20; i++) {
+            for (let i = 0; i < 10; i++) {
                 const stageNum = i + 1;
                 const button = document.createElement('div');
                 button.className = 'stage-button';
@@ -320,10 +411,8 @@
                     button.innerHTML = stageNum;
                 }
 
-                // クリックイベントを追加
-                if (stageStatus[i] > 0) {
-                    button.onclick = () => selectStage(stageNum);
-                }
+                // イベントリスナーを追加
+                setupButtonEvents(button, stageNum, i);
 
                 container.appendChild(button);
                 stageButtons.push(button);
@@ -333,6 +422,159 @@
                 option.value = i;
                 option.textContent = `ステージ ${stageNum}`;
                 selector.appendChild(option);
+            }
+            updateCoordinatesDisplay();
+        }
+
+        // ボタンのイベントを設定
+        function setupButtonEvents(button, stageNum, index) {
+            // マウスダウン（ドラッグ開始）
+            button.addEventListener('mousedown', (e) => {
+                if (isEditMode) {
+                    e.preventDefault();
+                    startDrag(e, index);
+                } else if (stageStatus[index] > 0) {
+                    selectStage(stageNum);
+                }
+            });
+
+            // タッチイベント（モバイル対応）
+            button.addEventListener('touchstart', (e) => {
+                if (isEditMode) {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    startDrag(touch, index);
+                }
+            });
+        }
+
+        // ドラッグ開始
+        function startDrag(event, index) {
+            isDragging = true;
+            selectedStageIndex = index;
+
+            const button = stageButtons[index];
+            button.classList.add('dragging');
+
+            const rect = button.getBoundingClientRect();
+            const containerRect = document.querySelector('.stage-buttons').getBoundingClientRect();
+
+            dragOffset.x = event.clientX - rect.left - rect.width / 2;
+            dragOffset.y = event.clientY - rect.top - rect.height / 2;
+
+            // 入力フィールドを更新
+            document.getElementById('stageSelector').value = index;
+            selectStageForEdit();
+
+            // グローバルイベントリスナーを追加
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', handleTouchDrag);
+            document.addEventListener('touchend', stopDrag);
+        }
+
+        // ドラッグ中
+        function handleDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            updateButtonPosition(e.clientX, e.clientY);
+        }
+
+        // タッチドラッグ中
+        function handleTouchDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateButtonPosition(touch.clientX, touch.clientY);
+        }
+
+        // ボタン位置を更新
+        function updateButtonPosition(clientX, clientY) {
+            const containerRect = document.querySelector('.stage-buttons').getBoundingClientRect();
+
+            let newX = clientX - containerRect.left - dragOffset.x - 20; // ボタン半径分調整
+            let newY = clientY - containerRect.top - dragOffset.y - 20;
+
+            // 境界内に制限
+            newX = Math.max(0, Math.min(newX, 760)); // 800px - 40px(ボタン幅)
+            newY = Math.max(0, Math.min(newY, 560)); // 600px - 40px(ボタン高さ)
+
+            // 位置を更新
+            stagePositions[selectedStageIndex].x = Math.round(newX);
+            stagePositions[selectedStageIndex].y = Math.round(newY);
+
+            const button = stageButtons[selectedStageIndex];
+            button.style.left = newX + 'px';
+            button.style.top = newY + 'px';
+
+            // 入力フィールドを更新
+            document.getElementById('xInput').value = Math.round(newX);
+            document.getElementById('yInput').value = Math.round(newY);
+
+            updateCoordinatesDisplay();
+        }
+
+        // ドラッグ終了
+        function stopDrag() {
+            if (!isDragging) return;
+
+            isDragging = false;
+
+            if (selectedStageIndex >= 0) {
+                stageButtons[selectedStageIndex].classList.remove('dragging');
+            }
+
+            // グローバルイベントリスナーを削除
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', handleTouchDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        // 編集モードの切替
+        function toggleEditMode() {
+            isEditMode = !isEditMode;
+            const container = document.querySelector('.container');
+            const btn = document.getElementById('editModeBtn');
+
+            if (isEditMode) {
+                container.classList.add('edit-mode');
+                btn.textContent = '✅ 編集モード OFF';
+                btn.style.background = '#f44336';
+            } else {
+                container.classList.remove('edit-mode');
+                btn.textContent = '📝 編集モード ON';
+                btn.style.background = '#FF9800';
+            }
+        }
+
+        // 座標表示を更新
+        function updateCoordinatesDisplay() {
+            const display = document.getElementById('coordsDisplay');
+            let html = '';
+            stagePositions.forEach((pos, i) => {
+                html += `S${i+1}: (${pos.x}, ${pos.y})<br>`;
+            });
+            display.innerHTML = html;
+        }
+
+        // 位置リセット
+        function resetPositions() {
+            if (confirm('全ての位置を初期状態に戻しますか？')) {
+                // 初期位置に戻す
+                const defaultPositions = [
+                    {x: 100, y: 80}, {x: 200, y: 70}, {x: 300, y: 85}, {x: 400, y: 75}, {x: 500, y: 90},
+                    {x: 600, y: 150}, {x: 520, y: 220}, {x: 420, y: 280}, {x: 300, y: 350}, {x: 180, y: 400}
+                ];
+
+                for (let i = 0; i < 10; i++) {
+                    stagePositions[i] = {...defaultPositions[i]};
+                    stageButtons[i].style.left = stagePositions[i].x + 'px';
+                    stageButtons[i].style.top = stagePositions[i].y + 'px';
+                }
+
+                selectStageForEdit();
+                updateCoordinatesDisplay();
             }
         }
 
