@@ -11,6 +11,7 @@ html, body {
   font-family: sans-serif;
 }
 
+
 .right-elements {
     display: flex; /* 右側の要素を横並びにする */
     align-items: center; /* 縦方向の中央揃え */
@@ -27,8 +28,6 @@ html, body {
   overflow: hidden;
 }
 
-
-
 .backgroundImg {
   position: relative;
   top: -5vh;
@@ -38,6 +37,7 @@ html, body {
   object-fit: contain;
   z-index: 0;
 }
+
 .navImg {
   position: absolute;
   z-index: 2;
@@ -46,11 +46,6 @@ html, body {
   object-fit: contain;
 }
 
-.navImg {
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
 .coinImg{
     position: relative;
     left: 60vw;
@@ -59,6 +54,7 @@ html, body {
     height: auto;
     object-fit: contain;
 }
+
 .bagImg{
     position: relative;
     left: 70vw;
@@ -68,43 +64,10 @@ html, body {
     object-fit: contain;
 }
 
-
 .coinNumber{
   font-size: clamp(8px, 1.6vw, 24px);
   position: absolute;
   top: 5%;
   left: 65vw;
   z-index: 4;
-}
-
-
-.selectButton {
-  position: absolute;
-  bottom: 30%;
-  left: 60vw;
-  display: flex; /* こちらも Flex コンテナにする場合 */
-  flex-direction: column; /* 子要素を縦に並べる */
-  z-index: 3;
-}
-
-.selectBtn{
-  font-size: clamp(8px, 2.0vw, 36px);
-  background-color: yellow;
-  padding-bottom: calc(27vw / 20);
-  padding-top: calc(27vw / 20);
-  border-radius: 2vh;
-  width: 27vw;
-  object-fit: contain;
-  margin-bottom: 10%;
-}
-
-.backTop{
-  width: 130px;
-  height: 70px;
-  position: absolute;
-  left: 40px;
-  top: 15px;
-  background-color: #2c3e50;
-  opacity: 0;
-  z-index: 102;
 }
