@@ -191,7 +191,7 @@
 <body>
     <div class="container">
         <div class="background"></div>
-        <img src="https://via.placeholder.com/800x600/4CAF50/FFFFFF?text=MAP" alt="Map" class="map-image">
+        <img src="{{ url_for('static', filename='images/map.png') }}" alt="Map" class="map-image">
 
         <div class="title">ステージを選ぼう！</div>
         <button class="back-button" onclick="goBack()">← 戻る</button>
