@@ -192,6 +192,11 @@ def main():
 # 設定画面
 @app.route('/config')
 def config():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+    
     return render_template("config.html")
 
 
@@ -199,6 +204,11 @@ def config():
 # 問題画面
 @app.route('/question')
 def question():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+    
     return render_template("question.html")
 
 
@@ -206,6 +216,11 @@ def question():
 # マップ画面
 @app.route('/map')
 def map():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+    
     return render_template("map.html")
 
 
@@ -213,6 +228,11 @@ def map():
 # 科目選択画面
 @app.route('/subject')
 def subject():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+    
     return render_template("subject.html")
 
 
