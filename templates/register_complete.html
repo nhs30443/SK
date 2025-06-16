@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>登録完了</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+
+<body>
+    <div class="container">
+        <div class="background"></div> <!-- 背景用の要素 -->
+        <div class="board">
+
+            <p class="complete">登録が完了しました</p>
+            <p class="login-link" id="countdown" data-login-url="{{ url_for('login') }}">
+                5秒後に <a href="{{ url_for('login') }}">ログインページ</a> へリダイレクトします
+            </p>
+
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/register_complete.js') }}"></script>
+
+</body>
+
+</html>
