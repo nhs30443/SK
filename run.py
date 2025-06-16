@@ -190,7 +190,10 @@ def main():
 #バッグ内
 @app.route('/in_bag')
 def in_bag():
-    return render_template("in_bag.html")
+    if userId is None:
+        return render_template('login.html')
+    
+    return render_template("config.html")
 
 
 # 設定画面
