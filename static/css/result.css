@@ -1,0 +1,199 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Hiragino Sans', 'Yu Gothic', 'Meiryo', sans-serif;
+    background: linear-gradient(135deg, #87CEEB 0%, #98FB98 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.background-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+}
+
+.results-panel {
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    width: 600px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    border: 3px solid rgba(135, 206, 235, 0.3);
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+}
+
+.correct-rate-section {
+    flex: 1;
+}
+
+.section-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #555;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.result-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #555;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.subject-scores {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.score-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 2px solid rgba(135, 206, 235, 0.3);
+}
+
+.subject {
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+}
+
+.percentage {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+.result-section {
+    flex: 1;
+    text-align: center;
+    padding-left: 40px;
+}
+
+.rank-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.rank-label {
+    font-size: 20px;
+    font-weight: bold;
+    color: #666;
+}
+
+.rank-grade {
+    font-size: 120px;
+    font-weight: bold;
+    color: #FF6B6B;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    line-height: 1;
+}
+
+.footer-section {
+    border-top: 2px solid rgba(135, 206, 235, 0.3);
+    padding-top: 20px;
+}
+
+.stats {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.stat-label {
+    font-size: 18px;
+    font-weight: bold;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .results-panel {
+        width: 90%;
+        padding: 30px;
+    }
+    
+    .header-section {
+        flex-direction: column;
+        gap: 30px;
+    }
+    
+    .result-section {
+        padding-left: 0;
+        text-align: center;
+    }
+    
+    .rank-grade {
+        font-size: 80px;
+    }
+    
+    .result-title {
+        font-size: 28px;
+    }
+}
+
+@media (max-width: 480px) {
+    .results-panel {
+        padding: 20px;
+    }
+    
+    .rank-grade {
+        font-size: 60px;
+    }
+    
+    .subject, .percentage {
+        font-size: 16px;
+    }
+    
+    .stat-label, .stat-value {
+        font-size: 16px;
+    }
+}

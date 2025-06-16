@@ -170,6 +170,11 @@ def subject():
     return render_template("subject.html")
 
 
+# 設定画面
+@app.route('/result')
+def result():
+    return render_template("result.html")
+
 
 
 

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習結果</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <img src="{{ url_for('static', filename='images/top.png') }}" alt="背景" class="background-image">
+        <div class="results-panel">
+            <div class="header-section">
+                <div class="correct-rate-section">
+                    <h2 class="section-title">正答率</h2>
+                    <div class="subject-scores">
+                        {% for subject in data.subjects %}
+                        <div class="score-row">
+                            <span class="subject">{{ subject.name }}</span>
+                            <span class="percentage">{{ subject.score }}%</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="result-section">
+                    <h1 class="result-title">リザルト</h1>
+                    <div class="rank-container">
+                        <div class="rank-label">ランク</div>
+                        <div class="rank-grade">{{ data.rank }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">経験値</span>
+                        <span class="stat-value">{{ "{:,}".format(data.experience) }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">コイン</span>
+                        <span class="stat-value">{{ data.coins }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
