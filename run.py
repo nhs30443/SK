@@ -187,6 +187,10 @@ def main():
     
     return render_template("main.html")
 
+#バッグ内
+@app.route('/in_bag')
+def in_bag():
+    return render_template("in_bag.html")
 
 
 # 設定画面

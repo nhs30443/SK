@@ -63,7 +63,7 @@ html, body {
     position: relative;
     left: 70vw;
     z-index: 3;
-    width: 5%;
+    width: 5vw;
     height: auto;
     object-fit: contain;
 }
@@ -82,8 +82,8 @@ html, body {
   position: absolute;
   bottom: 30%;
   left: 60vw;
-  display: flex; /* こちらも Flex コンテナにする場合 */
-  flex-direction: column; /* 子要素を縦に並べる */
+  display: flex;
+  flex-direction: column;
   z-index: 3;
 }
 
