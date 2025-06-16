@@ -5,7 +5,7 @@
     <title>チャレンジクエスト</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/in_bag.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/weapon-detail.css') }}">
 </head>
 <body>
     <div class="container">
@@ -22,26 +22,19 @@
             <img src="static/images/background.png" class="backgroundImg" alt="背景">
         </div>
         <main>
-            <div class="in_bag">
-                <h2>武器</h2>
-                <div class="haste-content">
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
-                    </div>
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
-                    </div>
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
+            <div class="in_menu">
+                <div class="weapon-content">
+                    <img src="static/images/bag.png" class="weapon-item" alt="バッグ">
+                    <div class="weapon-text">
+                        <h2 class="weapon-title">武器名前</h2>
+                        <p class="weapon-exp">
+                            武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます
+                        </p>
                     </div>
                 </div>
                 <a href=/main class="back-main"><span class="btn-back">戻る</span></a>
             </div>
         </main>
     </div>
-
 </body>
 </html>
