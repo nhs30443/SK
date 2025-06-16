@@ -56,6 +56,11 @@ def main():
 def in_bag():
     return render_template("in_bag.html")
 
+#武器詳細
+@app.route('/weapon-detail')
+def weapon_detail():
+    return render_template("weapon-detail.html")
+
 # 問題画面
 @app.route('/question')
 def question():
