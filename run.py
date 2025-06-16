@@ -237,9 +237,22 @@ def subject():
 
 
 # 設定画面
-@app.route('/result')
+@app.route('/result')  # または既存のルート名
 def result():
-    return render_template("result.html")
+    # 既存のロジックがあればそのまま使用
+    results_data = {
+        'subjects': [
+            {'name': '漢字', 'score': 10.0},
+            {'name': '英語', 'score': 10.0},
+            {'name': '算数', 'score': 10.0}
+        ],
+        'rank': 'A',
+        'experience': 100000,
+        'coins': 800
+    }
+
+    # 重要：dataパラメータを必ず渡す
+    return render_template("result.html", data=results_data)
 
 
 
