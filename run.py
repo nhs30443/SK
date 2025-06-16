@@ -193,7 +193,7 @@ def in_bag():
     if userId is None:
         return render_template('login.html')
     
-    return render_template("config.html")
+    return render_template("in_bag.html")
 
 
 # 設定画面
@@ -211,6 +211,10 @@ def config():
 #武器詳細
 @app.route('/weapon-detail')
 def weapon_detail():
+    userId = session.get("login_id")
+    if userId is None:
+        return render_template('login.html')
+        
     return render_template("weapon-detail.html")
 
 # 問題画面
