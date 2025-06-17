@@ -143,7 +143,6 @@ def register_complete():
 
 
 
-
 # ログインページ
 @app.route('/login', methods=['GET', 'POST'])
 def login():
