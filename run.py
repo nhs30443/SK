@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, json
+from flask import Flask, render_template, request, session, json, redirect, url_for
 import mysql.connector
 import re
 
@@ -37,144 +37,146 @@ def index():
 def clear():
     session.clear()
     
-    return render_template("login.html")
+    return redirect(url_for("login"))
 
 
 
 # 新規登録ページ
-@app.route('/register')
+@app.route('/register', methods=['GET', 'POST'])
 def register():
+    if request.method == 'POST':
+        con = conn_db()
+        cur = con.cursor()
+
+        #ID作成
+        cur.execute("SELECT MAX(accountId) FROM t_account")
+        max_id = cur.fetchone()[0]
+        if max_id:
+            accountId = f"{int(max_id) + 1:05}"
+        else:
+            accountId = "00001"
+            
+
+        #入力画面から値の受け取り
+        username = request.form.get('username')
+        emailAddress = request.form.get('emailAddress')
+        password = request.form.get('password')
+        confirmPassword = request.form.get('confirmPassword')
+        gender = request.form.get('gender')
+        gradeSetting = request.form.get('gradeSetting')
+
+
+        errors = {}
+        
+        
+        # メールアドレスの重複チェック
+        cur.execute("SELECT accountId FROM t_account WHERE emailAddress = %s", (emailAddress,))
+        if cur.fetchone():
+            errors["emailAddress"] = "メールアドレスは既に使われています。"
+
+        # パスワードのバリデーション
+        password_pattern = r"^(?=.*[a-zA-Z])(?=.*\d).{8,}$"
+        if not re.match(password_pattern, password):
+            errors["password"] = "パスワードは半角英数字を含む8文字以上で構成してください。"
+        elif password != confirmPassword:
+            errors["confirmPassword"] = "パスワードが一致しません。"
+
+
+        # エラーがある場合はテンプレート再表示
+        if errors:
+            return render_template('register.html', errors=errors)
+        
+        
+        # データの挿入
+        sql = """
+            INSERT INTO t_account (
+                accountId,
+                username,
+                emailAddress,
+                password,
+                gender,
+                gradeSetting,
+                coin,
+                totalExperience,
+                playerImage
+            ) VALUES (
+                %(accountId)s,
+                %(username)s,
+                %(emailAddress)s,
+                %(password)s,
+                %(gender)s,
+                %(gradeSetting)s,
+                %(coin)s,
+                %(totalExperience)s,
+                %(playerImage)s
+            )
+        """
+        data = {
+            'accountId': accountId,
+            'username': username,
+            'emailAddress': emailAddress,
+            'password': password,
+            'gender': gender,
+            'gradeSetting': gradeSetting,
+            'coin': 0,
+            'totalExperience': 0,
+            'playerImage': None
+        }
+        
+        cur.execute(sql, data)
+        
+        
+        con.commit()
+        con.close()
+        cur.close()
+        
+        # 登録完了ページへへリダイレクト
+        return redirect(url_for("register_complete"))
+    
     return render_template("register.html")
 
-#アカウント新規作成処理
-@app.route('/registerDB', methods=['POST'])
-def registerDB():
-    con = conn_db()
-    cur = con.cursor()
-
-    #ID作成
-    cur.execute("SELECT MAX(accountId) FROM t_account")
-    max_id = cur.fetchone()[0]
-    if max_id:
-        accountId = f"{int(max_id) + 1:05}"
-    else:
-        accountId = "00001"
-        
-
-    #入力画面から値の受け取り
-    username = request.form.get('username')
-    emailAddress = request.form.get('emailAddress')
-    password = request.form.get('password')
-    confirmPassword = request.form.get('confirmPassword')
-    gender = request.form.get('gender')
-    gradeSetting = request.form.get('gradeSetting')
-
-
-    errors = {}
+#アカウント新規作成完了画面
+@app.route('/register_complete')
+def register_complete():
     
-    
-    # メールアドレスの重複チェック
-    cur.execute("SELECT accountId FROM t_account WHERE emailAddress = %s", (emailAddress,))
-    if cur.fetchone():
-        errors["emailAddress"] = "メールアドレスは既に使われています。"
-
-    # パスワードのバリデーション
-    password_pattern = r"^(?=.*[a-zA-Z])(?=.*\d).{8,}$"
-    if not re.match(password_pattern, password):
-        errors["password"] = "パスワードは半角英数字を含む8文字以上で構成してください。"
-    elif password != confirmPassword:
-        errors["confirmPassword"] = "パスワードが一致しません。"
-
-
-    # エラーがある場合はテンプレート再表示
-    if errors:
-        return render_template('register.html', errors=errors)
-    
-    
-    # データの挿入
-    sql = """
-        INSERT INTO t_account (
-            accountId,
-            username,
-            emailAddress,
-            password,
-            gender,
-            gradeSetting,
-            coin,
-            totalExperience,
-            playerImage
-        ) VALUES (
-            %(accountId)s,
-            %(username)s,
-            %(emailAddress)s,
-            %(password)s,
-            %(gender)s,
-            %(gradeSetting)s,
-            %(coin)s,
-            %(totalExperience)s,
-            %(playerImage)s
-        )
-    """
-    data = {
-        'accountId': accountId,
-        'username': username,
-        'emailAddress': emailAddress,
-        'password': password,
-        'gender': gender,
-        'gradeSetting': gradeSetting,
-        'coin': 0,
-        'totalExperience': 0,
-        'playerImage': None
-    }
-    
-    cur.execute(sql, data)
-    
-    
-    con.commit()
-    con.close()
-    cur.close()
-    
-    # 登録完了ページへへリダイレクト
     return render_template("register_complete.html")
 
 
 
 # ログインページ
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        ary = []
+        #login_form.htmlから渡された情報を格納
+        emailAddress = request.form.get('emailAddress')
+        password = request.form.get('password')
+
+        con = conn_db()
+        cur = con.cursor()
+        sql = "select accountId from t_account where emailAddress = %s and password = %s"
+        cur.execute(sql,[emailAddress , password])
+        rows = cur.fetchall()
+        for row in rows:
+            ary.append(row)
+            session["login_id"] = row[0]
+
+        # aryDataをセッションに保存
+        session["aryData"] = json.dumps(ary)  # リストをJSON形式で保存
+        
+        cur.close()
+        con.close()
+        
+        
+        if not ary :
+            errors = {}
+            errors["login"] = "メールアドレスとパスワードが一致しません。"
+            return render_template("login.html", errors=errors)
+        
+        return redirect(url_for("main"))
+        
     return render_template("login.html")
-
-# ログイン認証
-@app.route('/login_check', methods = ['POST'])
-def login_check():
-    ary = []
-    #login_form.htmlから渡された情報を格納
-    emailAddress = request.form.get('emailAddress')
-    password = request.form.get('password')
-
-    con = conn_db()
-    cur = con.cursor()
-    sql = "select accountId from t_account where emailAddress = %s and password = %s"
-    cur.execute(sql,[emailAddress , password])
-    rows = cur.fetchall()
-    for row in rows:
-        ary.append(row)
-        session["login_id"] = row[0]
-
-    # aryDataをセッションに保存
-    session["aryData"] = json.dumps(ary)  # リストをJSON形式で保存
     
-    cur.close()
-    con.close()
-    
-    
-    if not ary :
-        errors = {}
-        errors["login"] = "メールアドレスとパスワードが一致しません。"
-        return render_template("login.html", errors=errors)
-    
-    return render_template("main.html", aryData=ary)
-
 
 
 # メインページ
@@ -183,9 +185,21 @@ def main():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
-        return render_template('login.html')
+        return redirect(url_for("login"))
     
     return render_template("main.html")
+
+
+
+#バッグ内
+@app.route('/in_bag')
+def in_bag():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+    
+    return render_template("in_bag.html")
 
 
 
@@ -195,9 +209,21 @@ def config():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
-        return render_template('login.html')
+        return redirect(url_for("login"))
     
     return render_template("config.html")
+
+
+
+#武器詳細
+@app.route('/weapon-detail')
+def weapon_detail():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+        
+    return render_template("weapon-detail.html")
 
 
 
@@ -207,7 +233,7 @@ def question():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
-        return render_template('login.html')
+        return redirect(url_for("login"))
     
     return render_template("question.html")
 
@@ -219,7 +245,7 @@ def map():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
-        return render_template('login.html')
+        return redirect(url_for("login"))
     
     return render_template("map.html")
 
@@ -231,9 +257,10 @@ def subject():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
-        return render_template('login.html')
+        return redirect(url_for("login"))
     
     return render_template("subject.html")
+
 
 
 # 設定画面
