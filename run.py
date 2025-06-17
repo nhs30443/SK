@@ -263,19 +263,24 @@ def subject():
 
 
 
-# 設定画面
+# リザルト画面
 @app.route('/result')  # または既存のルート名
 def result():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+    
+    
     # 既存のロジックがあればそのまま使用
     results_data = {
         'subjects': [
-            {'name': '漢字', 'score': 10.0},
-            {'name': '英語', 'score': 10.0},
-            {'name': '算数', 'score': 10.0},
-            {'name': '総合', 'score': 10.0},
+            {'name': '漢字', 'score': 80.0},
+            {'name': '英語', 'score': 80.0},
+            {'name': '算数', 'score': 85.0}
         ],
         'rank': 'A',
-        'experience': 100000,
+        'experience': 125000,
         'coins': 800
     }
 

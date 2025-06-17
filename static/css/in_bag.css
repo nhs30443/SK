@@ -41,12 +41,13 @@ button{
     background: linear-gradient(90deg, #6a11cb, #2575fc);
     box-shadow: 0 0 8px #2575fc;
     display: flex;
+    justify-content: center;  /* 水平方向中央 */
+    align-items: center;      /* 垂直方向中央 */
 }
 
 .btn-text{
     font-size: clamp(8px, 1.2vw, 32px);
-    margin-left: 1.2vw;
-    margin-top: 0.5vh;
+    margin: 0 5%;
 }
 
 .back-main{
@@ -64,10 +65,11 @@ button{
     box-shadow: 0 5px 15px rgba(38, 115, 253, 0.6);
     border:2px solid #000000;
     display: flex;
+    justify-content: center;  /* 水平方向中央 */
+    align-items: center;      /* 垂直方向中央 */
 }
 
 .btn-back{
-    font-size: clamp(8px, 2vw, 32px);
-    margin-left: 4vw;
-    margin-top: 0.9vh;
+    font-size: clamp(8px, 1.8vw, 32px);
+    padding: 5% 0;
 }
