@@ -5,7 +5,9 @@
     width: 60vw;
     height: 45%;
     background-color: #ffffff;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(230, 230, 250, 0.85));
     z-index: 100;
+    border-radius: 20px;
     object-fit: contain;
 }
 
@@ -28,7 +30,7 @@ h2{
 
 .weapon-item{
     width: 15vw;
-    padding-left: 3vw;
+    padding-left: 2vw;
     padding-top: 6vh;
 }
 
@@ -47,7 +49,7 @@ h2{
 
 .back-main{
     position: relative;
-    top: -10vh;
+    top: -7.3vh;
     left: 40vw;
     color: #ffffff;
     text-decoration: none;
@@ -58,7 +60,6 @@ h2{
     border-radius: 15px;
     background: linear-gradient(90deg, #6a11cb, #2575fc);
     box-shadow: 0 5px 15px rgba(38, 115, 253, 0.6);
-    border:2px solid #000000;
     display: flex;
 }
 
