@@ -47,11 +47,10 @@ html, body {
     max-height: 80%;
     width: 800px;
     height: 600px;
-    object-fit: contain; /* coverからcontainに戻す */
+    object-fit: contain;
     transition: opacity 0.3s ease;
-    /* 半透明の余白を排除する追加設定 */
-    image-rendering: crisp-edges; /* エッジを鮮明に */
-    background-color: transparent; /* 背景を透明に */
+    image-rendering: crisp-edges;
+    background-color: transparent;
 }
 
 /* ステージボタンのコンテナ */
@@ -61,10 +60,14 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 2;
-    width: 800px;
-    height: 600px;
+    width: 80%;
+    height: 80%;
+    max-width: 800px;
+    max-height: 600px;
     pointer-events: none;
     overflow: hidden;
+    /* 画面サイズに応じてスケール */
+    transform-origin: center center;
 }
 
 /* ステージボタン */
@@ -176,4 +179,37 @@ html, body {
     font-size: 28px;
     font-weight: bold;
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+}
+
+/* モバイル対応 */
+@media (max-width: 768px) {
+    .title {
+        font-size: 20px;
+        top: 15px;
+    }
+
+    .back-button {
+        padding: 8px 16px;
+        font-size: 14px;
+        top: 15px;
+        left: 15px;
+    }
+
+    .container {
+        border-radius: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title {
+        font-size: 16px;
+        top: 10px;
+    }
+
+    .back-button {
+        padding: 6px 12px;
+        font-size: 12px;
+        top: 10px;
+        left: 10px;
+    }
 }
