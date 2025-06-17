@@ -1,7 +1,15 @@
-// ステージボタンの配置座標（固定）
+// ステージボタンの配置座標（パーセンテージ）- 800x600マップに対する相対位置
 const stagePositions = [
-    {x: 184, y: 163}, {x: 304, y: 177}, {x: 416, y: 157}, {x: 539, y: 125}, {x: 611, y: 403},
-    {x: 665, y: 201}, {x: 498, y: 312}, {x: 392, y: 360}, {x: 248, y: 275}, {x: 156, y: 344}
+    {x: 23.0, y: 27.17}, // 184/800 * 100, 163/600 * 100
+    {x: 38.0, y: 29.5},  // 304/800 * 100, 177/600 * 100
+    {x: 52.0, y: 26.17}, // 416/800 * 100, 157/600 * 100
+    {x: 67.38, y: 20.83}, // 539/800 * 100, 125/600 * 100
+    {x: 76.38, y: 67.17}, // 611/800 * 100, 403/600 * 100
+    {x: 83.13, y: 33.5},  // 665/800 * 100, 201/600 * 100
+    {x: 62.25, y: 52.0},  // 498/800 * 100, 312/600 * 100
+    {x: 49.0, y: 60.0},   // 392/800 * 100, 360/600 * 100
+    {x: 31.0, y: 45.83},  // 248/800 * 100, 275/600 * 100
+    {x: 19.5, y: 57.33}   // 156/800 * 100, 344/600 * 100
 ];
 
 // ステージの状態（0: ロック, 1: 解放, 2: クリア済み）- 10個に調整
@@ -18,8 +26,10 @@ function createStageButtons() {
         const stageNum = i + 1;
         const button = document.createElement('div');
         button.className = 'stage-button';
-        button.style.left = stagePositions[i].x + 'px';
-        button.style.top = stagePositions[i].y + 'px';
+
+        // パーセンテージで位置を設定
+        button.style.left = stagePositions[i].x + '%';
+        button.style.top = stagePositions[i].y + '%';
         button.dataset.index = i;
 
         // ステージの状態に応じてスタイルを設定
@@ -60,6 +70,9 @@ function goBack() {
     // window.location.href = '/main';
     alert('メイン画面に戻ります');
 }
+
+// ウィンドウリサイズ時の処理は削除
+// updateButtonSizes関数も削除
 
 // ページ読み込み時にステージボタンを生成
 document.addEventListener('DOMContentLoaded', function() {
