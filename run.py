@@ -271,7 +271,8 @@ def result():
         'subjects': [
             {'name': '漢字', 'score': 10.0},
             {'name': '英語', 'score': 10.0},
-            {'name': '算数', 'score': 10.0}
+            {'name': '算数', 'score': 10.0},
+            {'name': '総合', 'score': 10.0},
         ],
         'rank': 'A',
         'experience': 100000,
