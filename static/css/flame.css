@@ -48,7 +48,7 @@ html, body {
 
 .coinImg{
     position: relative;
-    left: 60vw;
+    left: 75vw;
     z-index: 3;
     width: 5%;
     height: auto;
@@ -57,7 +57,7 @@ html, body {
 
 .bagImg{
     position: relative;
-    left: 70vw;
+    left: 85vw;
     z-index: 3;
     width: 5vw;
     height: auto;
@@ -67,7 +67,11 @@ html, body {
 .coinNumber{
   font-size: clamp(8px, 1.6vw, 24px);
   position: absolute;
-  top: 5%;
-  left: 65vw;
+  top: 3%;
+  left: 80vw;
   z-index: 4;
+}
+
+.cross{
+    font-size: clamp(6px, 1.2vw, 18px);
 }

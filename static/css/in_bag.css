@@ -4,8 +4,9 @@
     left: 20vw;
     width: 60vw;
     height: 45%;
-    background-color: #ffffff;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(230, 230, 250, 0.85));
     z-index: 100;
+    border-radius: 20px;
     object-fit: contain;
 }
 

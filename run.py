@@ -315,29 +315,65 @@ def subject():
 
 
 
-# リザルト画面
-@app.route('/result')  # または既存のルート名
+@app.route('/result')
 def result():
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
         return redirect(url_for("login"))
-    
-    
-    # 既存のロジックがあればそのまま使用
+
+    # 成績データ（例）
+    subjects = [
+        {'name': '漢字', 'score': 80.0},
+        {'name': '英語', 'score': 80.0},
+        {'name': '算数', 'score': 85.0},
+        {'name': '総合', 'score': 95.0},
+    ]
+
+    # 総合スコアを取得
+    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
+
+    # ランク計算関数
+    def calculate_rank(score):
+        if score is None:
+            return 'E'  # 総合が無い場合は最低ランク
+        elif score >= 95:
+            return 'S'
+        elif score >= 85:
+            return 'A'
+        elif score >= 75:
+            return 'B'
+        elif score >= 65:
+            return 'C'
+        elif score >= 55:
+            return 'D'
+        else:
+            return 'E'
+
+    def get_rank_color(rank):
+        return {
+            'S': 'gold',
+            'A': 'red',
+            'B': 'blue',
+            'C': 'yellow',
+            'D': 'green',
+            'E': 'gray'
+        }.get(rank, 'black')
+
+    rank = calculate_rank(total_score)
+    rank_color = get_rank_color(rank)
+
     results_data = {
-        'subjects': [
-            {'name': '漢字', 'score': 80.0},
-            {'name': '英語', 'score': 80.0},
-            {'name': '算数', 'score': 85.0}
-        ],
-        'rank': 'A',
+        'subjects': subjects,
+        'rank': rank,
+        'rank_color': rank_color,
         'experience': 125000,
         'coins': 800
     }
 
-    # 重要：dataパラメータを必ず渡す
     return render_template("result.html", data=results_data)
+
+
 
 
 
