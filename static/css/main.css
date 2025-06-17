@@ -89,7 +89,8 @@ html, body {
 
 .selectBtn{
   font-size: clamp(8px, 2.0vw, 36px);
-  background-color: yellow;
+  color: #ffffff;
+  background: linear-gradient(90deg, #6a11cb, #2575fc);
   padding-bottom: calc(27vw / 20);
   padding-top: calc(27vw / 20);
   border-radius: 2vh;
