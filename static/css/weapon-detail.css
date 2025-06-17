@@ -49,14 +49,15 @@ h2{
     position: relative;
     top: -10vh;
     left: 40vw;
-    color: #000000;
+    color: #ffffff;
     text-decoration: none;
     font-size: clamp(8px, 2vw, 32px);
     margin-left: 0.9vw;
     width: 12vw;
     height: 13%;
     border-radius: 15px;
-    background-color: yellow;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    box-shadow: 0 5px 15px rgba(38, 115, 253, 0.6);
     border:2px solid #000000;
     display: flex;
 }
