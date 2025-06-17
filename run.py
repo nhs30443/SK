@@ -37,7 +37,7 @@ def index():
 def clear():
     session.clear()
     
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 
 
