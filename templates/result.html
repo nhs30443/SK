@@ -27,7 +27,9 @@
                     <h1 class="result-title">リザルト</h1>
                     <div class="rank-container">
                         <div class="rank-label">ランク</div>
-                        <div class="rank-grade">{{ data.rank }}</div>
+                        <div class="rank-grade" style="color: {{ data.rank_color }};">
+                            {{ data.rank }}
+                        </div>
                     </div>
                 </div>
             </div>
