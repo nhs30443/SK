@@ -37,7 +37,7 @@ def index():
 def clear():
     session.clear()
     
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 
 
@@ -130,7 +130,7 @@ def register():
         con.close()
         cur.close()
         
-        # 登録完了ページへへリダイレクト
+        # 登録完了ページへリダイレクト
         return redirect(url_for("register_complete"))
     
     return render_template("register.html")
@@ -204,14 +204,66 @@ def in_bag():
 
 
 # 設定画面
-@app.route('/config')
+@app.route('/config', methods=['GET', 'POST'])
 def config():
+    if request.method == 'POST':
+        con = conn_db()
+        cur = con.cursor()
+        
+        
+        #入力画面から値の受け取り
+        username = request.form.get('username')
+        gender = request.form.get('gender')
+        gradeSetting = request.form.get('gradeSetting')
+        userId = session.get("login_id")
+
+
+        errors = {}
+
+
+        # エラーがある場合はテンプレート再表示
+        if errors:
+            return render_template('register.html', errors=errors)
+        
+        
+        # データの更新
+        cur.execute('''
+            UPDATE t_account
+            SET username = %s, gender = %s, gradeSetting = %s
+            WHERE accountId = %s
+        ''', (username, gender, gradeSetting, userId))
+
+        
+        
+        con.commit()
+        con.close()
+        cur.close()
+        
+        # メインへリダイレクト
+        return redirect(url_for("main"))
+        
+        
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
         return redirect(url_for("login"))
     
-    return render_template("config.html")
+    
+    con = conn_db()
+    cur = con.cursor()
+    
+    cur.execute('''
+        SELECT accountId, username, gender, gradeSetting
+        FROM t_account
+        WHERE accountId = %s
+    ''', (userId,))
+    
+    user = cur.fetchone()
+    
+    cur.close()
+    con.close()
+    
+    return render_template("config.html", user=user)
 
 
 

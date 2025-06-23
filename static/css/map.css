@@ -34,6 +34,8 @@ html, body {
     transition: transform 0.5s ease;
     transform-origin: center center;
     filter: blur(5px);
+    width: 100%;
+    height: 100%;
 }
 
 /* 中心に表示するmap.png */
@@ -181,6 +183,165 @@ html, body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
+/* モーダルオーバーレイ */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* モーダルコンテンツ */
+.modal-content {
+    background: linear-gradient(145deg, #ffffff, #f0f0f0);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transform: scale(0.7) translateY(50px);
+    transition: all 0.3s ease;
+    max-width: 400px;
+    width: 90%;
+    border: 3px solid #FFD700;
+    position: relative;
+    overflow: hidden;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1) translateY(0);
+}
+
+/* モーダルの装飾背景 */
+.modal-content::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg,
+        transparent 40%,
+        rgba(255, 215, 0, 0.1) 50%,
+        transparent 60%);
+    animation: shimmer 3s infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* ステージアイコン */
+.modal-stage-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #ff6b6b, #ffa500);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 32px;
+    font-weight: bold;
+    color: white;
+    margin: 0 auto 20px;
+    border: 4px solid #FFD700;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+.modal-stage-icon.cleared {
+    background: linear-gradient(135deg, #4CAF50, #8BC34A);
+}
+
+/* モーダルタイトル */
+.modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* モーダルメッセージ */
+.modal-message {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.5;
+}
+
+/* モーダルボタンコンテナ */
+.modal-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* モーダルボタン */
+.modal-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.modal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.modal-btn:active {
+    transform: translateY(0);
+}
+
+/* 開始ボタン */
+.modal-btn.start {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.modal-btn.start:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+}
+
+/* キャンセルボタン */
+.modal-btn.cancel {
+    background: linear-gradient(135deg, #f44336, #d32f2f);
+    color: white;
+}
+
+.modal-btn.cancel:hover {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+}
+
 /* モバイル対応 */
 @media (max-width: 768px) {
     .title {
@@ -198,6 +359,36 @@ html, body {
     .container {
         border-radius: 5px;
     }
+
+    .modal-content {
+        padding: 30px 20px;
+        max-width: 350px;
+    }
+
+    .modal-stage-icon {
+        width: 60px;
+        height: 60px;
+        font-size: 24px;
+    }
+
+    .modal-title {
+        font-size: 20px;
+    }
+
+    .modal-message {
+        font-size: 14px;
+    }
+
+    .modal-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        min-width: auto;
+    }
 }
 
 @media (max-width: 480px) {
@@ -211,5 +402,20 @@ html, body {
         font-size: 12px;
         top: 10px;
         left: 10px;
+    }
+
+    .modal-content {
+        padding: 25px 15px;
+        border-radius: 15px;
+    }
+
+    .modal-stage-icon {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
+
+    .modal-title {
+        font-size: 18px;
     }
 }
