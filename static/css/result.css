@@ -121,9 +121,10 @@ body {
 }
 
 .rank-label {
-    font-size: 18px;
+    font-size: 30px;
     font-weight: 500;
     color: #555;
+    margin-top:20px;
 }
 
 .rank-grade {
