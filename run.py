@@ -278,6 +278,16 @@ def weapon_detail():
     return render_template("weapon-detail.html")
 
 
+# アイテム詳細
+@app.route('/item-detail')
+def item_detail():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+
+    return render_template("item-detail.html")
+
 
 # 問題画面
 @app.route('/question')
