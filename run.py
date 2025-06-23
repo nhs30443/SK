@@ -322,13 +322,18 @@ def result():
     if userId is None:
         return redirect(url_for("login"))
 
-    # 成績データ（例）
+    # 成績データ（例）※総合は含めない
     subjects = [
         {'name': '漢字', 'score': 80.0},
         {'name': '英語', 'score': 80.0},
         {'name': '算数', 'score': 85.0},
-        {'name': '総合', 'score': 95.0},
     ]
+
+    # 総合正解率（平均）を計算
+    total_score = sum(s['score'] for s in subjects) / len(subjects)
+
+    # subjects に総合スコアを追加
+    subjects.append({'name': '総合', 'score': round(total_score, 1)})
 
     # 総合スコアを取得
     total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
