@@ -37,7 +37,7 @@ def index():
 def clear():
     session.clear()
     
-    return redirect(url_for("login"))
+    return redirect(url_for("index"))
 
 
 
@@ -130,7 +130,7 @@ def register():
         con.close()
         cur.close()
         
-        # 登録完了ページへへリダイレクト
+        # 登録完了ページへリダイレクト
         return redirect(url_for("register_complete"))
     
     return render_template("register.html")
@@ -204,14 +204,66 @@ def in_bag():
 
 
 # 設定画面
-@app.route('/config')
+@app.route('/config', methods=['GET', 'POST'])
 def config():
+    if request.method == 'POST':
+        con = conn_db()
+        cur = con.cursor()
+        
+        
+        #入力画面から値の受け取り
+        username = request.form.get('username')
+        gender = request.form.get('gender')
+        gradeSetting = request.form.get('gradeSetting')
+        userId = session.get("login_id")
+
+
+        errors = {}
+
+
+        # エラーがある場合はテンプレート再表示
+        if errors:
+            return render_template('register.html', errors=errors)
+        
+        
+        # データの更新
+        cur.execute('''
+            UPDATE t_account
+            SET username = %s, gender = %s, gradeSetting = %s
+            WHERE accountId = %s
+        ''', (username, gender, gradeSetting, userId))
+
+        
+        
+        con.commit()
+        con.close()
+        cur.close()
+        
+        # メインへリダイレクト
+        return redirect(url_for("main"))
+        
+        
     # セッション確認
     userId = session.get("login_id")
     if userId is None:
         return redirect(url_for("login"))
     
-    return render_template("config.html")
+    
+    con = conn_db()
+    cur = con.cursor()
+    
+    cur.execute('''
+        SELECT accountId, username, gender, gradeSetting
+        FROM t_account
+        WHERE accountId = %s
+    ''', (userId,))
+    
+    user = cur.fetchone()
+    
+    cur.close()
+    con.close()
+    
+    return render_template("config.html", user=user)
 
 
 
@@ -263,23 +315,65 @@ def subject():
 
 
 
-# 設定画面
-@app.route('/result')  # または既存のルート名
+@app.route('/result')
 def result():
-    # 既存のロジックがあればそのまま使用
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+
+    # 成績データ（例）
+    subjects = [
+        {'name': '漢字', 'score': 80.0},
+        {'name': '英語', 'score': 80.0},
+        {'name': '算数', 'score': 85.0},
+        {'name': '総合', 'score': 95.0},
+    ]
+
+    # 総合スコアを取得
+    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
+
+    # ランク計算関数
+    def calculate_rank(score):
+        if score is None:
+            return 'E'  # 総合が無い場合は最低ランク
+        elif score >= 95:
+            return 'S'
+        elif score >= 85:
+            return 'A'
+        elif score >= 75:
+            return 'B'
+        elif score >= 65:
+            return 'C'
+        elif score >= 55:
+            return 'D'
+        else:
+            return 'E'
+
+    def get_rank_color(rank):
+        return {
+            'S': 'gold',
+            'A': 'red',
+            'B': 'blue',
+            'C': 'yellow',
+            'D': 'green',
+            'E': 'gray'
+        }.get(rank, 'black')
+
+    rank = calculate_rank(total_score)
+    rank_color = get_rank_color(rank)
+
     results_data = {
-        'subjects': [
-            {'name': '漢字', 'score': 10.0},
-            {'name': '英語', 'score': 10.0},
-            {'name': '算数', 'score': 10.0}
-        ],
-        'rank': 'A',
-        'experience': 100000,
+        'subjects': subjects,
+        'rank': rank,
+        'rank_color': rank_color,
+        'experience': 125000,
         'coins': 800
     }
 
-    # 重要：dataパラメータを必ず渡す
     return render_template("result.html", data=results_data)
+
+
 
 
 

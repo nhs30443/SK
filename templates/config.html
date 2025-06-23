@@ -16,54 +16,40 @@
             <form action="/config" method="post">
                 <div class="form-row">
                     <label for="username">ユーザー名：</label>
-                    <input type="text" id="username" name="username" required>
-                </div>
-
-                <div class="form-row">
-                    <label for="password">パスワード：</label>
-                    <input type="password" id="password" name="password" required>
-                </div>
-
-                <div class="form-row">
-                    <label for="confirmPassword">パスワード（確認）：</label>
-                    <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    <input type="text" id="username" name="username" required value="{{ user[1] }}">
                 </div>
 
                 <div class="form-row">
                     <label>性別：</label>
                     <div id="gender-buttons">
-                        <button type="button" onclick="selectGender('male', this)">男</button>
-                        <button type="button" onclick="selectGender('female', this)">女</button>
+                        <button type="button" onclick="selectGender('man', this)"
+                            {% if user[2] == 'male' %}class="selected" {% endif %}>男</button>
+                        <button type="button" onclick="selectGender('woman', this)"
+                            {% if user[2] == 'female' %}class="selected" {% endif %}>女</button>
                     </div>
-                    <input type="hidden" name="gender" id="gender" required>
+                    <input type="hidden" name="gender" id="gender" value="{{ user[2] }}" required>
                 </div>
 
                 <div class="form-row">
                     <label for="grade">学年：</label>
-                    <select id="grade" name="grade" required>
-                        <option value="" disabled selected>選択してください</option>
-                        <option value="1">1年生</option>
-                        <option value="2">2年生</option>
-                        <option value="3">3年生</option>
-                        <option value="4">4年生</option>
-                        <option value="5">5年生</option>
-                        <option value="6">6年生</option>
+                    <select id="grade" name="gradeSetting" required>
+                        <option value="" disabled {% if not user[3] %}selected{% endif %}>選択してください</option>
+                        {% for n in range(1, 7) %}
+                        <option value="{{ n }}" {% if user[3] == n %}selected{% endif %}>{{ n }}年生</option>
+                        {% endfor %}
                     </select>
                 </div>
 
                 <button type="submit">変更</button>
             </form>
 
-            <form action="/config" method="post" class="logout-form">
+            <form action="/clear" method="get" class="logout-form">
                 <button type="submit" class="btn-logout">ログアウト</button>
             </form>
 
             <button type="button" class="btn-back" onclick="history.back()">◀ 戻る</button>
-            
         </div>
     </div>
-
-
 
     <script>
         function selectGender(value, button) {
@@ -72,8 +58,20 @@
             buttons.forEach(btn => btn.classList.remove('selected'));
             button.classList.add('selected');
         }
-    </script>
 
+        window.onload = function () {
+            console.log('window.onload fired');
+            const gender = document.getElementById('gender').value;
+            console.log('gender:', gender);
+            if (gender) {
+                const button = document.querySelector(`#gender-buttons button[onclick*="${gender}"]`);
+                console.log('button found:', button);
+                if (button) {
+                    selectGender(gender, button);
+                }
+            }
+        };
+    </script>
 </body>
 
 </html>
