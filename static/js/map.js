@@ -17,6 +17,86 @@ const stageStatus = [
     2, 2, 1, 1, 0, 0, 0, 0, 0, 0
 ];
 
+// モーダル要素を作成
+function createModal() {
+    const modalHTML = `
+        <div class="modal-overlay" id="stageModal">
+            <div class="modal-content">
+                <div class="modal-stage-icon" id="modalStageIcon"></div>
+                <div class="modal-title" id="modalTitle">ステージを開始</div>
+                <div class="modal-message" id="modalMessage">このステージに挑戦しますか？</div>
+                <div class="modal-buttons">
+                    <button class="modal-btn start" id="startBtn">開始</button>
+                    <button class="modal-btn cancel" id="cancelBtn">キャンセル</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+
+    // イベントリスナーを追加
+    const modal = document.getElementById('stageModal');
+    const startBtn = document.getElementById('startBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+
+    // キャンセルボタン
+    cancelBtn.addEventListener('click', hideModal);
+
+    // モーダル外をクリックして閉じる
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            hideModal();
+        }
+    });
+
+    // ESCキーで閉じる
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.classList.contains('show')) {
+            hideModal();
+        }
+    });
+}
+
+// モーダルを表示
+function showModal(stageNum) {
+    const modal = document.getElementById('stageModal');
+    const modalStageIcon = document.getElementById('modalStageIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const startBtn = document.getElementById('startBtn');
+
+    // ステージの状態に応じて表示を変更
+    const stageIndex = stageNum - 1;
+    const status = stageStatus[stageIndex];
+
+    modalStageIcon.textContent = stageNum;
+    modalStageIcon.className = 'modal-stage-icon';
+
+    if (status === 2) {
+        modalStageIcon.classList.add('cleared');
+        modalTitle.textContent = `ステージ ${stageNum} (クリア済み)`;
+        modalMessage.textContent = 'このステージは既にクリア済みです。もう一度挑戦しますか？';
+    } else {
+        modalTitle.textContent = `ステージ ${stageNum}`;
+        modalMessage.textContent = 'このステージに挑戦しますか？';
+    }
+
+    // 開始ボタンのイベントを設定
+    startBtn.onclick = () => {
+        hideModal();
+        startStage(stageNum);
+    };
+
+    modal.classList.add('show');
+}
+
+// モーダルを非表示
+function hideModal() {
+    const modal = document.getElementById('stageModal');
+    modal.classList.remove('show');
+}
+
 // ステージボタンを生成
 function createStageButtons() {
     const container = document.querySelector('.stage-buttons');
@@ -48,31 +128,49 @@ function createStageButtons() {
 
         // クリックイベントを追加（通常のゲームプレイ用）
         if (stageStatus[i] > 0) {
-            button.onclick = () => selectStage(stageNum);
+            button.onclick = () => showModal(stageNum);
         }
 
         container.appendChild(button);
     }
 }
 
-// ステージ選択時の処理
-function selectStage(stageNum) {
-    if (confirm(`ステージ ${stageNum} を始めますか？`)) {
+// ステージ開始処理
+function startStage(stageNum) {
+    // アニメーション効果を追加
+    const container = document.querySelector('.container');
+    container.style.transform = 'scale(0.95)';
+    container.style.opacity = '0.8';
+
+    setTimeout(() => {
         // 実際のFlaskアプリケーションでは以下のようにリダイレクト
         // window.location.href = `/question?stage=${stageNum}`;
+
+        // デモ用のアラート（実際のアプリでは削除）
         alert(`ステージ ${stageNum} を開始します！`);
-    }
+
+        // アニメーションをリセット
+        container.style.transform = '';
+        container.style.opacity = '';
+    }, 300);
 }
 
 // 戻るボタンの処理
 function goBack() {
-    // 実際のFlaskアプリケーションでは以下のようにリダイレクト
-    // window.location.href = '/main';
-    alert('メイン画面に戻ります');
-}
+    const container = document.querySelector('.container');
+    container.style.transform = 'scale(1.05)';
+    container.style.opacity = '0.8';
 
-// ウィンドウリサイズ時の処理は削除
-// updateButtonSizes関数も削除
+    setTimeout(() => {
+        // 実際のFlaskアプリケーションでは以下のようにリダイレクト
+        // window.location.href = '/main';
+        alert('メイン画面に戻ります');
+
+        // アニメーションをリセット
+        container.style.transform = '';
+        container.style.opacity = '';
+    }, 200);
+}
 
 // ページ読み込み時にステージボタンを生成
 document.addEventListener('DOMContentLoaded', function() {
@@ -81,6 +179,9 @@ document.addEventListener('DOMContentLoaded', function() {
         const background = document.querySelector('.background');
         background.style.backgroundImage = `url('${window.backgroundImageUrl}')`;
     }
+
+    // モーダルを作成
+    createModal();
 
     // ステージボタンを生成
     createStageButtons();
