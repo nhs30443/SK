@@ -141,17 +141,11 @@ function startStage(stageNum) {
     const container = document.querySelector('.container');
     container.style.transform = 'scale(0.95)';
     container.style.opacity = '0.8';
+    container.style.transition = 'all 0.3s ease';
 
     setTimeout(() => {
-        // 実際のFlaskアプリケーションでは以下のようにリダイレクト
-        // window.location.href = `/question?stage=${stageNum}`;
-
-        // デモ用のアラート（実際のアプリでは削除）
-        alert(`ステージ ${stageNum} を開始します！`);
-
-        // アニメーションをリセット
-        container.style.transform = '';
-        container.style.opacity = '';
+        // 実際のFlaskアプリケーションでリダイレクト
+        window.location.href = `/question?stage=${stageNum}`;
     }, 300);
 }
 
@@ -160,15 +154,11 @@ function goBack() {
     const container = document.querySelector('.container');
     container.style.transform = 'scale(1.05)';
     container.style.opacity = '0.8';
+    container.style.transition = 'all 0.2s ease';
 
     setTimeout(() => {
-        // 実際のFlaskアプリケーションでは以下のようにリダイレクト
-        // window.location.href = '/main';
-        alert('メイン画面に戻ります');
-
-        // アニメーションをリセット
-        container.style.transform = '';
-        container.style.opacity = '';
+        // 実際のFlaskアプリケーションでリダイレクト
+        window.location.href = '/main';
     }, 200);
 }
 
