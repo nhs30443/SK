@@ -17,7 +17,7 @@ body {
     height: 100vh;
     display: flex;
     align-items: center;
-    justify-content: center;\
+    justify-content: center;
 }
 
 .background-image {
@@ -116,7 +116,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 75px;
     margin-bottom: 15px;
 }
 
@@ -127,7 +127,7 @@ body {
 }
 
 .rank-grade {
-    font-size: 120px;
+    font-size: 180px;
     font-weight: bold;
     color: #FF6B6B;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
