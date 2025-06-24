@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>チャレンジクエスト</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/item-detail.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="backTop"></a>
+            <div class="header">
+                <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+                <div class="right-elements">
+                    <img src="static/images/coin.png" class="coinImg" alt="コイン">
+                    <p class="coinNumber"><span class="cross">×</span>1000</p>
+                    <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+                </div>
+            </div>
+        <div class="background">
+            <img src="static/images/background.png" class="backgroundImg" alt="背景">
+        </div>
+        <main>
+            <div class="in_menu">
+                <div class="weapon-content">
+                    <img src="static/images/bag.png" class="weapon-item" alt="バッグ">
+                    <div class="weapon-text">
+                        <h2 class="weapon-title">アイテム名前</h2>
+                        <p class="weapon-exp">
+                            武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます武器の説明がきます
+                        </p>
+                    </div>
+                </div>
+                <a href="/in_bag" class="back-main"><span class="btn-back">戻る</span></a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
