@@ -277,12 +277,14 @@ def weapon_detail():
     return render_template("weapon-detail.html")
 
 
+
 # アイテム詳細
 @app.route('/item-detail')
 @login_required
 def item_detail():
 
     return render_template("item-detail.html")
+
 
 
 # 問題画面
