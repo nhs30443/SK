@@ -43,8 +43,10 @@ def index():
     
     return render_template("top.html")
 
-# セッションクリア
-@app.route('/clear')
+
+
+# ログアウト
+@app.route('/logout')
 def clear():
     session.clear()
     
