@@ -15,15 +15,16 @@ h2{
     padding: 3vh 0 0 3vw;
 }
 .haste:first-child{
-    padding: 5vh 5vw 0 2vw;
+    padding: 0 5vw 0 2vw;
 }
 .haste {
     display: flex;
     flex-direction: column;
+    width: 7vw;
+    height: 20vh;
     align-items: center;
     gap: 10px;
-    padding: 5vh 5vw 0 0;
-    width: fit-content;
+    padding: 0 5vw 0 0;
 }
 
 .haste-content{
@@ -32,6 +33,7 @@ h2{
 
 .haste-item{
     width: 7vw;
+    height: auto;
 }
 
 button{
@@ -53,8 +55,27 @@ button{
 
 .back-main{
     position: relative;
-    top: -6vh;
-    left: 40vw;
+    top: -21.5vh;
+    left: 44.5vw;
+    color: #ffffff;
+    text-decoration: none;
+    font-size: clamp(8px, 2vw, 32px);
+    margin-left: 0.9vw;
+    width: 12vw;
+    height: 13%;
+    border-radius: 15px;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    box-shadow: 0 5px 15px rgba(38, 115, 253, 0.6);
+    border:2px solid #000000;
+    display: flex;
+    justify-content: center;  /* 水平方向中央 */
+    align-items: center;      /* 垂直方向中央 */
+}
+
+.buy-btn{
+    position: relative;
+    top: -25vh;
+    left: 44.5vw;
     color: #ffffff;
     text-decoration: none;
     font-size: clamp(8px, 2vw, 32px);
@@ -77,6 +98,8 @@ button{
 
 .selectbox-6 {
     position: relative;
+    top: -8vh;
+    left: 7vw;
 }
 
 .selectbox-6::before,
@@ -102,8 +125,8 @@ button{
 
 .selectbox-6 select {
     appearance: none;
-    min-width: 230px;
-    height: 2.8em;
+    height: 5vh;
+    width: auto;
     padding: .4em calc(.8em + 30px) .4em .8em;
     border: 1px solid #d0d0d0;
     border-radius: 3px;
