@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, session, json, redirect, url_for
 import mysql.connector
 import re
-
+from functools import wraps
 
 
 
@@ -19,6 +19,17 @@ def conn_db():
         charset="utf8"
     )
     return conn
+
+
+
+# ログイン確認だけ
+def login_required(view_func):
+    @wraps(view_func)
+    def wrapped_view(*args, **kwargs):
+        if "login_id" not in session:
+            return redirect(url_for("login"))
+        return view_func(*args, **kwargs)
+    return wrapped_view
 
 
 
@@ -181,11 +192,8 @@ def login():
 
 # メインページ
 @app.route('/main')
+@login_required
 def main():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     return render_template("main.html")
 
@@ -193,11 +201,8 @@ def main():
 
 #バッグ内
 @app.route('/in_bag')
+@login_required
 def in_bag():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     return render_template("in_bag.html")
 
@@ -205,6 +210,7 @@ def in_bag():
 
 # 設定画面
 @app.route('/config', methods=['GET', 'POST'])
+@login_required
 def config():
     if request.method == 'POST':
         con = conn_db()
@@ -241,12 +247,6 @@ def config():
         
         # メインへリダイレクト
         return redirect(url_for("main"))
-        
-        
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     
     con = conn_db()
@@ -269,33 +269,24 @@ def config():
 
 #武器詳細
 @app.route('/weapon-detail')
+@login_required
 def weapon_detail():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
         
     return render_template("weapon-detail.html")
 
 
 # アイテム詳細
 @app.route('/item-detail')
+@login_required
 def item_detail():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
 
     return render_template("item-detail.html")
 
 
 # 問題画面
 @app.route('/question')
+@login_required
 def question():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     return render_template("question.html")
 
@@ -303,11 +294,8 @@ def question():
 
 # マップ画面
 @app.route('/map')
+@login_required
 def map():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     return render_template("map.html")
 
@@ -315,22 +303,16 @@ def map():
 
 # 科目選択画面
 @app.route('/subject')
+@login_required
 def subject():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
     
     return render_template("subject.html")
 
 
 
 @app.route('/result')
+@login_required
 def result():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
 
     # 成績データ（例）※総合は含めない
     subjects = [
