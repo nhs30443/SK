@@ -14,17 +14,24 @@ h2{
     font-size: clamp(8px, 2vw, 180px);
     padding: 3vh 0 0 3vw;
 }
-.haste:first-child{
-    padding: 0 5vw 0 2vw;
-}
-.haste {
+.potion {
     display: flex;
     flex-direction: column;
     width: 7vw;
     height: 20vh;
     align-items: center;
     gap: 10px;
-    padding: 0 5vw 0 0;
+    padding: 3vh 5vw 0 2vw;
+}
+
+.buffer{
+    display: flex;
+    flex-direction: column;
+    width: 7vw;
+    height: 20vh;
+    align-items: center;
+    gap: 10px;
+    padding: 0 5vw 0 2vw;
 }
 
 .haste-content{
@@ -34,6 +41,11 @@ h2{
 .haste-item{
     width: 7vw;
     height: auto;
+}
+
+.potion-item{
+    height: 13vh;
+    width: auto;
 }
 
 button{
@@ -134,4 +146,11 @@ button{
     color: #333333;
     font-size: 1em;
     cursor: pointer;
+}
+
+.price {
+    position: absolute;
+    top: 3vh;
+    left: 47vw;
+    font-size: clamp(8px, 2vw, 180px);
 }
