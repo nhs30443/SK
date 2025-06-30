@@ -41,7 +41,10 @@ body {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(8px);
     border: 2px solid rgba(255, 255, 255, 0.3);
-    height:800px;
+
+=======
+    height: auto;
+    aspect-ratio: 16 / 9;
 }
 
 .header-section {
@@ -57,7 +60,7 @@ body {
 }
 
 .section-title {
-    font-size: 22px;
+    font-size: 35px;
     font-weight: bold;
     color: #444;
     margin-bottom: 18px;
@@ -73,6 +76,7 @@ body {
 }
 
 .subject-scores {
+    margin: 10px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -91,13 +95,13 @@ body {
 }
 
 .subject {
-    font-size: 18px;
+    font-size: 27px;
     font-weight: 500;
     color: #444;
 }
 
 .percentage {
-    font-size: 18px;
+    font-size: 27px;
     font-weight: bold;
     color: #444;
 }
@@ -114,18 +118,19 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 75px;
     margin-bottom: 15px;
 }
 
 .rank-label {
-    font-size: 18px;
+    font-size: 30px;
     font-weight: 500;
     color: #555;
+    margin-top:20px;
 }
 
 .rank-grade {
-    font-size: 120px;
+    font-size: 180px;
     font-weight: bold;
     color: #FF6B6B;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
@@ -160,48 +165,4 @@ body {
     font-size: 18px;
     font-weight: bold;
     color: #444;
-}
-
-/* Responsive design */
-@media (max-width: 768px) {
-    .results-panel {
-        width: 90%;
-        padding: 30px;
-    }
-    
-    .header-section {
-        flex-direction: column;
-        gap: 30px;
-    }
-    
-    .result-section {
-        padding-left: 0;
-        text-align: center;
-    }
-    
-    .rank-grade {
-        font-size: 80px;
-    }
-    
-    .result-title {
-        font-size: 28px;
-    }
-}
-
-@media (max-width: 480px) {
-    .results-panel {
-        padding: 20px;
-    }
-    
-    .rank-grade {
-        font-size: 60px;
-    }
-    
-    .subject, .percentage {
-        font-size: 16px;
-    }
-    
-    .stat-label, .stat-value {
-        font-size: 16px;
-    }
 }
