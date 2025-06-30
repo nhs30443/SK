@@ -200,6 +200,15 @@ def main():
     return render_template("main.html")
 
 
+# ショップ
+@app.route('/shop')
+def shop():
+    # セッション確認
+    userId = session.get("login_id")
+    if userId is None:
+        return redirect(url_for("login"))
+
+    return render_template("shop.html")
 
 #バッグ内
 @app.route('/in_bag')
