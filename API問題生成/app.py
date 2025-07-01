@@ -768,4 +768,4 @@ if __name__ == '__main__':
         print("⚠️  Gemini APIキーが設定されていません - 学年別フォールバック問題を使用します")
         print("   環境変数 GEMINI_API_KEY を設定してください")
 
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=True, host='0.0.0.0', port=2000)
