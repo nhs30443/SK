@@ -117,12 +117,10 @@ html, body {
 
 .hamburger span {
     height: clamp(2px, 0.5vw, 4px);
-    background: linear-gradient(90deg, #FFD700, #FFA500);
+    background-color: white;
     position: absolute;
     width: 100%;
-    border-radius: 2px;
     transition: all 0.3s ease;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 .hamburger span:nth-of-type(1) { top: 4px; }
@@ -168,15 +166,12 @@ li a {
     top: 80px;
     right: 40px;
     width: 400px;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
-    border: 4px double #FFD700;
-    border-radius: 10px;
+    background-color: #111;
+    border: 4px double #fff;
     padding: 20px;
     color: #fff;
     z-index: 10;
-    box-shadow:
-        6px 6px 0 #444,
-        0 0 20px rgba(255, 215, 0, 0.3);
+    box-shadow: 6px 6px 0 #444;
     height: 300px;
 }
 
@@ -186,18 +181,16 @@ li a {
 }
 
 #header-menu li a {
-    color: #FFD700;
+    color: #fff;
     text-decoration: none;
     font-size: 25px;
+    transition: 0.2s;
     font-family: 'DotGothic16', cursive !important;
-    transition: all 0.3s ease;
-    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
 }
 
 #header-menu li a:hover {
-    color: #FFF8DC;
-    text-shadow: 0 0 10px #ffff99, 0 0 20px #FFD700;
-    transform: translateX(5px);
+    color: #ffff66;
+    text-shadow: 0 0 5px #ffff99;
 }
 
 .overlay {
