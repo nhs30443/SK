@@ -4,21 +4,25 @@
     <meta charset="UTF-8">
     <title>クイズ画面</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/question.css') }}">
+    <!-- RPGっぽい漢字対応フォントを読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="overlay" class="overlay"></div>
+
     <header class="header">
-        <nav>
-            <ul id="header-menu">
-                <li><a href="{{ url_for('main') }}">HOME</a></li>
-                <li><a href="{{ url_for('subject') }}">SUBJECT</a></li>
-                <li><a href="{{ url_for('config') }}">CONFIG</a></li>
-                <li><a href="{{ url_for('map') }}">EXIT</a></li>
-            </ul>
-        </nav>
         <div id="hamburger" class="hamburger">
             <span></span><span></span><span></span>
         </div>
+        <nav>
+            <ul id="header-menu">
+                <li><a href="{{ url_for('main') }}">ホームに戻る</a></li>
+                <li><a href="{{ url_for('config') }}">設定</a></li>
+                <li><a href="{{ url_for('map') }}">ステージを出る</a></li>
+            </ul>
+        </nav>
     </header>
 
     <div class="game-container">
@@ -34,10 +38,13 @@
             <div class="choice">選択肢 3</div>
             <div class="choice">選択肢 4</div>
         </div>
+
+        <div class="result" id="result-box"></div>
     </div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/question.js') }}"></script>
 </body>
 </html>
+
 

@@ -321,6 +321,8 @@ def config():
     con = conn_db()
     cur = con.cursor()
     
+    userId = session.get("login_id")
+    
     cur.execute('''
         SELECT accountId, username, gender, gradeSetting
         FROM t_account

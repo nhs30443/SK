@@ -1,20 +1,22 @@
-// 例：選択肢をクリックしたら表示する
 document.querySelectorAll('.choice').forEach(choice => {
     choice.addEventListener('click', () => {
-    alert(`「${choice.textContent}」が選ばれました`);
+        const text = `「${choice.textContent}」が選ばれました`;
+        const resultBox = document.getElementById('result-box');
+        $(resultBox).stop(true, true).text(text).fadeIn().delay(1500).fadeOut();
     });
 });
 
-$(function(){
-  $('#hamburger').on('click', function() {
-    $('#hamburger').toggleClass("open");
-    $('#header-menu').slideToggle();
-    $('#overlay').fadeToggle();
-  });
+$(function() {
+    $('#hamburger').on('click', function() {
+        $(this).toggleClass("open");
+        $('#header-menu').fadeToggle();
+        $('#overlay').fadeToggle();
+    });
 
-  $('#overlay').on('click', function() {
-    $('#hamburger').removeClass("open");
-    $('#header-menu').slideUp();
-    $('#overlay').fadeOut();
-  });
+    $('#overlay').on('click', function() {
+        $('#hamburger').removeClass("open");
+        $('#header-menu').fadeOut();
+        $('#overlay').fadeOut();
+    });
 });
+
