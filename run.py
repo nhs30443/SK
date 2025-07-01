@@ -22,7 +22,7 @@ def conn_db():
 
 
 
-# ログイン確認だけ
+# ログイン確認
 def login_required(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
@@ -202,11 +202,8 @@ def main():
 
 # ショップ
 @app.route('/shop')
+@login_required
 def shop():
-    # セッション確認
-    userId = session.get("login_id")
-    if userId is None:
-        return redirect(url_for("login"))
 
     return render_template("shop.html")
 
