@@ -22,7 +22,7 @@ def conn_db():
 
 
 
-# ログイン確認だけ
+# ログイン確認
 def login_required(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
@@ -200,6 +200,12 @@ def main():
     return render_template("main.html")
 
 
+# ショップ
+@app.route('/shop')
+@login_required
+def shop():
+
+    return render_template("shop.html")
 
 #バッグ内
 @app.route('/in_bag')
@@ -253,6 +259,8 @@ def config():
     
     con = conn_db()
     cur = con.cursor()
+    
+    userId = session.get("login_id")
     
     cur.execute('''
         SELECT accountId, username, gender, gradeSetting

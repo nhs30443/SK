@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>チャレンジクエスト</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="backTop"></a>
+            <div class="header">
+                <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+                <div class="right-elements">
+                    <img src="static/images/coin.png" class="coinImg" alt="コイン">
+                    <p class="coinNumber"><span class="cross">×</span>1000</p>
+                    <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+                </div>
+            </div>
+        <div class="background">
+            <img src="static/images/background.png" class="backgroundImg" alt="背景">
+        </div>
+        <main>
+            <div class="in_bag">
+                <h2>アイテム</h2>
+                <p class="price">合計金額 <br><br><span id="totalPrice">0</span> コイン</p>
+                <div class="haste-content">
+                    <table>
+                        <tr class="table-upper">
+                            <td>
+                                <div class="potion">
+                                    <a href="/item-detail"><img src="static/images/potion_low.png" class="potion-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select name="quantity" id="potionLow">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="potion">
+                                    <a href="/item-detail"><img src="static/images/potion_mid.png" class="potion-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select id="potionMid">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="potion">
+                                    <a href="/item-detail"><img src="static/images/potion_high.png" class="potion-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select id="potionHigh">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr class="table-lower">
+                            <td>
+                                <div class="buffer">
+                                    <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select name="quantity" id="bufferLow">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="buffer">
+                                    <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select id="bufferMid">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="buffer">
+                                    <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                    <label class="selectbox-6">
+                                        <select id="bufferHigh">
+                                            <option value="0">0</option>
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                            <option value="6">6</option>
+                                            <option value="7">7</option>
+                                            <option value="8">8</option>
+                                            <option value="9">9</option>
+                                            <option value="10">10</option>
+                                        </select>
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <button class="buy-btn"><span class="btn-back">購入</span></button>
+                <a href="/main" class="back-main"><span class="btn-back">戻る</span></a>
+            </div>
+        </main>
+    </div>
+
+    <script>
+
+        const itemPrices = {
+            potionLow: 300,
+            potionMid: 600,
+            potionHigh: 1000,
+            bufferLow: 500,
+            bufferMid: 500,
+            bufferHigh: 500
+        };
+
+
+        const selectElements = document.querySelectorAll('select');
+        const totalPriceElement = document.getElementById('totalPrice');
+
+        function calculateTotalPrice() {
+            let total = 0;
+            selectElements.forEach(select => {
+                const itemId = select.id;
+                const quantity = parseInt(select.value);
+
+
+                if (itemPrices[itemId] && !isNaN(quantity)) {
+                    total += itemPrices[itemId] * quantity;
+                }
+            });
+            totalPriceElement.textContent = total; // 合計金額を更新
+        }
+
+
+        selectElements.forEach(select => {
+            select.addEventListener('change', calculateTotalPrice);
+        });
+
+
+        calculateTotalPrice();
+    </script>
+</body>
+</html>
