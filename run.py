@@ -22,7 +22,7 @@ def conn_db():
 
 
 
-# ログイン確認だけ
+# ログイン確認
 def login_required(view_func):
     @wraps(view_func)
     def wrapped_view(*args, **kwargs):
