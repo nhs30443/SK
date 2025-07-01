@@ -3,7 +3,7 @@ import mysql.connector
 import re
 from functools import wraps
 
-
+from zope.interface.interface import Method
 
 app = Flask(__name__)
 app.secret_key = "qawsedrftgyhujikolp"
@@ -196,23 +196,84 @@ def login():
 @app.route('/main')
 @login_required
 def main():
-    
-    return render_template("main.html")
+    con = conn_db()
+    cur = con.cursor()
+
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
+
+    coin = result[0] if result else 0
+    print(coin)
+    # 接続を閉じる
+    cur.close()
+    con.close()
+
+    return render_template("main.html", coin=coin)
 
 
 # ショップ
 @app.route('/shop')
 @login_required
 def shop():
+    con = conn_db()
+    cur = con.cursor()
 
-    return render_template("shop.html")
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
 
+    coin = result[0] if result else 0
+    print(coin)
+    # 接続を閉じる
+    cur.close()
+    con.close()
+    return render_template("shop.html",coin=coin)
+
+#ショップアイテム購入
+@app.route('/buy-shop', methods=["POST"])
+@login_required
+def buy_shop():
+    con = conn_db()
+    cur = con.cursor()
+
+    potion_low = request.form.get('potion_low')
+    potion_mid = request.form.get('potion_mid')
+    potion_high = request.form.get('potion_high')
+    buf_jp = request.form.get('buf_jp')
+    buf_mt = request.form.get('buf_mt')
+    buf_en = request.form.get('buf_en')
+
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
+
+    coin = result[0] if result else 0
+    # 接続を閉じる
+    cur.close()
+    con.close()
+    return render_template("shop.html",coin=coin)
 #バッグ内
 @app.route('/in_bag')
 @login_required
 def in_bag():
-    
-    return render_template("in_bag.html")
+    con = conn_db()
+    cur = con.cursor()
+
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
+
+    coin = result[0] if result else 0
+    print(coin)
+    # 接続を閉じる
+    cur.close()
+    con.close()
+    return render_template("in_bag.html",coin=coin)
 
 
 
@@ -279,8 +340,20 @@ def config():
 @app.route('/weapon-detail')
 @login_required
 def weapon_detail():
-        
-    return render_template("weapon-detail.html")
+    con = conn_db()
+    cur = con.cursor()
+
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
+
+    coin = result[0] if result else 0
+    print(coin)
+    # 接続を閉じる
+    cur.close()
+    con.close()
+    return render_template("weapon-detail.html",coin=coin)
 
 
 
@@ -288,8 +361,20 @@ def weapon_detail():
 @app.route('/item-detail')
 @login_required
 def item_detail():
+    con = conn_db()
+    cur = con.cursor()
 
-    return render_template("item-detail.html")
+    accountId = session.get("login_id")
+    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    result = cur.fetchone()
+
+    coin = result[0] if result else 0
+    print(coin)
+    # 接続を閉じる
+    cur.close()
+    con.close()
+    return render_template("item-detail.html",coin=coin)
 
 
 
