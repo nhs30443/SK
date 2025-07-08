@@ -8,7 +8,7 @@ html, body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
-  font-family: sans-serif;
+  font-family: 'DotGothic16', monospace; /* DotGothic16を追加 */
 }
 
 .container {
@@ -48,6 +48,7 @@ html, body {
     border-radius: 1.2vw; /* 画面幅の1.2% */
     font-size: 2.3vw; /* 画面幅の1.8% */
     font-weight: bold;
+    font-family: 'DotGothic16', monospace; /* ボタンにもDotGothic16を明示的に指定 */
     color: #333;
     cursor: pointer;
     display: flex;
