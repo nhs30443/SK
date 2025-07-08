@@ -112,9 +112,27 @@ function updateEnemyHP(amount) {
 
 
 $('.choice').on('click', function () {
+    if (battleEnded) return;  // 連打防止
+
+    battleEnded = true;       // クリック受付停止
+
     updateEnemyHP(-20);
-    updatePlayerHP(-10);
+    checkBattleEnd()
+
+    $('#enemy-hp').one('transitionend', function() {
+        setTimeout(() => {
+            updatePlayerHP(-10);
+
+            // プレイヤーHP減少アニメ終了後にbattleEnded解除
+            $('#player-hp').one('transitionend', function() {
+                battleEnded = false;
+                checkBattleEnd()
+            });
+        }, 1000);
+    });
 });
+
+
 
 
 
