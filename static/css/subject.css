@@ -36,17 +36,17 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 3vw; /* 画面幅の3% */
+    gap: 5vw; /* 画面幅の3% */
     z-index: 10;
 }
 
 /* ボタンスタイル */
 .subject-button {
-    width: 15vw; /* 画面幅の15% */
-    height: 7.5vw; /* 画面幅の7.5% */
+    width: 20vw; /* 画面幅の15% */
+    height: 10vw; /* 画面幅の7.5% */
     border: 0.15vw solid #333; /* 画面幅の0.15% */
     border-radius: 1.2vw; /* 画面幅の1.2% */
-    font-size: 1.8vw; /* 画面幅の1.8% */
+    font-size: 2.3vw; /* 画面幅の1.8% */
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -68,13 +68,13 @@ html, body {
 }
 
 .math-button {
-    background: linear-gradient(145deg, #87CEEB, #4682B4);
+    background: linear-gradient(145deg, #87CEEB, #5d97cb);
 }
 
 .kanji-button {
-    background: linear-gradient(145deg, #FFB6C1, #DC143C);
+    background: linear-gradient(145deg, #FFB6C1, #e35067);
 }
 
 .english-button {
-    background: linear-gradient(145deg, #F0E68C, #DAA520);
+    background: linear-gradient(145deg, #F0E68C, #e1be61);
 }
