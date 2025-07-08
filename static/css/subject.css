@@ -27,10 +27,7 @@ html, body {
   top: 0; left: 0; right: 0; bottom: 0;
   background: url('../images/top.png') no-repeat center center;
   background-size: cover;
-
 }
-
-
 
 /* ボタンコンテナ */
 .button-container {
@@ -39,17 +36,17 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 40px;
+    gap: min(40px, 3vw); /* 画面幅に応じて調整 */
     z-index: 10;
 }
 
 /* ボタンスタイル */
 .subject-button {
-    width: 200px;
-    height: 100px;
+    width: min(200px, 15vw); /* 画面幅に応じて調整 */
+    height: min(100px, 7.5vw); /* 画面幅に応じて調整 */
     border: 1.5px solid #333;
-    border-radius: 15px;
-    font-size: 1.5rem;
+    border-radius: min(15px, 1.2vw); /* 画面幅に応じて調整 */
+    font-size: min(1.5rem, 3vw); /* 画面幅に応じて調整 */
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -83,15 +80,16 @@ html, body {
     background: linear-gradient(145deg, #F0E68C, #DAA520);
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
+/* 非常に小さい画面用の最小値設定 */
+@media (max-width: 480px) {
     .button-container {
-        gap: 20px;
+        gap: 15px;
     }
 
     .subject-button {
-        width: 100px;
-        height: 50px;
-        font-size: 16px;
+        width: 80px;
+        height: 40px;
+        font-size: 12px;
+        border-radius: 8px;
     }
 }
