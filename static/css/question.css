@@ -127,7 +127,7 @@ html, body {
     background-color: white;
     position: absolute;
     width: 100%;
-    transition: all 0.3s ease;
+    /*transition: all 0.3s ease;*/
 }
 
 .hamburger span:nth-of-type(1) { top: 4px; }
