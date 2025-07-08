@@ -3,7 +3,7 @@ import mysql.connector
 import re
 from functools import wraps
 
-from zope.interface.interface import Method
+# from zope.interface.interface import Method
 
 app = Flask(__name__)
 app.secret_key = "qawsedrftgyhujikolp"
@@ -407,6 +407,7 @@ def subject():
 
 
 
+# リザルト画面
 @app.route('/result')
 @login_required
 def result():
