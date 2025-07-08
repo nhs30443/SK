@@ -110,27 +110,43 @@ function updateEnemyHP(amount) {
 }
 
 
-
 $('.choice').on('click', function () {
-    if (battleEnded) return;  // 連打防止
+    if (battleEnded) return;
 
-    battleEnded = true;       // クリック受付停止
+    battleEnded = true;
 
-    updateEnemyHP(-20);
-    checkBattleEnd()
+    const isCorrect = $(this).data('correct'); // true か false が入る
 
-    $('#enemy-hp').one('transitionend', function() {
+    if (isCorrect) {
+        // 正解の処理
+        updateEnemyHP(-20);
+        checkBattleEnd();
+
+        $('#enemy-hp').one('transitionend', function () {
+            setTimeout(() => {
+                updatePlayerHP(-10);
+
+                // プレイヤーHP減少アニメ終了後にbattleEnded解除
+                $('#player-hp').one('transitionend', function () {
+                    battleEnded = false;
+                    checkBattleEnd();
+                });
+            }, 1000);
+        });
+    } else {
+        // 間違いの処理
         setTimeout(() => {
             updatePlayerHP(-10);
 
-            // プレイヤーHP減少アニメ終了後にbattleEnded解除
-            $('#player-hp').one('transitionend', function() {
+            $('#player-hp').one('transitionend', function () {
                 battleEnded = false;
-                checkBattleEnd()
+                checkBattleEnd();
             });
         }, 1000);
-    });
+    }
 });
+
+
 
 
 
