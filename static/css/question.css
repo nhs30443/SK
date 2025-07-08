@@ -31,12 +31,17 @@ html, body {
     position: relative;
 }
 
-/* 背景画像だけの要素 */
+/* 背景画像の修正 - 中央配置とサイズ調整 */
 .background {
-  position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: url('../images/top.png') no-repeat center center;
-  background-size: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
 }
 
 /* RPG風装飾要素 */
@@ -108,6 +113,22 @@ html, body {
 .choice:active {
     transform: translateY(0);
     box-shadow: 0 0.2vw 0.4vw rgba(0,0,0,0.2);
+}
+
+/* 正解・不正解時のスタイル */
+.choice.correct {
+    background-color: #90EE90;
+    border: 3px solid #32CD32;
+}
+
+.choice.incorrect {
+    background-color: #FFB6C1;
+    border: 3px solid #DC143C;
+}
+
+.choice.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 /* ハンバーガーメニューのスタイル */
@@ -235,6 +256,40 @@ body {
     display: none;
 }
 
+/* 次の問題ボタン */
+.next-question-container {
+    position: absolute;
+    bottom: 15vh;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+}
+
+.next-question-btn {
+    background: linear-gradient(135deg, #4169E1, #1E90FF);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: clamp(16px, 2vw, 24px);
+    font-weight: bold;
+    border-radius: 10px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    font-family: 'DotGothic16', 'Pixelify Sans', monospace;
+}
+
+.next-question-btn:hover {
+    background: linear-gradient(135deg, #1E90FF, #4169E1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+.next-question-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
 /* 共通のHPバースタイル */
 .hp-bar {
     width: 200px;
@@ -264,6 +319,7 @@ body {
     position: absolute;
     top: 10%;
     left: 10%;
+    z-index: 4;
 }
 
 /* 敵のHPバー（右上） */
@@ -272,4 +328,5 @@ body {
     top: 10%;
     right: 10%;
     text-align: right;
+    z-index: 4;
 }
