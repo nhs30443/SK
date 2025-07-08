@@ -36,17 +36,17 @@ html, body {
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: min(40px, 3vw); /* 画面幅に応じて調整 */
+    gap: 3vw; /* 画面幅の3% */
     z-index: 10;
 }
 
 /* ボタンスタイル */
 .subject-button {
-    width: min(200px, 15vw); /* 画面幅に応じて調整 */
-    height: min(100px, 7.5vw); /* 画面幅に応じて調整 */
-    border: 1.5px solid #333;
-    border-radius: min(15px, 1.2vw); /* 画面幅に応じて調整 */
-    font-size: min(1.5rem, 3vw); /* 画面幅に応じて調整 */
+    width: 15vw; /* 画面幅の15% */
+    height: 7.5vw; /* 画面幅の7.5% */
+    border: 0.15vw solid #333; /* 画面幅の0.15% */
+    border-radius: 1.2vw; /* 画面幅の1.2% */
+    font-size: 1.8vw; /* 画面幅の1.8% */
     font-weight: bold;
     color: #333;
     cursor: pointer;
@@ -55,17 +55,17 @@ html, body {
     align-items: center;
     justify-content: center;
     text-decoration: none;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    box-shadow: 0 0.3vw 0.6vw rgba(0,0,0,0.2);
 }
 
 .subject-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    transform: translateY(-0.3vw);
+    box-shadow: 0 0.6vw 1.2vw rgba(0,0,0,0.3);
 }
 
 .subject-button:active {
     transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 0.2vw 0.4vw rgba(0,0,0,0.2);
 }
 
 .math-button {
@@ -78,18 +78,4 @@ html, body {
 
 .english-button {
     background: linear-gradient(145deg, #F0E68C, #DAA520);
-}
-
-/* 非常に小さい画面用の最小値設定 */
-@media (max-width: 480px) {
-    .button-container {
-        gap: 15px;
-    }
-
-    .subject-button {
-        width: 80px;
-        height: 40px;
-        font-size: 12px;
-        border-radius: 8px;
-    }
 }
