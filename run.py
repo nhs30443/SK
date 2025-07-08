@@ -407,6 +407,7 @@ def subject():
 
 
 
+# リザルト画面
 @app.route('/result')
 @login_required
 def result():

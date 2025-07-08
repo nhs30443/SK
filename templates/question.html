@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>クイズ画面</title>
@@ -7,8 +8,11 @@
     <!-- RPGっぽい漢字対応フォントを読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div id="overlay" class="overlay"></div>
 
@@ -42,9 +46,25 @@
         <div class="result" id="result-box"></div>
     </div>
 
+    <!-- HPバー（画面の外側に配置） -->
+    <div class="player-hp-container">
+        <span class="hp-label">あなた</span>
+        <div class="hp-bar">
+            <div class="hp-fill" id="player-hp" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <div class="enemy-hp-container">
+        <span class="hp-label">敵</span>
+        <div class="hp-bar">
+            <div class="hp-fill" id="enemy-hp" style="width: 100%;"></div>
+        </div>
+    </div>
+
+
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="{{ url_for('static', filename='js/question.js') }}"></script>
 </body>
+
 </html>
-
-

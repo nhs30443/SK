@@ -228,3 +228,42 @@ body {
     z-index: 2;
     display: none;
 }
+
+/* 共通のHPバースタイル */
+.hp-bar {
+    width: 200px;
+    height: 20px;
+    background-color: #333;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    background-color: #e60000;
+    transition: width 0.3s ease-in-out;
+}
+
+.hp-label {
+    color: #fff;
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: inline-block;
+    font-family: 'Press Start 2P', cursive;
+}
+
+/* 自分のHPバー（左上） */
+.player-hp-container {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+}
+
+/* 敵のHPバー（右上） */
+.enemy-hp-container {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    text-align: right;
+}
