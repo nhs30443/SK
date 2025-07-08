@@ -96,7 +96,7 @@ html, body {
     align-items: center;
     font-weight: bold;
     cursor: pointer;
-    transition: all 0.3s ease;
+    /*transition: all 0.3s ease;*/
     font-size: clamp(12px, 1.8vw, 20px);
 }
 
