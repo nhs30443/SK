@@ -24,20 +24,32 @@ function getHPColor(hpPercent) {
 
 // 問題を読み込む関数
 async function loadQuestion() {
+    console.log('新しい問題を読み込んでいます...');
+
+    // 問題読み込み中の表示
+    $('#question-text').text('問題を読み込み中...');
+    $('.choice').text('').removeClass('correct incorrect disabled');
+
     try {
         const subject = window.currentSubject || 'math';
+        console.log('科目:', subject);
+
         const response = await fetch(`/api/generate-question/${subject}`);
-        
+
         if (!response.ok) {
-            throw new Error('問題の取得に失敗しました');
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const questionData = await response.json();
+        console.log('問題データを受信:', questionData);
+
         currentQuestion = questionData;
-        
+
         // 問題を画面に表示
         displayQuestion(questionData);
-        
+
+        console.log('問題の表示が完了しました');
+
     } catch (error) {
         console.error('問題読み込みエラー:', error);
         // エラー時はフォールバック問題を表示
@@ -47,21 +59,29 @@ async function loadQuestion() {
 
 // 問題を画面に表示する関数
 function displayQuestion(questionData) {
+    console.log('問題を表示します:', questionData);
+
     // 問題文を表示
     $('#question-text').text(questionData.question);
-    
+
     // 選択肢を表示
     $('.choice').each(function(index) {
         $(this).text(questionData.choices[index]);
         $(this).removeClass('correct incorrect disabled');
-        $(this).css('pointer-events', 'auto');
+        $(this).css({
+            'pointer-events': 'auto',
+            'opacity': '1'
+        });
     });
-    
+
     // 結果表示エリアを非表示
     $('#result-box').hide();
     $('.next-question-container').hide();
-    
+
+    // 回答状態をリセット
     isAnswering = false;
+
+    console.log('問題表示完了');
 }
 
 // フォールバック問題を表示する関数
@@ -72,7 +92,7 @@ function displayFallbackQuestion() {
         correct_answer: 2,
         explanation: "5に3を足すと8になります。"
     };
-    
+
     currentQuestion = fallbackQuestion;
     displayQuestion(fallbackQuestion);
 }
@@ -80,11 +100,11 @@ function displayFallbackQuestion() {
 // 回答をチェックする関数
 async function checkAnswer(selectedIndex) {
     if (!currentQuestion || isAnswering) return;
-    
+
     isAnswering = true;
-    
+
     const isCorrect = selectedIndex === currentQuestion.correct_answer;
-    
+
     // 選択した選択肢をハイライト
     $('.choice').each(function(index) {
         if (index === selectedIndex) {
@@ -92,34 +112,47 @@ async function checkAnswer(selectedIndex) {
         }
         $(this).css('pointer-events', 'none');
     });
-    
+
     // 正解の選択肢をハイライト（間違った場合）
     if (!isCorrect) {
         $('.choice').eq(currentQuestion.correct_answer).addClass('correct');
     }
-    
+
     // 結果メッセージを表示
-    const resultMessage = isCorrect ? 
-        `正解です！${currentQuestion.explanation}` : 
+    const resultMessage = isCorrect ?
+        `正解です！${currentQuestion.explanation}` :
         `不正解です。正解は「${currentQuestion.choices[currentQuestion.correct_answer]}」です。${currentQuestion.explanation}`;
-    
+
     $('#result-box').text(resultMessage).fadeIn();
-    
-    // HPの更新
+
+    // HPの更新（戦闘終了判定も含む）
     if (isCorrect) {
         // 正解時は敵にダメージ
         updateEnemyHP(-20);
+        // HPアニメーション完了後に次の問題ボタンを表示
+        $('#enemy-hp').one('transitionend', function() {
+            showNextQuestionButton();
+        });
+        // transitionendが発火しない場合のフォールバック
+        setTimeout(showNextQuestionButton, 1000);
     } else {
         // 不正解時はプレイヤーにダメージ
         updatePlayerHP(-10);
+        // HPアニメーション完了後に次の問題ボタンを表示
+        $('#player-hp').one('transitionend', function() {
+            showNextQuestionButton();
+        });
+        // transitionendが発火しない場合のフォールバック
+        setTimeout(showNextQuestionButton, 1000);
     }
-    
-    // 少し待ってから次の問題ボタンを表示
-    setTimeout(() => {
-        if (!battleEnded) {
-            $('.next-question-container').fadeIn();
-        }
-    }, 2000);
+}
+
+// 次の問題ボタンを表示する関数
+function showNextQuestionButton() {
+    if (!battleEnded) {
+        console.log('次の問題ボタンを表示します');
+        $('.next-question-container').fadeIn();
+    }
 }
 
 $(document).ready(function () {
@@ -136,7 +169,7 @@ $(document).ready(function () {
 
     updatePlayerHP(0);  // 表示更新（変化量0で現在値反映）
     updateEnemyHP(0);
-    
+
     // 初回問題読み込み
     loadQuestion();
 });
@@ -174,9 +207,10 @@ function updatePlayerHP(amount) {
 
     localStorage.setItem('playerHP', playerHP);
 
-    $('#player-hp').one('transitionend', function() {
+    // HP更新後にバトル終了チェック（少し遅延させる）
+    setTimeout(() => {
         checkBattleEnd();
-    });
+    }, 300);
 }
 
 function updateEnemyHP(amount) {
@@ -188,24 +222,52 @@ function updateEnemyHP(amount) {
 
     localStorage.setItem('enemyHP', enemyHP);
 
-    $('#enemy-hp').one('transitionend', function() {
+    // HP更新後にバトル終了チェック（少し遅延させる）
+    setTimeout(() => {
         checkBattleEnd();
-    });
+    }, 300);
 }
 
 // 選択肢クリック時の処理
 $(document).on('click', '.choice', function() {
-    if (battleEnded || isAnswering) return;
-    
+    console.log('選択肢がクリックされました');
+    console.log('battleEnded:', battleEnded);
+    console.log('isAnswering:', isAnswering);
+
+    if (battleEnded || isAnswering) {
+        console.log('クリックを無視します');
+        return;
+    }
+
     const selectedIndex = parseInt($(this).data('index'));
+    console.log('選択されたインデックス:', selectedIndex);
+
     checkAnswer(selectedIndex);
 });
 
 // 次の問題ボタンクリック時の処理
 $(document).on('click', '#next-question-btn', function() {
-    if (battleEnded) return;
-    
-    loadQuestion();
+    console.log('次の問題ボタンがクリックされました');
+
+    if (battleEnded) {
+        console.log('バトルが終了しているため、次の問題は読み込みません');
+        return;
+    }
+
+    // ボタンを一時的に無効化
+    $(this).prop('disabled', true).text('読み込み中...');
+
+    // 次の問題ボタンを非表示
+    $('.next-question-container').hide();
+
+    // 新しい問題を読み込み
+    loadQuestion().then(() => {
+        // 読み込み完了後にボタンを再有効化
+        $('#next-question-btn').prop('disabled', false).text('次の問題');
+    }).catch(() => {
+        // エラー時もボタンを再有効化
+        $('#next-question-btn').prop('disabled', false).text('次の問題');
+    });
 });
 
 // ハンバーガーメニューの処理
