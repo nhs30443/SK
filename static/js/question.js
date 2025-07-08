@@ -1,6 +1,7 @@
 // グローバル変数
 let currentQuestion = null;
 let isAnswering = false;
+let questionCount = 0; // 問題数をカウント
 
 // プレイヤーの最大HPと現在HP
 const maxPlayerHP = 40;
@@ -22,47 +23,89 @@ function getHPColor(hpPercent) {
     }
 }
 
-// 問題を読み込む関数
+// 問題を読み込む関数（改善版）
 async function loadQuestion() {
-    console.log('新しい問題を読み込んでいます...');
+    console.log(`新しい問題を読み込んでいます... (問題数: ${questionCount + 1})`);
 
     // 問題読み込み中の表示
     $('#question-text').text('問題を読み込み中...');
     $('.choice').text('').removeClass('correct incorrect disabled');
 
-    try {
-        const subject = window.currentSubject || 'math';
-        console.log('科目:', subject);
+    const subject = window.currentSubject || 'math';
+    console.log('科目:', subject);
 
-        const response = await fetch(`/api/generate-question/${subject}`);
+    // 最大再試行回数
+    const maxRetries = 3;
+    let retryCount = 0;
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    while (retryCount < maxRetries) {
+        try {
+            // キャッシュを避けるためにタイムスタンプを追加
+            const timestamp = new Date().getTime();
+            const response = await fetch(`/api/generate-question/${subject}?t=${timestamp}&retry=${retryCount}`, {
+                method: 'GET',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const questionData = await response.json();
+            console.log('問題データを受信:', questionData);
+
+            // レスポンスの検証
+            if (!questionData || !questionData.question || !questionData.choices) {
+                throw new Error('無効な問題データを受信しました');
+            }
+
+            // 同じ問題かチェック（簡易版）
+            if (currentQuestion && currentQuestion.question === questionData.question) {
+                console.warn('同じ問題が生成されました。再試行します...');
+                retryCount++;
+                if (retryCount < maxRetries) {
+                    // 1秒待ってから再試行
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    continue;
+                }
+            }
+
+            currentQuestion = questionData;
+            questionCount++;
+
+            // 問題を画面に表示
+            displayQuestion(questionData);
+
+            console.log(`問題の表示が完了しました (問題数: ${questionCount})`);
+            return; // 成功時は関数を終了
+
+        } catch (error) {
+            console.error(`問題読み込みエラー (試行 ${retryCount + 1}/${maxRetries}):`, error);
+            retryCount++;
+
+            if (retryCount < maxRetries) {
+                console.log(`${retryCount + 1}回目の再試行を行います...`);
+                // 再試行前に少し待機
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
-
-        const questionData = await response.json();
-        console.log('問題データを受信:', questionData);
-
-        currentQuestion = questionData;
-
-        // 問題を画面に表示
-        displayQuestion(questionData);
-
-        console.log('問題の表示が完了しました');
-
-    } catch (error) {
-        console.error('問題読み込みエラー:', error);
-        // エラー時はフォールバック問題を表示
-        displayFallbackQuestion();
     }
+
+    // すべての再試行が失敗した場合
+    console.error('すべての再試行が失敗しました。フォールバック問題を表示します。');
+    displayFallbackQuestion();
 }
 
 // 問題を画面に表示する関数
 function displayQuestion(questionData) {
     console.log('問題を表示します:', questionData);
 
-    // 問題文を表示
-    $('#question-text').text(questionData.question);
+    // 問題文を表示（問題番号も追加）
+    $('#question-text').text(`問題${questionCount}: ${questionData.question}`);
 
     // 選択肢を表示
     $('.choice').each(function(index) {
@@ -84,17 +127,48 @@ function displayQuestion(questionData) {
     console.log('問題表示完了');
 }
 
-// フォールバック問題を表示する関数
+// フォールバック問題を表示する関数（改善版）
 function displayFallbackQuestion() {
-    const fallbackQuestion = {
-        question: "5 + 3 = ?",
-        choices: ["6", "7", "8", "9"],
-        correct_answer: 2,
-        explanation: "5に3を足すと8になります。"
+    const fallbackQuestions = {
+        math: [
+            {
+                question: "8 + 5 = ?",
+                choices: ["11", "12", "13", "14"],
+                correct_answer: 2,
+                explanation: "8に5を足すと13になります。"
+            },
+            {
+                question: "15 - 7 = ?",
+                choices: ["6", "7", "8", "9"],
+                correct_answer: 2,
+                explanation: "15から7を引くと8になります。"
+            }
+        ],
+        kanji: [
+            {
+                question: "「つき」を漢字で書くとどれですか？",
+                choices: ["日", "月", "星", "空"],
+                correct_answer: 1,
+                explanation: "「つき」は「月」と書きます。"
+            }
+        ],
+        english: [
+            {
+                question: "「本」を英語で言うとどれですか？",
+                choices: ["pen", "book", "desk", "chair"],
+                correct_answer: 1,
+                explanation: "「本」は英語で「book」です。"
+            }
+        ]
     };
 
-    currentQuestion = fallbackQuestion;
-    displayQuestion(fallbackQuestion);
+    const subject = window.currentSubject || 'math';
+    const subjectQuestions = fallbackQuestions[subject] || fallbackQuestions.math;
+    const randomQuestion = subjectQuestions[Math.floor(Math.random() * subjectQuestions.length)];
+
+    currentQuestion = randomQuestion;
+    questionCount++;
+    displayQuestion(randomQuestion);
 }
 
 // 回答をチェックする関数
@@ -155,7 +229,7 @@ function showNextQuestionButton() {
     }
 }
 
-$(document).ready(function () {
+$(document).ready(async function () {
     // LocalStorageから復元（なければ初期値のまま）
     const savedPlayerHP = localStorage.getItem('playerHP');
     if (savedPlayerHP !== null) {
@@ -167,11 +241,20 @@ $(document).ready(function () {
         enemyHP = Number(savedEnemyHP);
     }
 
+    // 問題数をリセット
+    questionCount = 0;
+
     updatePlayerHP(0);  // 表示更新（変化量0で現在値反映）
     updateEnemyHP(0);
 
     // 初回問題読み込み
-    loadQuestion();
+    try {
+        await loadQuestion();
+        console.log('初回問題の読み込みが完了しました');
+    } catch (error) {
+        console.error('初回問題の読み込みでエラーが発生しました:', error);
+        displayFallbackQuestion();
+    }
 });
 
 function checkBattleEnd() {
@@ -245,8 +328,8 @@ $(document).on('click', '.choice', function() {
     checkAnswer(selectedIndex);
 });
 
-// 次の問題ボタンクリック時の処理
-$(document).on('click', '#next-question-btn', function() {
+// 次の問題ボタンクリック時の処理（修正版）
+$(document).on('click', '#next-question-btn', async function() {
     console.log('次の問題ボタンがクリックされました');
 
     if (battleEnded) {
@@ -260,14 +343,18 @@ $(document).on('click', '#next-question-btn', function() {
     // 次の問題ボタンを非表示
     $('.next-question-container').hide();
 
-    // 新しい問題を読み込み
-    loadQuestion().then(() => {
+    try {
+        // 新しい問題を読み込み
+        await loadQuestion();
+        console.log('次の問題の読み込みが完了しました');
+    } catch (error) {
+        console.error('次の問題の読み込みでエラーが発生しました:', error);
+        // エラー時はフォールバック問題を表示
+        displayFallbackQuestion();
+    } finally {
         // 読み込み完了後にボタンを再有効化
         $('#next-question-btn').prop('disabled', false).text('次の問題');
-    }).catch(() => {
-        // エラー時もボタンを再有効化
-        $('#next-question-btn').prop('disabled', false).text('次の問題');
-    });
+    }
 });
 
 // ハンバーガーメニューの処理

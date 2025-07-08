@@ -5,6 +5,8 @@ from functools import wraps
 import google.generativeai as genai
 import json
 import random
+import time
+import hashlib
 
 app = Flask(__name__)
 app.secret_key = "qawsedrftgyhujikolp"
@@ -37,106 +39,348 @@ def login_required(view_func):
     return wrapped_view
 
 
-# 問題生成関数
+# 問題生成統計を追跡するクラス
+class QuestionGenerationStats:
+    def __init__(self):
+        self.stats = {
+            'total_generated': 0,
+            'successful_generations': 0,
+            'fallback_used': 0,
+            'subjects': {'math': 0, 'kanji': 0, 'english': 0},
+            'grades': {}
+        }
+
+    def record_generation(self, subject, grade, success=True, fallback=False):
+        self.stats['total_generated'] += 1
+        if success:
+            self.stats['successful_generations'] += 1
+        if fallback:
+            self.stats['fallback_used'] += 1
+
+        self.stats['subjects'][subject] = self.stats['subjects'].get(subject, 0) + 1
+        self.stats['grades'][grade] = self.stats['grades'].get(grade, 0) + 1
+
+    def get_success_rate(self):
+        if self.stats['total_generated'] == 0:
+            return 0
+        return (self.stats['successful_generations'] / self.stats['total_generated']) * 100
+
+
+# グローバル統計インスタンス
+generation_stats = QuestionGenerationStats()
+
+
+# 高度な問題生成関数
 def generate_question(subject, grade="小学3年生"):
     """
-    Gemini APIを使って科目別の4択問題を生成
+    高度な自動問題生成システム
     """
-    subject_prompts = {
-        'math': f"""
-{grade}レベルの算数の問題を1問作成してください。
-計算問題、文章問題、図形問題などバラエティに富んだ内容にしてください。
-難易度は{grade}に適したレベルにしてください。
-""",
-        'kanji': f"""
-{grade}レベルの漢字の問題を1問作成してください。
-漢字の読み方、書き方、意味、熟語などの問題にしてください。
-{grade}で習う漢字を中心に出題してください。
-""",
-        'english': f"""
-{grade}レベルの英語の問題を1問作成してください。
-英単語、簡単な英文、アルファベットなど{grade}に適したレベルの問題にしてください。
-"""
+    # ランダム要素の強化
+    random_seed = int(time.time() * 1000000) % 1000000
+    random.seed(random_seed)
+
+    # 学年に応じた難易度設定
+    grade_levels = {
+        "1": "とても簡単で基礎的な",
+        "2": "簡単で身近な",
+        "3": "普通の",
+        "4": "少し考える必要がある",
+        "5": "難しめの",
+        "6": "高度な"
     }
 
-    base_prompt = f"""
-以下の条件で問題を作成してください：
+    grade_num = grade.replace("小学", "").replace("年生", "")
+    difficulty_desc = grade_levels.get(grade_num, "普通の")
 
-1. {subject_prompts.get(subject, '一般的な')}
-2. 4択の選択肢を作成してください
-3. 正解は1つだけにしてください
-4. 間違いの選択肢も自然で紛らわしいものにしてください
-5. 小学生にも分かりやすい文章にしてください
-
-以下のJSON形式で回答してください：
-{{
-    "question": "問題文",
-    "choices": [
-        "選択肢1",
-        "選択肢2", 
-        "選択肢3",
-        "選択肢4"
-    ],
-    "correct_answer": 0,
-    "explanation": "解説"
-}}
-
-correct_answerは正解の選択肢のインデックス（0-3）を指定してください。
-"""
-
-    try:
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(base_prompt)
-
-        response_text = response.text
-
-        if "```json" in response_text:
-            response_text = response_text.split("```json")[1].split("```")[0]
-        elif "```" in response_text:
-            response_text = response_text.split("```")[1].split("```")[0]
-
-        question_data = json.loads(response_text.strip())
-
-        if not all(key in question_data for key in ['question', 'choices', 'correct_answer', 'explanation']):
-            raise ValueError("必要なキーが不足しています")
-
-        if len(question_data['choices']) != 4:
-            raise ValueError("選択肢は4つである必要があります")
-
-        if not (0 <= question_data['correct_answer'] <= 3):
-            raise ValueError("correct_answerは0-3の範囲である必要があります")
-
-        return question_data
-
-    except Exception as e:
-        print(f"問題生成エラー: {e}")
-        return get_fallback_question(subject)
-
-
-def get_fallback_question(subject):
-    """API失敗時のフォールバック問題"""
-    fallback_questions = {
+    # 科目別の詳細なパターン
+    subject_details = {
         'math': {
-            "question": "5 + 3 = ?",
-            "choices": ["6", "7", "8", "9"],
-            "correct_answer": 2,
-            "explanation": "5に3を足すと8になります。"
+            'patterns': [
+                f"{random.randint(1, 20)} + {random.randint(1, 20)} のような足し算",
+                f"{random.randint(10, 50)} - {random.randint(1, 20)} のような引き算",
+                f"{random.randint(2, 9)} × {random.randint(2, 9)} のような掛け算",
+                f"{random.randint(2, 9) * random.randint(2, 9)} ÷ {random.randint(2, 9)} のような割り算",
+                f"りんご{random.randint(3, 15)}個とみかん{random.randint(2, 10)}個の文章問題",
+                f"{random.randint(100, 500)}円の買い物の計算問題",
+                f"{random.randint(1, 12)}時{random.randint(10, 50)}分の時間計算",
+                f"{random.randint(10, 100)}cmを{random.choice(['m', 'mm'])}に変換する問題"
+            ],
+            'focus': "計算力と数的思考力"
         },
         'kanji': {
-            "question": "「やま」を漢字で書くとどれですか？",
-            "choices": ["川", "山", "海", "空"],
-            "correct_answer": 1,
-            "explanation": "「やま」は「山」と書きます。"
+            'patterns': [
+                f"「{random.choice(['やま', 'かわ', 'うみ', 'そら', 'はな', 'き', 'みず', 'ひ'])}」の漢字の読み書き",
+                f"「{random.choice(['がっこう', 'せんせい', 'ともだち', 'かぞく', 'いえ'])}」の漢字の読み書き",
+                f"「{random.choice(['あかい', 'おおきい', 'ちいさい', 'たかい', 'ひくい'])}」の漢字変換",
+                f"「{random.choice(['はしる', 'およぐ', 'とぶ', 'あるく', 'たつ'])}」の動詞の漢字",
+                f"反対の意味を持つ漢字の組み合わせ",
+                f"同じ部首を持つ漢字のグループ",
+                f"日常生活でよく使う漢字の意味"
+            ],
+            'focus': "漢字の読み書きと意味理解"
         },
         'english': {
-            "question": "「りんご」を英語で言うとどれですか？",
-            "choices": ["orange", "apple", "banana", "grape"],
-            "correct_answer": 1,
-            "explanation": "「りんご」は英語で「apple」です。"
+            'patterns': [
+                f"「{random.choice(['りんご', 'みかん', 'バナナ', 'ぶどう'])}」などの果物の英単語",
+                f"「{random.choice(['いぬ', 'ねこ', 'うさぎ', 'とり'])}」などの動物の英単語",
+                f"「{random.choice(['あか', 'あお', 'きいろ', 'みどり'])}」などの色の英単語",
+                f"「{random.choice(['おはよう', 'こんにちは', 'ありがとう', 'さようなら'])}」などの挨拶の英語",
+                f"「{random.choice(['がっこう', 'いえ', 'こうえん', 'びょういん'])}」などの場所の英単語",
+                f"1から{random.randint(10, 20)}までの数字の英語",
+                f"「{random.choice(['げつようび', 'かようび', 'すいようび'])}」などの曜日の英語"
+            ],
+            'focus': "基本英単語と発音"
         }
     }
 
-    return fallback_questions.get(subject, fallback_questions['math'])
+    # ランダムパターン選択
+    selected_pattern = random.choice(subject_details[subject]['patterns'])
+    focus_area = subject_details[subject]['focus']
+
+    # 時間ベースのユニーク要素
+    current_time = int(time.time())
+    unique_elements = [
+        random.randint(1, 100),
+        random.choice(['A', 'B', 'C', 'D']),
+        current_time % 1000
+    ]
+
+    # 超詳細プロンプト
+    enhanced_prompt = f"""
+あなたは{grade}の児童向け問題作成の専門家です。以下の詳細な指示に従って、完全にオリジナルな問題を作成してください。
+
+【基本設定】
+- 対象: {grade}の児童
+- 科目: {subject}
+- 難易度: {difficulty_desc}レベル
+- 重点分野: {focus_area}
+- 問題パターン: {selected_pattern}
+
+【ユニーク要素】
+- 問題作成ID: Q{random_seed}
+- タイムスタンプ: {current_time}
+- ランダム要素: {unique_elements}
+- バリエーション番号: {random.randint(1000, 9999)}
+
+【絶対遵守事項】
+1. 🔄 毎回必ず異なる数値・単語・シチュエーションを使用
+2. 📚 {grade}の学習指導要領に準拠した内容
+3. 🎯 4択で1つだけが正解、他の3つは合理的な間違い選択肢
+4. 👶 小学生が理解できる平易な言葉遣い
+5. 🌟 興味を引く身近な話題を取り入れる
+
+【特別指示】
+- 数学: 答えは必ず整数になるよう調整
+- 漢字: {grade}配当漢字を中心に使用
+- 英語: 基本語彙500語以内で構成
+- 全科目: 問題文は1文で完結させる
+
+【創造性の要求】
+この問題は今まで作成したどの問題とも異なる、完全にオリジナルな内容にしてください。
+同じような計算式、同じような単語、同じようなシチュエーションは避けてください。
+
+【出力フォーマット（必須）】
+```json
+{{
+    "question": "問題文（50文字以内で具体的に）",
+    "choices": [
+        "選択肢1（簡潔で明確）",
+        "選択肢2（紛らわしいが間違い）",
+        "選択肢3（もっともらしい間違い）",
+        "選択肢4（一般的な間違い）"
+    ],
+    "correct_answer": 0,
+    "explanation": "{grade}児童向けの丁寧で分かりやすい解説（30文字以内）"
+}}
+```
+
+今すぐ、上記の全ての条件を満たした新しい問題を1つ作成してください。
+"""
+
+    try:
+        # 最高レベルの創造性設定
+        generation_config = {
+            "temperature": 1.2,  # 創造性最大
+            "top_p": 0.9,
+            "top_k": 50,
+            "max_output_tokens": 1024,
+        }
+
+        model = genai.GenerativeModel('gemini-pro')
+        response = model.generate_content(
+            enhanced_prompt,
+            generation_config=generation_config
+        )
+
+        response_text = response.text.strip()
+
+        # JSON抽出の改善
+        if "```json" in response_text:
+            start = response_text.find("```json") + 7
+            end = response_text.find("```", start)
+            response_text = response_text[start:end].strip()
+        elif "```" in response_text:
+            start = response_text.find("```") + 3
+            end = response_text.rfind("```")
+            response_text = response_text[start:end].strip()
+
+        # JSON解析
+        question_data = json.loads(response_text)
+
+        # 厳密な検証
+        validation_errors = []
+
+        if not question_data.get('question'):
+            validation_errors.append("問題文が空です")
+        if not isinstance(question_data.get('choices'), list) or len(question_data['choices']) != 4:
+            validation_errors.append("選択肢は4つ必要です")
+        if not isinstance(question_data.get('correct_answer'), int) or not (0 <= question_data['correct_answer'] <= 3):
+            validation_errors.append("正解インデックスが無効です")
+        if not question_data.get('explanation'):
+            validation_errors.append("解説が空です")
+
+        if validation_errors:
+            raise ValueError(f"検証エラー: {', '.join(validation_errors)}")
+
+        # メタデータ追加
+        question_data.update({
+            'generation_id': random_seed,
+            'pattern': selected_pattern,
+            'timestamp': current_time,
+            'subject': subject,
+            'grade': grade
+        })
+
+        print(f"✅ 高度な問題生成成功: {subject} - ID:{random_seed}")
+        return question_data
+
+    except Exception as e:
+        print(f"❌ 高度な問題生成エラー: {e}")
+        # より充実したフォールバック
+        return get_smart_fallback_question(subject, grade)
+
+
+def get_smart_fallback_question(subject, grade="小学3年生"):
+    """
+    スマートフォールバック問題システム
+    """
+    grade_num = int(grade.replace("小学", "").replace("年生", ""))
+    current_time = int(time.time())
+
+    # 動的フォールバック問題生成
+    if subject == 'math':
+        if grade_num <= 2:
+            num1, num2 = random.randint(1, 10), random.randint(1, 5)
+            answer = num1 + num2
+            choices = [str(answer - 1), str(answer), str(answer + 1), str(answer + 2)]
+            random.shuffle(choices)
+            correct_idx = choices.index(str(answer))
+
+            return {
+                "question": f"{num1} + {num2} = ?",
+                "choices": choices,
+                "correct_answer": correct_idx,
+                "explanation": f"{num1}に{num2}を足すと{answer}になります。",
+                "generation_id": f"fallback_{current_time}",
+                "subject": subject,
+                "grade": grade
+            }
+        else:
+            num1, num2 = random.randint(2, 12), random.randint(2, 12)
+            answer = num1 * num2
+            wrong_answers = [answer - 1, answer + 1, answer + num1, answer - num2]
+            choices = [str(answer)] + [str(max(1, w)) for w in wrong_answers[:3]]
+            random.shuffle(choices)
+            correct_idx = choices.index(str(answer))
+
+            return {
+                "question": f"{num1} × {num2} = ?",
+                "choices": choices,
+                "correct_answer": correct_idx,
+                "explanation": f"{num1}に{num2}をかけると{answer}になります。",
+                "generation_id": f"fallback_{current_time}",
+                "subject": subject,
+                "grade": grade
+            }
+
+    elif subject == 'kanji':
+        kanji_pairs = [
+            ("やま", "山", ["川", "海", "空"]),
+            ("みず", "水", ["火", "土", "風"]),
+            ("はな", "花", ["草", "木", "葉"]),
+            ("そら", "空", ["雲", "星", "月"]),
+            ("いし", "石", ["土", "砂", "岩"])
+        ]
+
+        selected = random.choice(kanji_pairs)
+        hiragana, correct_kanji, wrong_options = selected
+        choices = [correct_kanji] + wrong_options
+        random.shuffle(choices)
+        correct_idx = choices.index(correct_kanji)
+
+        return {
+            "question": f"「{hiragana}」を漢字で書くとどれですか？",
+            "choices": choices,
+            "correct_answer": correct_idx,
+            "explanation": f"「{hiragana}」は「{correct_kanji}」と書きます。",
+            "generation_id": f"fallback_{current_time}",
+            "subject": subject,
+            "grade": grade
+        }
+
+    else:  # english
+        english_pairs = [
+            ("りんご", "apple", ["orange", "banana", "grape"]),
+            ("いぬ", "dog", ["cat", "bird", "fish"]),
+            ("あか", "red", ["blue", "green", "yellow"]),
+            ("ほん", "book", ["pen", "desk", "chair"]),
+            ("がっこう", "school", ["house", "park", "store"])
+        ]
+
+        selected = random.choice(english_pairs)
+        japanese, correct_english, wrong_options = selected
+        choices = [correct_english] + wrong_options
+        random.shuffle(choices)
+        correct_idx = choices.index(correct_english)
+
+        return {
+            "question": f"「{japanese}」を英語で言うとどれですか？",
+            "choices": choices,
+            "correct_answer": correct_idx,
+            "explanation": f"「{japanese}」は英語で「{correct_english}」です。",
+            "generation_id": f"fallback_{current_time}",
+            "subject": subject,
+            "grade": grade
+        }
+
+
+# 問題品質チェック関数
+def validate_question_quality(question_data):
+    """
+    生成された問題の品質をチェック
+    """
+    issues = []
+
+    question = question_data.get('question', '')
+    choices = question_data.get('choices', [])
+
+    # 基本チェック
+    if len(question) < 5:
+        issues.append("問題文が短すぎます")
+    if len(question) > 100:
+        issues.append("問題文が長すぎます")
+
+    # 選択肢チェック
+    if len(set(choices)) != 4:
+        issues.append("選択肢に重複があります")
+
+    for i, choice in enumerate(choices):
+        if len(choice) < 1:
+            issues.append(f"選択肢{i + 1}が空です")
+        if len(choice) > 20:
+            issues.append(f"選択肢{i + 1}が長すぎます")
+
+    return issues
 
 
 ############################################################################
@@ -459,12 +703,15 @@ def question_with_subject(subject):
     return render_template("question.html", subject=subject)
 
 
-# 問題生成API（新規）
+# 問題生成API（高度版）
 @app.route('/api/generate-question/<subject>')
 @login_required
 def api_generate_question(subject):
-    """問題生成API"""
+    """
+    高度な自動問題生成API
+    """
     try:
+        # データベース接続
         con = conn_db()
         cur = con.cursor()
 
@@ -478,15 +725,41 @@ def api_generate_question(subject):
         cur.close()
         con.close()
 
+        # リクエスト情報の取得
+        retry_count = request.args.get('retry', '0')
+        timestamp = request.args.get('t', str(int(time.time())))
+
+        print(f"🎯 問題生成開始: 科目={subject}, 学年={grade}, 再試行={retry_count}, 時刻={timestamp}")
+
+        # 問題生成実行
         question_data = generate_question(subject, grade)
+
+        # 成功ログ
+        question_preview = question_data.get('question', '')[:30] + "..." if len(
+            question_data.get('question', '')) > 30 else question_data.get('question', '')
+        print(f"✅ 問題生成完了: [{question_data.get('generation_id', 'unknown')}] {question_preview}")
+
+        # 追加のメタデータ
+        question_data['api_timestamp'] = timestamp
+        question_data['retry_count'] = retry_count
+
         return jsonify(question_data)
 
     except Exception as e:
-        print(f"API エラー: {e}")
-        return jsonify(get_fallback_question(subject)), 500
+        print(f"❌ API致命的エラー: {str(e)}")
+
+        # 緊急フォールバック
+        emergency_fallback = get_smart_fallback_question(subject,
+                                                         f"小学{grade_setting if 'grade_setting' in locals() else '3'}年生")
+
+        return jsonify({
+            "error": "問題生成中にエラーが発生しました",
+            "fallback_used": True,
+            **emergency_fallback
+        }), 200  # エラーでも200で返してフロントエンドで処理継続
 
 
-# 回答チェックAPI（新規）
+# 回答チェックAPI
 @app.route('/api/check-answer', methods=['POST'])
 @login_required
 def api_check_answer():
@@ -511,6 +784,70 @@ def api_check_answer():
     except Exception as e:
         print(f"回答チェックエラー: {e}")
         return jsonify({'error': 'エラーが発生しました'}), 500
+
+
+# デバッグ用エンドポイント（開発時のみ使用）
+@app.route('/api/debug/question-stats')
+@login_required
+def debug_question_stats():
+    """
+    問題生成の統計情報を表示（デバッグ用）
+    """
+    return jsonify({
+        'stats': generation_stats.stats,
+        'success_rate': f"{generation_stats.get_success_rate():.2f}%"
+    })
+
+
+# 手動問題リフレッシュエンドポイント
+@app.route('/api/refresh-question/<subject>')
+@login_required
+def refresh_question(subject):
+    """
+    強制的に新しい問題を生成
+    """
+    try:
+        con = conn_db()
+        cur = con.cursor()
+
+        accountId = session.get("login_id")
+        cur.execute("SELECT gradeSetting FROM t_account WHERE accountId = %s", (accountId,))
+        result = cur.fetchone()
+
+        grade_setting = result[0] if result else "3"
+        grade = f"小学{grade_setting}年生"
+
+        cur.close()
+        con.close()
+
+        print(f"🔄 手動リフレッシュ: {subject} - {grade}")
+
+        # 強制的に新しい問題を生成（複数回試行）
+        for attempt in range(3):
+            try:
+                question_data = generate_question(subject, grade)
+
+                # 品質チェック
+                quality_issues = validate_question_quality(question_data)
+                if not quality_issues:
+                    generation_stats.record_generation(subject, grade, success=True)
+                    return jsonify(question_data)
+                else:
+                    print(f"⚠️ 品質問題あり (試行{attempt + 1}): {quality_issues}")
+
+            except Exception as e:
+                print(f"❌ 生成試行{attempt + 1}失敗: {e}")
+
+        # すべて失敗した場合はフォールバック
+        print("🔄 フォールバックを使用")
+        fallback_question = get_smart_fallback_question(subject, grade)
+        generation_stats.record_generation(subject, grade, success=False, fallback=True)
+
+        return jsonify(fallback_question)
+
+    except Exception as e:
+        print(f"❌ リフレッシュAPI エラー: {e}")
+        return jsonify({'error': 'リフレッシュに失敗しました'}), 500
 
 
 # マップ画面
