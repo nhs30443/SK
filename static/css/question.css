@@ -116,14 +116,14 @@ html, body {
     position: absolute;
     top: 20px;
     right: 20px;
-    width: clamp(24px, 4vw, 60px);
-    height: clamp(18px, 3vw, 40px);
+    width: 60px;
+    height:40px;
     cursor: pointer;
     z-index: 11;
 }
 
 .hamburger span {
-    height: clamp(2px, 0.5vw, 4px);
+    height: 4px;
     background-color: white;
     position: absolute;
     width: 100%;
@@ -131,8 +131,8 @@ html, body {
 }
 
 .hamburger span:nth-of-type(1) { top: 4px; }
-.hamburger span:nth-of-type(2) { top: 12px; }
-.hamburger span:nth-of-type(3) { top: 20px; }
+.hamburger span:nth-of-type(2) { top: 18px; }
+.hamburger span:nth-of-type(3) { top: 32px; }
 
 .hamburger.open span:nth-of-type(1) {
     top: 10px;
