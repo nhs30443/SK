@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
@@ -35,7 +35,7 @@
                                         <p class="coin">300コイン</p>
                                         <input type="text" value="300" name="potion_low" hidden>
                                         <label class="selectbox-6">
-                                            <select name="quantity" id="potionLow">
+                                            <select name="quantity_low" id="potionLow">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -57,7 +57,7 @@
                                         <p class="coin">1000コイン</p>
                                         <input type="text" value="1000" name="potion_mid" hidden>
                                         <label class="selectbox-6">
-                                            <select id="potionMid">
+                                            <select name="quantity_mid" id="potionMid">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -79,7 +79,7 @@
                                         <p class="coin">2000コイン</p>
                                         <input type="text" value="2000" name="potion_high" hidden>
                                         <label class="selectbox-6">
-                                            <select id="potionHigh">
+                                            <select name="quantity_high" id="potionHigh">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -103,7 +103,7 @@
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="800" name="buf_jp" hidden>
                                         <label class="selectbox-6">
-                                            <select name="quantity" id="bufferLow">
+                                            <select name="quantity_jp" id="bufferJp">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -125,7 +125,7 @@
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="800" name="buf_mt" hidden>
                                         <label class="selectbox-6">
-                                            <select id="bufferMid">
+                                            <select name="quantity_mt" id="bufferMt">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -147,7 +147,7 @@
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="300" name="buf_en" hidden>
                                         <label class="selectbox-6">
-                                            <select id="bufferHigh">
+                                            <select name="quantity_en" id="bufferEn">
                                                 <option value="0">0</option>
                                                 <option value="1">1</option>
                                                 <option value="2">2</option>
@@ -166,6 +166,12 @@
                             </tr>
                         </table>
                     </div>
+                    {% if messages and messages.poor %}
+                        <p class="messages_log">{{ messages.poor }}</p>
+                    {% elif messages and message.comp %}
+                        <p class="messages_log">{{ messages.comp }}</p>
+                    {% endif %}
+
                     <button class="buy-btn"><span class="btn-back">購入</span></button>
                     <a href="/main" class="back-main"><span class="btn-back">戻る</span></a>
                 </form>
