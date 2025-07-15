@@ -259,10 +259,11 @@ body {
 /* 次の問題ボタン */
 .next-question-container {
     position: absolute;
-    bottom: 15vh;
+    bottom: 8vh;
     left: 50%;
     transform: translateX(-50%);
     z-index: 3;
+    padding-top:30px;
 }
 
 .next-question-btn {

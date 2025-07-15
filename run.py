@@ -71,7 +71,7 @@ generation_stats = QuestionGenerationStats()
 
 
 # 高度な問題生成関数
-def generate_question(subject, grade="小学3年生"):
+def generate_question(subject, grade="小学6年生"):
     """
     高度な自動問題生成システム
     """
@@ -206,13 +206,27 @@ def generate_question(subject, grade="小学3年生"):
             "max_output_tokens": 1024,
         }
 
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel(
+            model_name='models/gemini-1.5-flash',
+            safety_settings=[
+                {"category": "HARM_CATEGORY_DANGEROUS_CONTENT", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_SEXUAL", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HATE_SPEECH", "threshold": "BLOCK_NONE"},
+                {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_NONE"},
+            ]
+        )
+
         response = model.generate_content(
             enhanced_prompt,
             generation_config=generation_config
         )
 
-        response_text = response.text.strip()
+        # partsがあるか確認してから抽出
+        if response.candidates and response.candidates[0].content.parts:
+            response_text = response.candidates[0].content.parts[0].text.strip()
+        else:
+            raise ValueError("生成結果が空、または安全フィルターでブロックされました")
+
 
         # JSON抽出の改善
         if "```json" in response_text:
@@ -260,7 +274,7 @@ def generate_question(subject, grade="小学3年生"):
         return get_smart_fallback_question(subject, grade)
 
 
-def get_smart_fallback_question(subject, grade="小学3年生"):
+def get_smart_fallback_question(subject, grade="小学6年生"):
     """
     スマートフォールバック問題システム
     """
