@@ -7,6 +7,7 @@ import json
 import random
 import time
 import hashlib
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "qawsedrftgyhujikolp"
@@ -68,6 +69,138 @@ class QuestionGenerationStats:
 
 # グローバル統計インスタンス
 generation_stats = QuestionGenerationStats()
+
+
+# 回答履歴管理クラス
+class AnswerHistory:
+    def __init__(self):
+        self.history = {}  # {user_id: [{'subject': str, 'is_correct': bool, 'timestamp': datetime, 'question_id': str}]}
+
+    def add_answer(self, user_id, subject, is_correct, question_id=None):
+        """回答を履歴に追加"""
+        if user_id not in self.history:
+            self.history[user_id] = []
+
+        answer_record = {
+            'subject': subject,
+            'is_correct': is_correct,
+            'timestamp': datetime.now(),
+            'question_id': question_id or f"q_{len(self.history[user_id])}"
+        }
+
+        self.history[user_id].append(answer_record)
+
+        # 履歴が長くなりすぎないよう、最新1000件に制限
+        if len(self.history[user_id]) > 1000:
+            self.history[user_id] = self.history[user_id][-1000:]
+
+    def get_subject_accuracy(self, user_id, subject=None, days_back=30):
+        """科目別の正答率を取得"""
+        if user_id not in self.history:
+            return 0.0
+
+        cutoff_time = datetime.now() - timedelta(days=days_back)
+
+        # 期間内の回答をフィルタ
+        recent_answers = [
+            answer for answer in self.history[user_id]
+            if answer['timestamp'] >= cutoff_time
+        ]
+
+        # 科目でフィルタ（指定がある場合）
+        if subject:
+            recent_answers = [
+                answer for answer in recent_answers
+                if answer['subject'] == subject
+            ]
+
+        if not recent_answers:
+            return 0.0
+
+        correct_count = sum(1 for answer in recent_answers if answer['is_correct'])
+        total_count = len(recent_answers)
+
+        return round((correct_count / total_count) * 100, 1)
+
+    def get_all_subjects_accuracy(self, user_id, days_back=30):
+        """全科目の正答率を取得"""
+        if user_id not in self.history:
+            return {}
+
+        cutoff_time = datetime.now() - timedelta(days=days_back)
+
+        # 期間内の回答をフィルタ
+        recent_answers = [
+            answer for answer in self.history[user_id]
+            if answer['timestamp'] >= cutoff_time
+        ]
+
+        # 科目別に集計
+        subject_stats = {}
+        for answer in recent_answers:
+            subject = answer['subject']
+            if subject not in subject_stats:
+                subject_stats[subject] = {'total': 0, 'correct': 0}
+
+            subject_stats[subject]['total'] += 1
+            if answer['is_correct']:
+                subject_stats[subject]['correct'] += 1
+
+        # 正答率を計算
+        result = {}
+        for subject, stats in subject_stats.items():
+            accuracy = (stats['correct'] / stats['total']) * 100 if stats['total'] > 0 else 0
+            result[subject] = {
+                'total_questions': stats['total'],
+                'correct_answers': stats['correct'],
+                'accuracy': round(accuracy, 1)
+            }
+
+        return result
+
+    def get_user_stats(self, user_id):
+        """ユーザーの総合統計を取得"""
+        if user_id not in self.history:
+            return {
+                'total_questions': 0,
+                'total_correct': 0,
+                'accuracy_7_days': 0.0,
+                'accuracy_30_days': 0.0,
+                'accuracy_all_time': 0.0
+            }
+
+        all_answers = self.history[user_id]
+        total_questions = len(all_answers)
+        total_correct = sum(1 for answer in all_answers if answer['is_correct'])
+
+        return {
+            'total_questions': total_questions,
+            'total_correct': total_correct,
+            'accuracy_7_days': self.get_subject_accuracy(user_id, days_back=7),
+            'accuracy_30_days': self.get_subject_accuracy(user_id, days_back=30),
+            'accuracy_all_time': self.get_subject_accuracy(user_id, days_back=365)
+        }
+
+
+# グローバル回答履歴インスタンス
+answer_history = AnswerHistory()
+
+
+# セッションベースの一時的な正答率記録（ページリロード対応）
+def save_session_stats(user_id):
+    """セッションに統計データを保存"""
+    if user_id in answer_history.history:
+        session['user_stats'] = {
+            'last_updated': datetime.now().isoformat(),
+            'stats_7_days': answer_history.get_all_subjects_accuracy(user_id, 7),
+            'stats_30_days': answer_history.get_all_subjects_accuracy(user_id, 30),
+            'total_questions': len(answer_history.history[user_id])
+        }
+
+
+def load_session_stats():
+    """セッションから統計データを読み込み"""
+    return session.get('user_stats', {})
 
 
 # 高度な問題生成関数
@@ -759,31 +892,255 @@ def api_generate_question(subject):
         }), 200  # エラーでも200で返してフロントエンドで処理継続
 
 
-# 回答チェックAPI
+# 回答チェックAPI（修正版）
 @app.route('/api/check-answer', methods=['POST'])
 @login_required
 def api_check_answer():
-    """回答チェックAPI"""
+    """回答チェックAPI - メモリに結果を記録"""
     try:
         data = request.get_json()
         selected_answer = data.get('selected_answer')
         correct_answer = data.get('correct_answer')
+        subject = data.get('subject')
+        question_id = data.get('question_id', 'unknown')
 
         is_correct = selected_answer == correct_answer
+        accountId = session.get("login_id")
 
-        # 正解時の処理（経験値やコイン追加など）
+        # メモリに回答履歴を記録
+        answer_history.add_answer(accountId, subject, is_correct, question_id)
+
+        # セッションに統計を保存
+        save_session_stats(accountId)
+
+        # 正解時の処理（セッションでコイン・経験値を管理）
         if is_correct:
-            # ここで経験値やコインを追加する処理を実装
-            pass
+            session['coins'] = session.get('coins', 0) + 10
+            session['experience'] = session.get('experience', 0) + 50
 
         return jsonify({
             'is_correct': is_correct,
-            'message': '正解です！' if is_correct else '不正解です。'
+            'message': '正解です！コイン+10、経験値+50獲得！' if is_correct else '不正解です。次回頑張りましょう！',
+            'coins_earned': 10 if is_correct else 0,
+            'experience_earned': 50 if is_correct else 0
         })
 
     except Exception as e:
         print(f"回答チェックエラー: {e}")
         return jsonify({'error': 'エラーが発生しました'}), 500
+
+
+# リザルト画面（修正版）
+@app.route('/result')
+@login_required
+def result():
+    """メモリベースの動的正答率取得によるリザルト表示"""
+    try:
+        accountId = session.get("login_id")
+
+        # メモリから全科目の正答率を取得（過去30日間）
+        subject_accuracies = answer_history.get_all_subjects_accuracy(accountId, days_back=30)
+
+        # 科目名のマッピング（英語名→日本語名）
+        subject_mapping = {
+            'math': '算数',
+            'kanji': '漢字',
+            'english': '英語'
+        }
+
+        # 表示用の科目データを作成
+        subjects = []
+        total_accuracy = 0
+        valid_subjects = 0
+
+        for eng_name, jp_name in subject_mapping.items():
+            if eng_name in subject_accuracies:
+                accuracy = subject_accuracies[eng_name]['accuracy']
+                subjects.append({
+                    'name': jp_name,
+                    'score': accuracy,
+                    'total_questions': subject_accuracies[eng_name]['total_questions'],
+                    'correct_answers': subject_accuracies[eng_name]['correct_answers']
+                })
+                total_accuracy += accuracy
+                valid_subjects += 1
+            else:
+                # データがない科目は0%として表示
+                subjects.append({
+                    'name': jp_name,
+                    'score': 0.0,
+                    'total_questions': 0,
+                    'correct_answers': 0
+                })
+
+        # 総合正答率を計算
+        if valid_subjects > 0:
+            overall_accuracy = round(total_accuracy / valid_subjects, 1)
+        else:
+            # 全体の正答率を直接計算
+            overall_accuracy = answer_history.get_subject_accuracy(accountId, subject=None, days_back=30)
+
+        subjects.append({
+            'name': '総合',
+            'score': overall_accuracy,
+            'total_questions': sum(s.get('total_questions', 0) for s in subjects),
+            'correct_answers': sum(s.get('correct_answers', 0) for s in subjects)
+        })
+
+        # ランク計算
+        def calculate_rank(score):
+            if score is None or score == 0:
+                return 'E'
+            elif score >= 95:
+                return 'S'
+            elif score >= 85:
+                return 'A'
+            elif score >= 75:
+                return 'B'
+            elif score >= 65:
+                return 'C'
+            elif score >= 55:
+                return 'D'
+            else:
+                return 'E'
+
+        def get_rank_color(rank):
+            return {
+                'S': 'gold',
+                'A': 'red',
+                'B': 'blue',
+                'C': 'yellow',
+                'D': 'green',
+                'E': 'gray'
+            }.get(rank, 'black')
+
+        rank = calculate_rank(overall_accuracy)
+        rank_color = get_rank_color(rank)
+
+        # セッションから現在のコインと経験値を取得
+        current_coins = session.get('coins', 0)
+        current_experience = session.get('experience', 0)
+
+        # ユーザー統計を取得
+        user_stats = answer_history.get_user_stats(accountId)
+
+        results_data = {
+            'subjects': subjects,
+            'rank': rank,
+            'rank_color': rank_color,
+            'experience': current_experience,
+            'coins': current_coins,
+            'period_info': '過去30日間の結果',
+            'total_questions': user_stats['total_questions'],
+            'accuracy_trends': {
+                '7_days': answer_history.get_subject_accuracy(accountId, days_back=7),
+                '30_days': overall_accuracy,
+                'all_time': answer_history.get_subject_accuracy(accountId, days_back=365)
+            }
+        }
+
+        return render_template("result.html", data=results_data)
+
+    except Exception as e:
+        print(f"リザルト画面エラー: {e}")
+
+        # エラー時のフォールバック（固定値）
+        subjects = [
+            {'name': '漢字', 'score': 0.0, 'total_questions': 0, 'correct_answers': 0},
+            {'name': '英語', 'score': 0.0, 'total_questions': 0, 'correct_answers': 0},
+            {'name': '算数', 'score': 0.0, 'total_questions': 0, 'correct_answers': 0},
+            {'name': '総合', 'score': 0.0, 'total_questions': 0, 'correct_answers': 0}
+        ]
+
+        results_data = {
+            'subjects': subjects,
+            'rank': 'E',
+            'rank_color': 'gray',
+            'experience': session.get('experience', 0),
+            'coins': session.get('coins', 0),
+            'period_info': 'データなし',
+            'total_questions': 0,
+            'accuracy_trends': {'7_days': 0.0, '30_days': 0.0, 'all_time': 0.0}
+        }
+
+        return render_template("result.html", data=results_data)
+
+
+# 統計情報取得API
+@app.route('/api/user-stats')
+@login_required
+def api_user_stats():
+    """ユーザーの詳細統計情報を取得"""
+    try:
+        accountId = session.get("login_id")
+
+        # 期間別の統計
+        stats = {
+            'last_7_days': answer_history.get_all_subjects_accuracy(accountId, 7),
+            'last_30_days': answer_history.get_all_subjects_accuracy(accountId, 30),
+            'all_time': answer_history.get_all_subjects_accuracy(accountId, 365),
+            'user_summary': answer_history.get_user_stats(accountId)
+        }
+
+        return jsonify(stats)
+
+    except Exception as e:
+        print(f"統計取得エラー: {e}")
+        return jsonify({'error': 'データ取得に失敗しました'}), 500
+
+
+# 統計リセットAPI（開発・テスト用）
+@app.route('/api/reset-stats', methods=['POST'])
+@login_required
+def api_reset_stats():
+    """統計データをリセット（開発・テスト用）"""
+    try:
+        accountId = session.get("login_id")
+
+        if accountId in answer_history.history:
+            del answer_history.history[accountId]
+
+        # セッションの統計データもクリア
+        session.pop('user_stats', None)
+        session.pop('coins', None)
+        session.pop('experience', None)
+
+        return jsonify({'message': '統計データをリセットしました'})
+
+    except Exception as e:
+        print(f"統計リセットエラー: {e}")
+        return jsonify({'error': 'リセットに失敗しました'}), 500
+
+
+# 手動で回答データを追加するAPI（テスト用）
+@app.route('/api/add-test-data', methods=['POST'])
+@login_required
+def api_add_test_data():
+    """テスト用の回答データを追加"""
+    try:
+        accountId = session.get("login_id")
+
+        # サンプルデータを追加
+        test_data = [
+            ('math', True), ('math', True), ('math', False), ('math', True),
+            ('kanji', True), ('kanji', False), ('kanji', True), ('kanji', True),
+            ('english', False), ('english', True), ('english', True), ('english', False),
+            ('math', True), ('kanji', False), ('english', True),
+        ]
+
+        for subject, is_correct in test_data:
+            answer_history.add_answer(accountId, subject, is_correct)
+
+        save_session_stats(accountId)
+
+        return jsonify({
+            'message': f'テストデータ{len(test_data)}件を追加しました',
+            'data': answer_history.get_all_subjects_accuracy(accountId, 30)
+        })
+
+    except Exception as e:
+        print(f"テストデータ追加エラー: {e}")
+        return jsonify({'error': 'テストデータ追加に失敗しました'}), 500
 
 
 # デバッグ用エンドポイント（開発時のみ使用）
@@ -862,65 +1219,6 @@ def map():
 @login_required
 def subject():
     return render_template("subject.html")
-
-
-# リザルト画面
-@app.route('/result')
-@login_required
-def result():
-    subjects = [
-        {'name': '漢字', 'score': 80.0},
-        {'name': '英語', 'score': 80.0},
-        {'name': '算数', 'score': 85.0},
-        {'name': '総合', 'score': 85.0}
-    ]
-
-    def calculate_rank(score):
-        if score is None:
-            return 'E'
-        elif score >= 95:
-            return 'S'
-        elif score >= 85:
-            return 'A'
-        elif score >= 75:
-            return 'B'
-        elif score >= 65:
-            return 'C'
-        elif score >= 55:
-            return 'D'
-        else:
-            return 'E'
-
-    def get_rank_color(rank):
-        return {
-            'S': 'gold',
-            'A': 'red',
-            'B': 'blue',
-            'C': 'yellow',
-            'D': 'green',
-            'E': 'gray'
-        }.get(rank, 'black')
-
-    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
-    rank = calculate_rank(total_score)
-    rank_color = get_rank_color(rank)
-
-    results_data = {
-        'subjects': subjects,
-        'rank': rank,
-        'rank_color': rank_color,
-        'experience': 125000,
-        'coins': 800
-    }
-
-    return render_template("result.html", data=results_data)
-
-
-
-# gaeover
-@app.route('/gameover')
-def gameover():
-    return render_template("gameover.html")
 
 
 # デバッグ用
