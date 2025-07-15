@@ -290,7 +290,7 @@ function showGameOverScreen() {
             window.location.href = '/result';  // リザルト画面に移動
         }, 1000);
     }
-}
+
 
 function updatePlayerHP(amount) {
     playerHP = Math.max(0, Math.min(maxPlayerHP, playerHP + amount));
