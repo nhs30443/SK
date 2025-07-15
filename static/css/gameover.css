@@ -1,0 +1,277 @@
+html, body {
+    aspect-ratio: 16 / 9;
+    margin: 0;
+    padding: 0;
+    background: black;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'DotGothic16', 'Pixelify Sans', monospace;
+}
+
+.aspect-wrapper {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-container {
+    background: #000;
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    max-height: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    filter: brightness(0.3) contrast(1.1) saturate(0.6);
+    animation: fadeIn 2s ease-in-out;
+}
+
+/* 暗いオーバーレイ */
+.background::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(139, 0, 0, 0.3) 0%, transparent 50%),
+        linear-gradient(0deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 100%);
+    pointer-events: none;
+}
+
+.game-over-title {
+    position: absolute;
+    top: 30vh;
+    left: 56vw;
+    transform: translateX(-50%);
+    font-size: clamp(40px, 8vw, 120px);
+    font-weight: bold;
+    color: #ff0000;
+    text-shadow: 
+        4px 4px 0 #000,
+        0 0 20px #ff0000,
+        0 0 40px #ff0000;
+    z-index: 2;
+    animation: glowPulse 2s ease-in-out infinite alternate;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.actions {
+    position: absolute;
+    bottom: 20vh;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80vw;
+    max-width: 800px;
+    display: flex;
+    justify-content: center;
+    gap: 3vw;
+    z-index: 2;
+    animation: slideUp 2s ease-out;
+}
+
+.action-btn {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+    border: 3px solid #fff;
+    border-radius: 15px;
+    box-shadow: 
+        0 0.3vw 0.6vw rgba(0,0,0,0.4),
+        inset 0 2px 0 rgba(255,255,255,0.1);
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: clamp(14px, 2vw, 24px);
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    min-width: 120px;
+    font-family: 'DotGothic16', cursive;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+
+.action-btn:hover {
+    background: linear-gradient(135deg, #6a6a6a, #4a4a4a);
+    transform: translateY(-0.3vw);
+    box-shadow: 
+        0 0.6vw 1.2vw rgba(0,0,0,0.5),
+        inset 0 2px 0 rgba(255,255,255,0.2);
+    border-color: #ffff66;
+}
+
+.action-btn:active {
+    transform: translateY(0);
+    box-shadow: 
+        0 0.2vw 0.4vw rgba(0,0,0,0.3),
+        inset 0 2px 0 rgba(255,255,255,0.1);
+}
+
+.action-btn.retry {
+    background: linear-gradient(135deg, #ff6b6b, #d63031);
+    border-color: #ff7675;
+}
+
+.action-btn.retry:hover {
+    background: linear-gradient(135deg, #ff7675, #e17055);
+    border-color: #ffeaa7;
+}
+
+.action-btn.home {
+    background: linear-gradient(135deg, #74b9ff, #0984e3);
+    border-color: #81ecec;
+}
+
+.action-btn.home:hover {
+    background: linear-gradient(135deg, #81ecec, #00b894);
+    border-color: #ffeaa7;
+}
+
+/* HPバー（空の状態） */
+.hp-bar {
+    width: 200px;
+    height: 20px;
+    background-color: #333;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.hp-fill {
+    height: 100%;
+    background-color: #e60000;
+    transition: width 0.3s ease-in-out;
+}
+
+.hp-label {
+    color: #fff;
+    font-size: 12px;
+    margin-bottom: 4px;
+    display: inline-block;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.player-hp-container {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+}
+
+.enemy-hp-container {
+    position: absolute;
+    top: 10%;
+    right: 10%;
+    text-align: right;
+}
+
+/* アニメーション */
+@keyframes glowPulse {
+    0% {
+        text-shadow: 
+            4px 4px 0 #000,
+            0 0 20px #ff0000,
+            0 0 40px #ff0000;
+    }
+    100% {
+        text-shadow: 
+            4px 4px 0 #000,
+            0 0 30px #ff0000,
+            0 0 60px #ff0000,
+            0 0 80px #ff0000;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateX(-50%) translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    .action-btn {
+        width: 60%;
+        min-width: 200px;
+    }
+}
+
+/* 画面揺れエフェクト */
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+/* 血しぶきエフェクト風の装飾 */
+.blood-effect {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #ff0000, #8b0000);
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: bloodDrop 3s ease-in-out infinite;
+}
+
+.blood-effect:nth-child(1) {
+    top: 30%;
+    left: 15%;
+    animation-delay: 0s;
+}
+
+.blood-effect:nth-child(2) {
+    top: 60%;
+    right: 20%;
+    animation-delay: 1s;
+}
+
+.blood-effect:nth-child(3) {
+    bottom: 40%;
+    left: 70%;
+    animation-delay: 2s;
+}
+
+@keyframes bloodDrop {
+    0%, 100% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 0.6; transform: scale(1); }
+}

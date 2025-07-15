@@ -930,6 +930,13 @@ def result():
     return render_template("result.html", data=results_data)
 
 
+
+# gaeover
+@app.route('/gameover')
+def gameover():
+    return render_template("gameover.html")
+
+
 # デバッグ用
 @app.route('/test')
 def test():
