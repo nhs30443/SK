@@ -872,11 +872,8 @@ def result():
         {'name': '漢字', 'score': 80.0},
         {'name': '英語', 'score': 80.0},
         {'name': '算数', 'score': 85.0},
+        {'name': '総合', 'score': 85.0}
     ]
-
-    total_score = sum(s['score'] for s in subjects) / len(subjects)
-    subjects.append({'name': '総合', 'score': round(total_score, 1)})
-    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
 
     def calculate_rank(score):
         if score is None:
@@ -904,6 +901,7 @@ def result():
             'E': 'gray'
         }.get(rank, 'black')
 
+    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
     rank = calculate_rank(total_score)
     rank_color = get_rank_color(rank)
 
@@ -916,6 +914,13 @@ def result():
     }
 
     return render_template("result.html", data=results_data)
+
+
+
+# gaeover
+@app.route('/gameover')
+def gameover():
+    return render_template("gameover.html")
 
 
 # デバッグ用
