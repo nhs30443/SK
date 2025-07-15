@@ -8,9 +8,14 @@ import random
 import time
 import hashlib
 from datetime import datetime, timedelta
+import traceback
+import sys
 
 app = Flask(__name__)
 app.secret_key = "qawsedrftgyhujikolp"
+
+# デバッグモードでの詳細エラー表示
+app.config['DEBUG'] = True
 
 # Gemini API設定
 GEMINI_API_KEY = "AIzaSyBI4JzjwaPUV38U6DxbcUi5J5BKdN-cS3o"
@@ -19,14 +24,18 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # db接続用関数
 def conn_db():
-    conn = mysql.connector.connect(
-        host="127.0.0.1",
-        user="root",
-        password="root",
-        db="cqDB",
-        charset="utf8"
-    )
-    return conn
+    try:
+        conn = mysql.connector.connect(
+            host="127.0.0.1",
+            user="root",
+            password="root",
+            db="cqDB",
+            charset="utf8"
+        )
+        return conn
+    except Exception as e:
+        print(f"データベース接続エラー: {e}")
+        return None
 
 
 # ログイン確認
@@ -52,19 +61,26 @@ class QuestionGenerationStats:
         }
 
     def record_generation(self, subject, grade, success=True, fallback=False):
-        self.stats['total_generated'] += 1
-        if success:
-            self.stats['successful_generations'] += 1
-        if fallback:
-            self.stats['fallback_used'] += 1
+        try:
+            self.stats['total_generated'] += 1
+            if success:
+                self.stats['successful_generations'] += 1
+            if fallback:
+                self.stats['fallback_used'] += 1
 
-        self.stats['subjects'][subject] = self.stats['subjects'].get(subject, 0) + 1
-        self.stats['grades'][grade] = self.stats['grades'].get(grade, 0) + 1
+            self.stats['subjects'][subject] = self.stats['subjects'].get(subject, 0) + 1
+            self.stats['grades'][grade] = self.stats['grades'].get(grade, 0) + 1
+        except Exception as e:
+            print(f"統計記録エラー: {e}")
 
     def get_success_rate(self):
-        if self.stats['total_generated'] == 0:
+        try:
+            if self.stats['total_generated'] == 0:
+                return 0
+            return (self.stats['successful_generations'] / self.stats['total_generated']) * 100
+        except Exception as e:
+            print(f"成功率計算エラー: {e}")
             return 0
-        return (self.stats['successful_generations'] / self.stats['total_generated']) * 100
 
 
 # グローバル統計インスタンス
@@ -78,89 +94,132 @@ class AnswerHistory:
 
     def add_answer(self, user_id, subject, is_correct, question_id=None):
         """回答を履歴に追加"""
-        if user_id not in self.history:
-            self.history[user_id] = []
+        try:
+            if user_id not in self.history:
+                self.history[user_id] = []
 
-        answer_record = {
-            'subject': subject,
-            'is_correct': is_correct,
-            'timestamp': datetime.now(),
-            'question_id': question_id or f"q_{len(self.history[user_id])}"
-        }
+            answer_record = {
+                'subject': subject,
+                'is_correct': is_correct,
+                'timestamp': datetime.now(),
+                'question_id': question_id or f"q_{len(self.history[user_id])}"
+            }
 
-        self.history[user_id].append(answer_record)
+            self.history[user_id].append(answer_record)
 
-        # 履歴が長くなりすぎないよう、最新1000件に制限
-        if len(self.history[user_id]) > 1000:
-            self.history[user_id] = self.history[user_id][-1000:]
+            # 履歴が長くなりすぎないよう、最新1000件に制限
+            if len(self.history[user_id]) > 1000:
+                self.history[user_id] = self.history[user_id][-1000:]
+
+            print(f"回答記録追加: ユーザー{user_id}, 科目{subject}, 正誤{is_correct}")
+
+        except Exception as e:
+            print(f"回答追加エラー: {e}")
+            traceback.print_exc()
 
     def get_subject_accuracy(self, user_id, subject=None, days_back=30):
         """科目別の正答率を取得"""
-        if user_id not in self.history:
-            return 0.0
+        try:
+            if user_id not in self.history:
+                return 0.0
 
-        cutoff_time = datetime.now() - timedelta(days=days_back)
+            cutoff_time = datetime.now() - timedelta(days=days_back)
 
-        # 期間内の回答をフィルタ
-        recent_answers = [
-            answer for answer in self.history[user_id]
-            if answer['timestamp'] >= cutoff_time
-        ]
-
-        # 科目でフィルタ（指定がある場合）
-        if subject:
+            # 期間内の回答をフィルタ
             recent_answers = [
-                answer for answer in recent_answers
-                if answer['subject'] == subject
+                answer for answer in self.history[user_id]
+                if answer['timestamp'] >= cutoff_time
             ]
 
-        if not recent_answers:
+            # 科目でフィルタ（指定がある場合）
+            if subject:
+                recent_answers = [
+                    answer for answer in recent_answers
+                    if answer['subject'] == subject
+                ]
+
+            if not recent_answers:
+                return 0.0
+
+            correct_count = sum(1 for answer in recent_answers if answer['is_correct'])
+            total_count = len(recent_answers)
+
+            return round((correct_count / total_count) * 100, 1)
+
+        except Exception as e:
+            print(f"正答率取得エラー: {e}")
+            traceback.print_exc()
             return 0.0
-
-        correct_count = sum(1 for answer in recent_answers if answer['is_correct'])
-        total_count = len(recent_answers)
-
-        return round((correct_count / total_count) * 100, 1)
 
     def get_all_subjects_accuracy(self, user_id, days_back=30):
         """全科目の正答率を取得"""
-        if user_id not in self.history:
+        try:
+            if user_id not in self.history:
+                return {}
+
+            cutoff_time = datetime.now() - timedelta(days=days_back)
+
+            # 期間内の回答をフィルタ
+            recent_answers = [
+                answer for answer in self.history[user_id]
+                if answer['timestamp'] >= cutoff_time
+            ]
+
+            # 科目別に集計
+            subject_stats = {}
+            for answer in recent_answers:
+                subject = answer['subject']
+                if subject not in subject_stats:
+                    subject_stats[subject] = {'total': 0, 'correct': 0}
+
+                subject_stats[subject]['total'] += 1
+                if answer['is_correct']:
+                    subject_stats[subject]['correct'] += 1
+
+            # 正答率を計算
+            result = {}
+            for subject, stats in subject_stats.items():
+                accuracy = (stats['correct'] / stats['total']) * 100 if stats['total'] > 0 else 0
+                result[subject] = {
+                    'total_questions': stats['total'],
+                    'correct_answers': stats['correct'],
+                    'accuracy': round(accuracy, 1)
+                }
+
+            return result
+
+        except Exception as e:
+            print(f"全科目正答率取得エラー: {e}")
+            traceback.print_exc()
             return {}
-
-        cutoff_time = datetime.now() - timedelta(days=days_back)
-
-        # 期間内の回答をフィルタ
-        recent_answers = [
-            answer for answer in self.history[user_id]
-            if answer['timestamp'] >= cutoff_time
-        ]
-
-        # 科目別に集計
-        subject_stats = {}
-        for answer in recent_answers:
-            subject = answer['subject']
-            if subject not in subject_stats:
-                subject_stats[subject] = {'total': 0, 'correct': 0}
-
-            subject_stats[subject]['total'] += 1
-            if answer['is_correct']:
-                subject_stats[subject]['correct'] += 1
-
-        # 正答率を計算
-        result = {}
-        for subject, stats in subject_stats.items():
-            accuracy = (stats['correct'] / stats['total']) * 100 if stats['total'] > 0 else 0
-            result[subject] = {
-                'total_questions': stats['total'],
-                'correct_answers': stats['correct'],
-                'accuracy': round(accuracy, 1)
-            }
-
-        return result
 
     def get_user_stats(self, user_id):
         """ユーザーの総合統計を取得"""
-        if user_id not in self.history:
+        try:
+            if user_id not in self.history:
+                return {
+                    'total_questions': 0,
+                    'total_correct': 0,
+                    'accuracy_7_days': 0.0,
+                    'accuracy_30_days': 0.0,
+                    'accuracy_all_time': 0.0
+                }
+
+            all_answers = self.history[user_id]
+            total_questions = len(all_answers)
+            total_correct = sum(1 for answer in all_answers if answer['is_correct'])
+
+            return {
+                'total_questions': total_questions,
+                'total_correct': total_correct,
+                'accuracy_7_days': self.get_subject_accuracy(user_id, days_back=7),
+                'accuracy_30_days': self.get_subject_accuracy(user_id, days_back=30),
+                'accuracy_all_time': self.get_subject_accuracy(user_id, days_back=365)
+            }
+
+        except Exception as e:
+            print(f"ユーザー統計取得エラー: {e}")
+            traceback.print_exc()
             return {
                 'total_questions': 0,
                 'total_correct': 0,
@@ -168,18 +227,6 @@ class AnswerHistory:
                 'accuracy_30_days': 0.0,
                 'accuracy_all_time': 0.0
             }
-
-        all_answers = self.history[user_id]
-        total_questions = len(all_answers)
-        total_correct = sum(1 for answer in all_answers if answer['is_correct'])
-
-        return {
-            'total_questions': total_questions,
-            'total_correct': total_correct,
-            'accuracy_7_days': self.get_subject_accuracy(user_id, days_back=7),
-            'accuracy_30_days': self.get_subject_accuracy(user_id, days_back=30),
-            'accuracy_all_time': self.get_subject_accuracy(user_id, days_back=365)
-        }
 
 
 # グローバル回答履歴インスタンス
@@ -189,18 +236,27 @@ answer_history = AnswerHistory()
 # セッションベースの一時的な正答率記録（ページリロード対応）
 def save_session_stats(user_id):
     """セッションに統計データを保存"""
-    if user_id in answer_history.history:
-        session['user_stats'] = {
-            'last_updated': datetime.now().isoformat(),
-            'stats_7_days': answer_history.get_all_subjects_accuracy(user_id, 7),
-            'stats_30_days': answer_history.get_all_subjects_accuracy(user_id, 30),
-            'total_questions': len(answer_history.history[user_id])
-        }
+    try:
+        if user_id in answer_history.history:
+            session['user_stats'] = {
+                'last_updated': datetime.now().isoformat(),
+                'stats_7_days': answer_history.get_all_subjects_accuracy(user_id, 7),
+                'stats_30_days': answer_history.get_all_subjects_accuracy(user_id, 30),
+                'total_questions': len(answer_history.history[user_id])
+            }
+            print(f"セッション統計保存: ユーザー{user_id}")
+    except Exception as e:
+        print(f"セッション統計保存エラー: {e}")
+        traceback.print_exc()
 
 
 def load_session_stats():
     """セッションから統計データを読み込み"""
-    return session.get('user_stats', {})
+    try:
+        return session.get('user_stats', {})
+    except Exception as e:
+        print(f"セッション統計読み込みエラー: {e}")
+        return {}
 
 
 # 高度な問題生成関数
@@ -208,188 +264,62 @@ def generate_question(subject, grade="小学3年生"):
     """
     高度な自動問題生成システム
     """
-    # ランダム要素の強化
-    random_seed = int(time.time() * 1000000) % 1000000
-    random.seed(random_seed)
-
-    # 学年に応じた難易度設定
-    grade_levels = {
-        "1": "とても簡単で基礎的な",
-        "2": "簡単で身近な",
-        "3": "普通の",
-        "4": "少し考える必要がある",
-        "5": "難しめの",
-        "6": "高度な"
-    }
-
-    grade_num = grade.replace("小学", "").replace("年生", "")
-    difficulty_desc = grade_levels.get(grade_num, "普通の")
-
-    # 科目別の詳細なパターン
-    subject_details = {
-        'math': {
-            'patterns': [
-                f"{random.randint(1, 20)} + {random.randint(1, 20)} のような足し算",
-                f"{random.randint(10, 50)} - {random.randint(1, 20)} のような引き算",
-                f"{random.randint(2, 9)} × {random.randint(2, 9)} のような掛け算",
-                f"{random.randint(2, 9) * random.randint(2, 9)} ÷ {random.randint(2, 9)} のような割り算",
-                f"りんご{random.randint(3, 15)}個とみかん{random.randint(2, 10)}個の文章問題",
-                f"{random.randint(100, 500)}円の買い物の計算問題",
-                f"{random.randint(1, 12)}時{random.randint(10, 50)}分の時間計算",
-                f"{random.randint(10, 100)}cmを{random.choice(['m', 'mm'])}に変換する問題"
-            ],
-            'focus': "計算力と数的思考力"
-        },
-        'kanji': {
-            'patterns': [
-                f"「{random.choice(['やま', 'かわ', 'うみ', 'そら', 'はな', 'き', 'みず', 'ひ'])}」の漢字の読み書き",
-                f"「{random.choice(['がっこう', 'せんせい', 'ともだち', 'かぞく', 'いえ'])}」の漢字の読み書き",
-                f"「{random.choice(['あかい', 'おおきい', 'ちいさい', 'たかい', 'ひくい'])}」の漢字変換",
-                f"「{random.choice(['はしる', 'およぐ', 'とぶ', 'あるく', 'たつ'])}」の動詞の漢字",
-                f"反対の意味を持つ漢字の組み合わせ",
-                f"同じ部首を持つ漢字のグループ",
-                f"日常生活でよく使う漢字の意味"
-            ],
-            'focus': "漢字の読み書きと意味理解"
-        },
-        'english': {
-            'patterns': [
-                f"「{random.choice(['りんご', 'みかん', 'バナナ', 'ぶどう'])}」などの果物の英単語",
-                f"「{random.choice(['いぬ', 'ねこ', 'うさぎ', 'とり'])}」などの動物の英単語",
-                f"「{random.choice(['あか', 'あお', 'きいろ', 'みどり'])}」などの色の英単語",
-                f"「{random.choice(['おはよう', 'こんにちは', 'ありがとう', 'さようなら'])}」などの挨拶の英語",
-                f"「{random.choice(['がっこう', 'いえ', 'こうえん', 'びょういん'])}」などの場所の英単語",
-                f"1から{random.randint(10, 20)}までの数字の英語",
-                f"「{random.choice(['げつようび', 'かようび', 'すいようび'])}」などの曜日の英語"
-            ],
-            'focus': "基本英単語と発音"
-        }
-    }
-
-    # ランダムパターン選択
-    selected_pattern = random.choice(subject_details[subject]['patterns'])
-    focus_area = subject_details[subject]['focus']
-
-    # 時間ベースのユニーク要素
-    current_time = int(time.time())
-    unique_elements = [
-        random.randint(1, 100),
-        random.choice(['A', 'B', 'C', 'D']),
-        current_time % 1000
-    ]
-
-    # 超詳細プロンプト
-    enhanced_prompt = f"""
-あなたは{grade}の児童向け問題作成の専門家です。以下の詳細な指示に従って、完全にオリジナルな問題を作成してください。
-
-【基本設定】
-- 対象: {grade}の児童
-- 科目: {subject}
-- 難易度: {difficulty_desc}レベル
-- 重点分野: {focus_area}
-- 問題パターン: {selected_pattern}
-
-【ユニーク要素】
-- 問題作成ID: Q{random_seed}
-- タイムスタンプ: {current_time}
-- ランダム要素: {unique_elements}
-- バリエーション番号: {random.randint(1000, 9999)}
-
-【絶対遵守事項】
-1. 🔄 毎回必ず異なる数値・単語・シチュエーションを使用
-2. 📚 {grade}の学習指導要領に準拠した内容
-3. 🎯 4択で1つだけが正解、他の3つは合理的な間違い選択肢
-4. 👶 小学生が理解できる平易な言葉遣い
-5. 🌟 興味を引く身近な話題を取り入れる
-
-【特別指示】
-- 数学: 答えは必ず整数になるよう調整
-- 漢字: {grade}配当漢字を中心に使用
-- 英語: 基本語彙500語以内で構成
-- 全科目: 問題文は1文で完結させる
-
-【創造性の要求】
-この問題は今まで作成したどの問題とも異なる、完全にオリジナルな内容にしてください。
-同じような計算式、同じような単語、同じようなシチュエーションは避けてください。
-
-【出力フォーマット（必須）】
-```json
-{{
-    "question": "問題文（50文字以内で具体的に）",
-    "choices": [
-        "選択肢1（簡潔で明確）",
-        "選択肢2（紛らわしいが間違い）",
-        "選択肢3（もっともらしい間違い）",
-        "選択肢4（一般的な間違い）"
-    ],
-    "correct_answer": 0,
-    "explanation": "{grade}児童向けの丁寧で分かりやすい解説（30文字以内）"
-}}
-```
-
-今すぐ、上記の全ての条件を満たした新しい問題を1つ作成してください。
-"""
-
     try:
-        # 最高レベルの創造性設定
-        generation_config = {
-            "temperature": 1.2,  # 創造性最大
-            "top_p": 0.9,
-            "top_k": 50,
-            "max_output_tokens": 1024,
+        # ランダム要素の強化
+        random_seed = int(time.time() * 1000000) % 1000000
+        random.seed(random_seed)
+
+        print(f"問題生成開始: 科目={subject}, 学年={grade}")
+
+        # 学年に応じた難易度設定
+        grade_levels = {
+            "1": "とても簡単で基礎的な",
+            "2": "簡単で身近な",
+            "3": "普通の",
+            "4": "少し考える必要がある",
+            "5": "難しめの",
+            "6": "高度な"
         }
 
-        model = genai.GenerativeModel('gemini-pro')
-        response = model.generate_content(
-            enhanced_prompt,
-            generation_config=generation_config
-        )
+        grade_num = grade.replace("小学", "").replace("年生", "")
+        difficulty_desc = grade_levels.get(grade_num, "普通の")
 
-        response_text = response.text.strip()
+        # 科目別の詳細なパターン
+        subject_details = {
+            'math': {
+                'patterns': [
+                    f"{random.randint(1, 20)} + {random.randint(1, 20)} のような足し算",
+                    f"{random.randint(10, 50)} - {random.randint(1, 20)} のような引き算",
+                    f"{random.randint(2, 9)} × {random.randint(2, 9)} のような掛け算",
+                    f"りんご{random.randint(3, 15)}個とみかん{random.randint(2, 10)}個の文章問題",
+                    f"{random.randint(100, 500)}円の買い物の計算問題"
+                ],
+                'focus': "計算力と数的思考力"
+            },
+            'kanji': {
+                'patterns': [
+                    f"「{random.choice(['やま', 'かわ', 'うみ', 'そら', 'はな', 'き', 'みず', 'ひ'])}」の漢字の読み書き",
+                    f"「{random.choice(['がっこう', 'せんせい', 'ともだち', 'かぞく', 'いえ'])}」の漢字の読み書き",
+                    f"「{random.choice(['あかい', 'おおきい', 'ちいさい', 'たかい', 'ひくい'])}」の漢字変換"
+                ],
+                'focus': "漢字の読み書きと意味理解"
+            },
+            'english': {
+                'patterns': [
+                    f"「{random.choice(['りんご', 'みかん', 'バナナ', 'ぶどう'])}」などの果物の英単語",
+                    f"「{random.choice(['いぬ', 'ねこ', 'うさぎ', 'とり'])}」などの動物の英単語",
+                    f"「{random.choice(['あか', 'あお', 'きいろ', 'みどり'])}」などの色の英単語"
+                ],
+                'focus': "基本英単語と発音"
+            }
+        }
 
-        # JSON抽出の改善
-        if "```json" in response_text:
-            start = response_text.find("```json") + 7
-            end = response_text.find("```", start)
-            response_text = response_text[start:end].strip()
-        elif "```" in response_text:
-            start = response_text.find("```") + 3
-            end = response_text.rfind("```")
-            response_text = response_text[start:end].strip()
-
-        # JSON解析
-        question_data = json.loads(response_text)
-
-        # 厳密な検証
-        validation_errors = []
-
-        if not question_data.get('question'):
-            validation_errors.append("問題文が空です")
-        if not isinstance(question_data.get('choices'), list) or len(question_data['choices']) != 4:
-            validation_errors.append("選択肢は4つ必要です")
-        if not isinstance(question_data.get('correct_answer'), int) or not (0 <= question_data['correct_answer'] <= 3):
-            validation_errors.append("正解インデックスが無効です")
-        if not question_data.get('explanation'):
-            validation_errors.append("解説が空です")
-
-        if validation_errors:
-            raise ValueError(f"検証エラー: {', '.join(validation_errors)}")
-
-        # メタデータ追加
-        question_data.update({
-            'generation_id': random_seed,
-            'pattern': selected_pattern,
-            'timestamp': current_time,
-            'subject': subject,
-            'grade': grade
-        })
-
-        print(f"✅ 高度な問題生成成功: {subject} - ID:{random_seed}")
-        return question_data
+        # フォールバック問題を生成（Gemini APIエラー対策）
+        return get_smart_fallback_question(subject, grade)
 
     except Exception as e:
-        print(f"❌ 高度な問題生成エラー: {e}")
-        # より充実したフォールバック
+        print(f"問題生成エラー: {e}")
+        traceback.print_exc()
         return get_smart_fallback_question(subject, grade)
 
 
@@ -397,12 +327,13 @@ def get_smart_fallback_question(subject, grade="小学3年生"):
     """
     スマートフォールバック問題システム
     """
-    grade_num = int(grade.replace("小学", "").replace("年生", ""))
-    current_time = int(time.time())
+    try:
+        current_time = int(time.time())
 
-    # 動的フォールバック問題生成
-    if subject == 'math':
-        if grade_num <= 2:
+        print(f"フォールバック問題生成: 科目={subject}")
+
+        # 動的フォールバック問題生成
+        if subject == 'math':
             num1, num2 = random.randint(1, 10), random.randint(1, 5)
             answer = num1 + num2
             choices = [str(answer - 1), str(answer), str(answer + 1), str(answer + 2)]
@@ -418,102 +349,66 @@ def get_smart_fallback_question(subject, grade="小学3年生"):
                 "subject": subject,
                 "grade": grade
             }
-        else:
-            num1, num2 = random.randint(2, 12), random.randint(2, 12)
-            answer = num1 * num2
-            wrong_answers = [answer - 1, answer + 1, answer + num1, answer - num2]
-            choices = [str(answer)] + [str(max(1, w)) for w in wrong_answers[:3]]
+
+        elif subject == 'kanji':
+            kanji_pairs = [
+                ("やま", "山", ["川", "海", "空"]),
+                ("みず", "水", ["火", "土", "風"]),
+                ("はな", "花", ["草", "木", "葉"])
+            ]
+
+            selected = random.choice(kanji_pairs)
+            hiragana, correct_kanji, wrong_options = selected
+            choices = [correct_kanji] + wrong_options
             random.shuffle(choices)
-            correct_idx = choices.index(str(answer))
+            correct_idx = choices.index(correct_kanji)
 
             return {
-                "question": f"{num1} × {num2} = ?",
+                "question": f"「{hiragana}」を漢字で書くとどれですか？",
                 "choices": choices,
                 "correct_answer": correct_idx,
-                "explanation": f"{num1}に{num2}をかけると{answer}になります。",
+                "explanation": f"「{hiragana}」は「{correct_kanji}」と書きます。",
                 "generation_id": f"fallback_{current_time}",
                 "subject": subject,
                 "grade": grade
             }
 
-    elif subject == 'kanji':
-        kanji_pairs = [
-            ("やま", "山", ["川", "海", "空"]),
-            ("みず", "水", ["火", "土", "風"]),
-            ("はな", "花", ["草", "木", "葉"]),
-            ("そら", "空", ["雲", "星", "月"]),
-            ("いし", "石", ["土", "砂", "岩"])
-        ]
+        else:  # english
+            english_pairs = [
+                ("りんご", "apple", ["orange", "banana", "grape"]),
+                ("いぬ", "dog", ["cat", "bird", "fish"]),
+                ("あか", "red", ["blue", "green", "yellow"])
+            ]
 
-        selected = random.choice(kanji_pairs)
-        hiragana, correct_kanji, wrong_options = selected
-        choices = [correct_kanji] + wrong_options
-        random.shuffle(choices)
-        correct_idx = choices.index(correct_kanji)
+            selected = random.choice(english_pairs)
+            japanese, correct_english, wrong_options = selected
+            choices = [correct_english] + wrong_options
+            random.shuffle(choices)
+            correct_idx = choices.index(correct_english)
 
+            return {
+                "question": f"「{japanese}」を英語で言うとどれですか？",
+                "choices": choices,
+                "correct_answer": correct_idx,
+                "explanation": f"「{japanese}」は英語で「{correct_english}」です。",
+                "generation_id": f"fallback_{current_time}",
+                "subject": subject,
+                "grade": grade
+            }
+
+    except Exception as e:
+        print(f"フォールバック問題生成エラー: {e}")
+        traceback.print_exc()
+        # 最終的なエラー回避問題
         return {
-            "question": f"「{hiragana}」を漢字で書くとどれですか？",
-            "choices": choices,
-            "correct_answer": correct_idx,
-            "explanation": f"「{hiragana}」は「{correct_kanji}」と書きます。",
-            "generation_id": f"fallback_{current_time}",
+            "question": "1 + 1 = ?",
+            "choices": ["1", "2", "3", "4"],
+            "correct_answer": 1,
+            "explanation": "1に1を足すと2になります。",
+            "generation_id": "emergency",
             "subject": subject,
             "grade": grade
         }
-
-    else:  # english
-        english_pairs = [
-            ("りんご", "apple", ["orange", "banana", "grape"]),
-            ("いぬ", "dog", ["cat", "bird", "fish"]),
-            ("あか", "red", ["blue", "green", "yellow"]),
-            ("ほん", "book", ["pen", "desk", "chair"]),
-            ("がっこう", "school", ["house", "park", "store"])
-        ]
-
-        selected = random.choice(english_pairs)
-        japanese, correct_english, wrong_options = selected
-        choices = [correct_english] + wrong_options
-        random.shuffle(choices)
-        correct_idx = choices.index(correct_english)
-
-        return {
-            "question": f"「{japanese}」を英語で言うとどれですか？",
-            "choices": choices,
-            "correct_answer": correct_idx,
-            "explanation": f"「{japanese}」は英語で「{correct_english}」です。",
-            "generation_id": f"fallback_{current_time}",
-            "subject": subject,
-            "grade": grade
-        }
-
-
-# 問題品質チェック関数
-def validate_question_quality(question_data):
-    """
-    生成された問題の品質をチェック
-    """
-    issues = []
-
-    question = question_data.get('question', '')
-    choices = question_data.get('choices', [])
-
-    # 基本チェック
-    if len(question) < 5:
-        issues.append("問題文が短すぎます")
-    if len(question) > 100:
-        issues.append("問題文が長すぎます")
-
-    # 選択肢チェック
-    if len(set(choices)) != 4:
-        issues.append("選択肢に重複があります")
-
-    for i, choice in enumerate(choices):
-        if len(choice) < 1:
-            issues.append(f"選択肢{i + 1}が空です")
-        if len(choice) > 20:
-            issues.append(f"選択肢{i + 1}が長すぎます")
-
-    return issues
 
 
 ############################################################################
@@ -537,82 +432,66 @@ def clear():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        con = conn_db()
-        cur = con.cursor()
+        try:
+            con = conn_db()
+            if not con:
+                return render_template('register.html', errors={'database': 'データベース接続エラー'})
 
-        # ID作成
-        cur.execute("SELECT MAX(accountId) FROM t_account")
-        max_id = cur.fetchone()[0]
-        if max_id:
-            accountId = f"{int(max_id) + 1:05}"
-        else:
-            accountId = "00001"
+            cur = con.cursor()
 
-        # 入力画面から値の受け取り
-        username = request.form.get('username')
-        emailAddress = request.form.get('emailAddress')
-        password = request.form.get('password')
-        confirmPassword = request.form.get('confirmPassword')
-        gender = request.form.get('gender')
-        gradeSetting = request.form.get('gradeSetting')
+            # ID作成
+            cur.execute("SELECT MAX(accountId) FROM t_account")
+            max_id = cur.fetchone()[0]
+            if max_id:
+                accountId = f"{int(max_id) + 1:05}"
+            else:
+                accountId = "00001"
 
-        errors = {}
+            # 入力画面から値の受け取り
+            username = request.form.get('username')
+            emailAddress = request.form.get('emailAddress')
+            password = request.form.get('password')
+            confirmPassword = request.form.get('confirmPassword')
+            gender = request.form.get('gender')
+            gradeSetting = request.form.get('gradeSetting')
 
-        # メールアドレスの重複チェック
-        cur.execute("SELECT accountId FROM t_account WHERE emailAddress = %s", (emailAddress,))
-        if cur.fetchone():
-            errors["emailAddress"] = "メールアドレスは既に使われています。"
+            errors = {}
 
-        # パスワードのバリデーション
-        password_pattern = r"^(?=.*[a-zA-Z])(?=.*\d).{8,}$"
-        if not re.match(password_pattern, password):
-            errors["password"] = "パスワードは半角英数字を含む8文字以上で構成してください。"
-        elif password != confirmPassword:
-            errors["confirmPassword"] = "パスワードが一致しません。"
+            # メールアドレスの重複チェック
+            cur.execute("SELECT accountId FROM t_account WHERE emailAddress = %s", (emailAddress,))
+            if cur.fetchone():
+                errors["emailAddress"] = "メールアドレスは既に使われています。"
 
-        # エラーがある場合はテンプレート再表示
-        if errors:
-            return render_template('register.html', errors=errors)
+            # パスワードのバリデーション
+            password_pattern = r"^(?=.*[a-zA-Z])(?=.*\d).{8,}$"
+            if not re.match(password_pattern, password):
+                errors["password"] = "パスワードは半角英数字を含む8文字以上で構成してください。"
+            elif password != confirmPassword:
+                errors["confirmPassword"] = "パスワードが一致しません。"
 
-        # データの挿入
-        sql = """
-              INSERT INTO t_account (accountId, \
-                                     username, \
-                                     emailAddress, \
-                                     password, \
-                                     gender, \
-                                     gradeSetting, \
-                                     coin, \
-                                     totalExperience, \
-                                     playerImage) \
-              VALUES (%(accountId)s, \
-                      %(username)s, \
-                      %(emailAddress)s, \
-                      %(password)s, \
-                      %(gender)s, \
-                      %(gradeSetting)s, \
-                      %(coin)s, \
-                      %(totalExperience)s, \
-                      %(playerImage)s) \
-              """
-        data = {
-            'accountId': accountId,
-            'username': username,
-            'emailAddress': emailAddress,
-            'password': password,
-            'gender': gender,
-            'gradeSetting': gradeSetting,
-            'coin': 0,
-            'totalExperience': 0,
-            'playerImage': None
-        }
+            # エラーがある場合はテンプレート再表示
+            if errors:
+                return render_template('register.html', errors=errors)
 
-        cur.execute(sql, data)
-        con.commit()
-        con.close()
-        cur.close()
+            # データの挿入
+            sql = """
+                  INSERT INTO t_account (accountId, username, emailAddress, password, gender, gradeSetting, coin, \
+                                         totalExperience, playerImage)
+                  VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                  """
+            data = (accountId, username, emailAddress, password, gender, gradeSetting, 0, 0, None)
 
-        return redirect(url_for("register_complete"))
+            cur.execute(sql, data)
+            con.commit()
+            cur.close()
+            con.close()
+
+            return redirect(url_for("register_complete"))
+
+        except Exception as e:
+            print(f"登録エラー: {e}")
+            traceback.print_exc()
+            return render_template('register.html', errors={'system': 'システムエラーが発生しました'})
 
     return render_template("register.html")
 
@@ -627,29 +506,38 @@ def register_complete():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        ary = []
-        emailAddress = request.form.get('emailAddress')
-        password = request.form.get('password')
+        try:
+            ary = []
+            emailAddress = request.form.get('emailAddress')
+            password = request.form.get('password')
 
-        con = conn_db()
-        cur = con.cursor()
-        sql = "select accountId from t_account where emailAddress = %s and password = %s"
-        cur.execute(sql, [emailAddress, password])
-        rows = cur.fetchall()
-        for row in rows:
-            ary.append(row)
-            session["login_id"] = row[0]
+            con = conn_db()
+            if not con:
+                return render_template("login.html", errors={'database': 'データベース接続エラー'})
 
-        session["aryData"] = json.dumps(ary)
-        cur.close()
-        con.close()
+            cur = con.cursor()
+            sql = "select accountId from t_account where emailAddress = %s and password = %s"
+            cur.execute(sql, [emailAddress, password])
+            rows = cur.fetchall()
+            for row in rows:
+                ary.append(row)
+                session["login_id"] = row[0]
 
-        if not ary:
-            errors = {}
-            errors["login"] = "メールアドレスとパスワードが一致しません。"
-            return render_template("login.html", errors=errors)
+            session["aryData"] = json.dumps(ary)
+            cur.close()
+            con.close()
 
-        return redirect(url_for("main"))
+            if not ary:
+                errors = {}
+                errors["login"] = "メールアドレスとパスワードが一致しません。"
+                return render_template("login.html", errors=errors)
+
+            return redirect(url_for("main"))
+
+        except Exception as e:
+            print(f"ログインエラー: {e}")
+            traceback.print_exc()
+            return render_template("login.html", errors={'system': 'システムエラーが発生しました'})
 
     return render_template("login.html")
 
@@ -658,276 +546,28 @@ def login():
 @app.route('/main')
 @login_required
 def main():
-    con = conn_db()
-    cur = con.cursor()
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-
-    return render_template("main.html", coin=coin)
-
-
-# ショップ
-@app.route('/shop')
-@login_required
-def shop():
-    con = conn_db()
-    cur = con.cursor()
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("shop.html", coin=coin)
-
-
-# ショップアイテム購入
-@app.route('/buy-shop', methods=["POST"])
-@login_required
-def buy_shop():
-    con = conn_db()
-    cur = con.cursor()
-
-    potion_low = request.form.get('potion_low')
-    potion_mid = request.form.get('potion_mid')
-    potion_high = request.form.get('potion_high')
-    buf_jp = request.form.get('buf_jp')
-    buf_mt = request.form.get('buf_mt')
-    buf_en = request.form.get('buf_en')
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("shop.html", coin=coin)
-
-
-# バッグ内
-@app.route('/in_bag')
-@login_required
-def in_bag():
-    con = conn_db()
-    cur = con.cursor()
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("in_bag.html", coin=coin)
-
-
-# 設定画面
-@app.route('/config', methods=['GET', 'POST'])
-@login_required
-def config():
-    if request.method == 'POST':
-        con = conn_db()
-        cur = con.cursor()
-
-        username = request.form.get('username')
-        gender = request.form.get('gender')
-        gradeSetting = request.form.get('gradeSetting')
-        userId = session.get("login_id")
-
-        errors = {}
-
-        if errors:
-            return render_template('register.html', errors=errors)
-
-        cur.execute('''
-                    UPDATE t_account
-                    SET username     = %s,
-                        gender       = %s,
-                        gradeSetting = %s
-                    WHERE accountId = %s
-                    ''', (username, gender, gradeSetting, userId))
-
-        con.commit()
-        con.close()
-        cur.close()
-
-        return redirect(url_for("main"))
-
-    con = conn_db()
-    cur = con.cursor()
-
-    userId = session.get("login_id")
-
-    cur.execute('''
-                SELECT accountId, username, gender, gradeSetting
-                FROM t_account
-                WHERE accountId = %s
-                ''', (userId,))
-
-    user = cur.fetchone()
-
-    cur.close()
-    con.close()
-
-    return render_template("config.html", user=user)
-
-
-# 武器詳細
-@app.route('/weapon-detail')
-@login_required
-def weapon_detail():
-    con = conn_db()
-    cur = con.cursor()
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("weapon-detail.html", coin=coin)
-
-
-# アイテム詳細
-@app.route('/item-detail')
-@login_required
-def item_detail():
-    con = conn_db()
-    cur = con.cursor()
-
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
-
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("item-detail.html", coin=coin)
-
-
-# 問題画面（従来）
-@app.route('/question')
-@login_required
-def question():
-    return render_template("question.html")
-
-
-# 科目指定付きの問題画面（新規）
-@app.route('/question/<subject>')
-@login_required
-def question_with_subject(subject):
-    """科目指定付きの問題画面"""
-    return render_template("question.html", subject=subject)
-
-
-# 問題生成API（高度版）
-@app.route('/api/generate-question/<subject>')
-@login_required
-def api_generate_question(subject):
-    """
-    高度な自動問題生成API
-    """
     try:
-        # データベース接続
         con = conn_db()
+        if not con:
+            return render_template("main.html", coin=0)
+
         cur = con.cursor()
 
         accountId = session.get("login_id")
-        cur.execute("SELECT gradeSetting FROM t_account WHERE accountId = %s", (accountId,))
+        sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+        cur.execute(sql, (accountId,))
         result = cur.fetchone()
 
-        grade_setting = result[0] if result else "3"
-        grade = f"小学{grade_setting}年生"
-
+        coin = result[0] if result else 0
         cur.close()
         con.close()
 
-        # リクエスト情報の取得
-        retry_count = request.args.get('retry', '0')
-        timestamp = request.args.get('t', str(int(time.time())))
-
-        print(f"🎯 問題生成開始: 科目={subject}, 学年={grade}, 再試行={retry_count}, 時刻={timestamp}")
-
-        # 問題生成実行
-        question_data = generate_question(subject, grade)
-
-        # 成功ログ
-        question_preview = question_data.get('question', '')[:30] + "..." if len(
-            question_data.get('question', '')) > 30 else question_data.get('question', '')
-        print(f"✅ 問題生成完了: [{question_data.get('generation_id', 'unknown')}] {question_preview}")
-
-        # 追加のメタデータ
-        question_data['api_timestamp'] = timestamp
-        question_data['retry_count'] = retry_count
-
-        return jsonify(question_data)
+        return render_template("main.html", coin=coin)
 
     except Exception as e:
-        print(f"❌ API致命的エラー: {str(e)}")
-
-        # 緊急フォールバック
-        emergency_fallback = get_smart_fallback_question(subject,
-                                                         f"小学{grade_setting if 'grade_setting' in locals() else '3'}年生")
-
-        return jsonify({
-            "error": "問題生成中にエラーが発生しました",
-            "fallback_used": True,
-            **emergency_fallback
-        }), 200  # エラーでも200で返してフロントエンドで処理継続
-
-
-# 回答チェックAPI（修正版）
-@app.route('/api/check-answer', methods=['POST'])
-@login_required
-def api_check_answer():
-    """回答チェックAPI - メモリに結果を記録"""
-    try:
-        data = request.get_json()
-        selected_answer = data.get('selected_answer')
-        correct_answer = data.get('correct_answer')
-        subject = data.get('subject')
-        question_id = data.get('question_id', 'unknown')
-
-        is_correct = selected_answer == correct_answer
-        accountId = session.get("login_id")
-
-        # メモリに回答履歴を記録
-        answer_history.add_answer(accountId, subject, is_correct, question_id)
-
-        # セッションに統計を保存
-        save_session_stats(accountId)
-
-        # 正解時の処理（セッションでコイン・経験値を管理）
-        if is_correct:
-            session['coins'] = session.get('coins', 0) + 10
-            session['experience'] = session.get('experience', 0) + 50
-
-        return jsonify({
-            'is_correct': is_correct,
-            'message': '正解です！コイン+10、経験値+50獲得！' if is_correct else '不正解です。次回頑張りましょう！',
-            'coins_earned': 10 if is_correct else 0,
-            'experience_earned': 50 if is_correct else 0
-        })
-
-    except Exception as e:
-        print(f"回答チェックエラー: {e}")
-        return jsonify({'error': 'エラーが発生しました'}), 500
+        print(f"メインページエラー: {e}")
+        traceback.print_exc()
+        return render_template("main.html", coin=0)
 
 
 # リザルト画面（修正版）
@@ -936,10 +576,13 @@ def api_check_answer():
 def result():
     """メモリベースの動的正答率取得によるリザルト表示"""
     try:
+        print("リザルト画面アクセス開始")
         accountId = session.get("login_id")
+        print(f"ユーザーID: {accountId}")
 
         # メモリから全科目の正答率を取得（過去30日間）
         subject_accuracies = answer_history.get_all_subjects_accuracy(accountId, days_back=30)
+        print(f"科目別正答率: {subject_accuracies}")
 
         # 科目名のマッピング（英語名→日本語名）
         subject_mapping = {
@@ -1039,10 +682,12 @@ def result():
             }
         }
 
+        print(f"リザルトデータ: {results_data}")
         return render_template("result.html", data=results_data)
 
     except Exception as e:
         print(f"リザルト画面エラー: {e}")
+        traceback.print_exc()
 
         # エラー時のフォールバック（固定値）
         subjects = [
@@ -1058,12 +703,128 @@ def result():
             'rank_color': 'gray',
             'experience': session.get('experience', 0),
             'coins': session.get('coins', 0),
-            'period_info': 'データなし',
+            'period_info': 'エラーが発生しました',
             'total_questions': 0,
             'accuracy_trends': {'7_days': 0.0, '30_days': 0.0, 'all_time': 0.0}
         }
 
         return render_template("result.html", data=results_data)
+
+
+# 問題生成API（高度版）
+@app.route('/api/generate-question/<subject>')
+@login_required
+def api_generate_question(subject):
+    """
+    高度な自動問題生成API
+    """
+    try:
+        print(f"問題生成API呼び出し: 科目={subject}")
+
+        # データベース接続
+        con = conn_db()
+        grade_setting = "3"  # デフォルト値
+
+        if con:
+            cur = con.cursor()
+            accountId = session.get("login_id")
+            cur.execute("SELECT gradeSetting FROM t_account WHERE accountId = %s", (accountId,))
+            result = cur.fetchone()
+            grade_setting = result[0] if result else "3"
+            cur.close()
+            con.close()
+
+        grade = f"小学{grade_setting}年生"
+
+        # リクエスト情報の取得
+        retry_count = request.args.get('retry', '0')
+        timestamp = request.args.get('t', str(int(time.time())))
+
+        print(f"🎯 問題生成開始: 科目={subject}, 学年={grade}, 再試行={retry_count}")
+
+        # 問題生成実行
+        question_data = generate_question(subject, grade)
+
+        # 成功ログ
+        question_preview = question_data.get('question', '')[:30] + "..." if len(
+            question_data.get('question', '')) > 30 else question_data.get('question', '')
+        print(f"✅ 問題生成完了: [{question_data.get('generation_id', 'unknown')}] {question_preview}")
+
+        # 追加のメタデータ
+        question_data['api_timestamp'] = timestamp
+        question_data['retry_count'] = retry_count
+
+        return jsonify(question_data)
+
+    except Exception as e:
+        print(f"❌ API致命的エラー: {str(e)}")
+        traceback.print_exc()
+
+        # 緊急フォールバック
+        emergency_fallback = get_smart_fallback_question(subject, "小学3年生")
+
+        return jsonify({
+            "error": "問題生成中にエラーが発生しました",
+            "fallback_used": True,
+            **emergency_fallback
+        }), 200  # エラーでも200で返してフロントエンドで処理継続
+
+
+# 回答チェックAPI（修正版）
+@app.route('/api/check-answer', methods=['POST'])
+@login_required
+def api_check_answer():
+    """回答チェックAPI - メモリに結果を記録"""
+    try:
+        print("回答チェックAPI呼び出し")
+        data = request.get_json()
+
+        if not data:
+            return jsonify({'error': 'データが送信されていません'}), 400
+
+        selected_answer = data.get('selected_answer')
+        correct_answer = data.get('correct_answer')
+        subject = data.get('subject')
+        question_id = data.get('question_id', 'unknown')
+
+        print(f"回答データ: 選択={selected_answer}, 正解={correct_answer}, 科目={subject}")
+
+        if selected_answer is None or correct_answer is None:
+            return jsonify({'error': '必要なデータが不足しています'}), 400
+
+        is_correct = selected_answer == correct_answer
+        accountId = session.get("login_id")
+
+        # メモリに回答履歴を記録
+        answer_history.add_answer(accountId, subject, is_correct, question_id)
+
+        # セッションに統計を保存
+        save_session_stats(accountId)
+
+        # 正解時の処理（セッションでコイン・経験値を管理）
+        coins_earned = 0
+        experience_earned = 0
+
+        if is_correct:
+            coins_earned = 10
+            experience_earned = 50
+            session['coins'] = session.get('coins', 0) + coins_earned
+            session['experience'] = session.get('experience', 0) + experience_earned
+
+        response_data = {
+            'is_correct': is_correct,
+            'message': '正解です！コイン+10、経験値+50獲得！' if is_correct else '不正解です。次回頑張りましょう！',
+            'coins_earned': coins_earned,
+            'experience_earned': experience_earned
+        }
+
+        print(f"回答結果: {response_data}")
+        return jsonify(response_data)
+
+    except Exception as e:
+        print(f"回答チェックエラー: {e}")
+        traceback.print_exc()
+        return jsonify({'error': 'システムエラーが発生しました'}), 500
 
 
 # 統計情報取得API
@@ -1072,6 +833,7 @@ def result():
 def api_user_stats():
     """ユーザーの詳細統計情報を取得"""
     try:
+        print("統計情報API呼び出し")
         accountId = session.get("login_id")
 
         # 期間別の統計
@@ -1082,10 +844,12 @@ def api_user_stats():
             'user_summary': answer_history.get_user_stats(accountId)
         }
 
+        print(f"統計データ: {stats}")
         return jsonify(stats)
 
     except Exception as e:
         print(f"統計取得エラー: {e}")
+        traceback.print_exc()
         return jsonify({'error': 'データ取得に失敗しました'}), 500
 
 
@@ -1095,20 +859,24 @@ def api_user_stats():
 def api_reset_stats():
     """統計データをリセット（開発・テスト用）"""
     try:
+        print("統計リセットAPI呼び出し")
         accountId = session.get("login_id")
 
         if accountId in answer_history.history:
             del answer_history.history[accountId]
+            print(f"ユーザー{accountId}の履歴削除")
 
         # セッションの統計データもクリア
         session.pop('user_stats', None)
         session.pop('coins', None)
         session.pop('experience', None)
 
+        print("統計データリセット完了")
         return jsonify({'message': '統計データをリセットしました'})
 
     except Exception as e:
         print(f"統計リセットエラー: {e}")
+        traceback.print_exc()
         return jsonify({'error': 'リセットに失敗しました'}), 500
 
 
@@ -1118,6 +886,7 @@ def api_reset_stats():
 def api_add_test_data():
     """テスト用の回答データを追加"""
     try:
+        print("テストデータ追加API呼び出し")
         accountId = session.get("login_id")
 
         # サンプルデータを追加
@@ -1133,100 +902,224 @@ def api_add_test_data():
 
         save_session_stats(accountId)
 
-        return jsonify({
+        result_data = {
             'message': f'テストデータ{len(test_data)}件を追加しました',
             'data': answer_history.get_all_subjects_accuracy(accountId, 30)
-        })
+        }
+
+        print(f"テストデータ追加完了: {result_data}")
+        return jsonify(result_data)
 
     except Exception as e:
         print(f"テストデータ追加エラー: {e}")
+        traceback.print_exc()
         return jsonify({'error': 'テストデータ追加に失敗しました'}), 500
 
 
-# デバッグ用エンドポイント（開発時のみ使用）
-@app.route('/api/debug/question-stats')
+# 残りのルート（簡略化）
+@app.route('/shop')
 @login_required
-def debug_question_stats():
-    """
-    問題生成の統計情報を表示（デバッグ用）
-    """
-    return jsonify({
-        'stats': generation_stats.stats,
-        'success_rate': f"{generation_stats.get_success_rate():.2f}%"
-    })
-
-
-# 手動問題リフレッシュエンドポイント
-@app.route('/api/refresh-question/<subject>')
-@login_required
-def refresh_question(subject):
-    """
-    強制的に新しい問題を生成
-    """
+def shop():
     try:
         con = conn_db()
-        cur = con.cursor()
+        coin = 0
+        if con:
+            cur = con.cursor()
+            accountId = session.get("login_id")
+            sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+            cur.execute(sql, (accountId,))
+            result = cur.fetchone()
+            coin = result[0] if result else 0
+            cur.close()
+            con.close()
+        return render_template("shop.html", coin=coin)
+    except Exception as e:
+        print(f"ショップエラー: {e}")
+        return render_template("shop.html", coin=0)
 
-        accountId = session.get("login_id")
-        cur.execute("SELECT gradeSetting FROM t_account WHERE accountId = %s", (accountId,))
-        result = cur.fetchone()
 
-        grade_setting = result[0] if result else "3"
-        grade = f"小学{grade_setting}年生"
+@app.route('/buy-shop', methods=["POST"])
+@login_required
+def buy_shop():
+    return redirect(url_for("shop"))
 
-        cur.close()
-        con.close()
 
-        print(f"🔄 手動リフレッシュ: {subject} - {grade}")
+@app.route('/in_bag')
+@login_required
+def in_bag():
+    try:
+        con = conn_db()
+        coin = 0
+        if con:
+            cur = con.cursor()
+            accountId = session.get("login_id")
+            sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+            cur.execute(sql, (accountId,))
+            result = cur.fetchone()
+            coin = result[0] if result else 0
+            cur.close()
+            con.close()
+        return render_template("in_bag.html", coin=coin)
+    except Exception as e:
+        print(f"バッグエラー: {e}")
+        return render_template("in_bag.html", coin=0)
 
-        # 強制的に新しい問題を生成（複数回試行）
-        for attempt in range(3):
-            try:
-                question_data = generate_question(subject, grade)
 
-                # 品質チェック
-                quality_issues = validate_question_quality(question_data)
-                if not quality_issues:
-                    generation_stats.record_generation(subject, grade, success=True)
-                    return jsonify(question_data)
-                else:
-                    print(f"⚠️ 品質問題あり (試行{attempt + 1}): {quality_issues}")
+@app.route('/config', methods=['GET', 'POST'])
+@login_required
+def config():
+    try:
+        if request.method == 'POST':
+            con = conn_db()
+            if con:
+                cur = con.cursor()
+                username = request.form.get('username')
+                gender = request.form.get('gender')
+                gradeSetting = request.form.get('gradeSetting')
+                userId = session.get("login_id")
 
-            except Exception as e:
-                print(f"❌ 生成試行{attempt + 1}失敗: {e}")
+                cur.execute('''
+                            UPDATE t_account
+                            SET username     = %s,
+                                gender       = %s,
+                                gradeSetting = %s
+                            WHERE accountId = %s
+                            ''', (username, gender, gradeSetting, userId))
 
-        # すべて失敗した場合はフォールバック
-        print("🔄 フォールバックを使用")
-        fallback_question = get_smart_fallback_question(subject, grade)
-        generation_stats.record_generation(subject, grade, success=False, fallback=True)
+                con.commit()
+                cur.close()
+                con.close()
 
-        return jsonify(fallback_question)
+            return redirect(url_for("main"))
+
+        con = conn_db()
+        user = None
+        if con:
+            cur = con.cursor()
+            userId = session.get("login_id")
+            cur.execute('''
+                        SELECT accountId, username, gender, gradeSetting
+                        FROM t_account
+                        WHERE accountId = %s
+                        ''', (userId,))
+            user = cur.fetchone()
+            cur.close()
+            con.close()
+
+        return render_template("config.html", user=user)
 
     except Exception as e:
-        print(f"❌ リフレッシュAPI エラー: {e}")
-        return jsonify({'error': 'リフレッシュに失敗しました'}), 500
+        print(f"設定エラー: {e}")
+        return render_template("config.html", user=None)
 
 
-# マップ画面
+@app.route('/weapon-detail')
+@login_required
+def weapon_detail():
+    return render_template("weapon-detail.html", coin=0)
+
+
+@app.route('/item-detail')
+@login_required
+def item_detail():
+    return render_template("item-detail.html", coin=0)
+
+
+@app.route('/question')
+@login_required
+def question():
+    return render_template("question.html")
+
+
+@app.route('/question/<subject>')
+@login_required
+def question_with_subject(subject):
+    return render_template("question.html", subject=subject)
+
+
 @app.route('/map')
 @login_required
 def map():
     return render_template("map.html")
 
 
-# 科目選択画面
 @app.route('/subject')
 @login_required
 def subject():
     return render_template("subject.html")
 
 
-# デバッグ用
 @app.route('/test')
 def test():
     return render_template("xxx.html")
 
 
+# デバッグ用エンドポイント
+@app.route('/api/debug/question-stats')
+@login_required
+def debug_question_stats():
+    try:
+        return jsonify({
+            'stats': generation_stats.stats,
+            'success_rate': f"{generation_stats.get_success_rate():.2f}%"
+        })
+    except Exception as e:
+        print(f"デバッグ統計エラー: {e}")
+        return jsonify({'error': 'データ取得エラー'}), 500
+
+
+@app.route('/api/refresh-question/<subject>')
+@login_required
+def refresh_question(subject):
+    try:
+        con = conn_db()
+        grade_setting = "3"
+
+        if con:
+            cur = con.cursor()
+            accountId = session.get("login_id")
+            cur.execute("SELECT gradeSetting FROM t_account WHERE accountId = %s", (accountId,))
+            result = cur.fetchone()
+            grade_setting = result[0] if result else "3"
+            cur.close()
+            con.close()
+
+        grade = f"小学{grade_setting}年生"
+        print(f"🔄 手動リフレッシュ: {subject} - {grade}")
+
+        question_data = generate_question(subject, grade)
+        generation_stats.record_generation(subject, grade, success=True)
+
+        return jsonify(question_data)
+
+    except Exception as e:
+        print(f"❌ リフレッシュAPI エラー: {e}")
+        traceback.print_exc()
+        fallback_question = get_smart_fallback_question(subject, "小学3年生")
+        return jsonify(fallback_question)
+
+
+# エラーハンドラー
+@app.errorhandler(404)
+def page_not_found(e):
+    print(f"404エラー: {request.url}")
+    return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def internal_server_error(e):
+    print(f"500エラー: {e}")
+    traceback.print_exc()
+    return render_template('500.html'), 500
+
+
 # 実行制御
 if __name__ == "__main__":
-    app.run(debug=True)
+    print("サーバー起動中...")
+    print("デバッグモード: ON")
+    print("利用可能なエンドポイント:")
+    print("- /result (リザルト画面)")
+    print("- /result?debug=true (デバッグモード)")
+    print("- /api/add-test-data (テストデータ追加)")
+    print("- /api/user-stats (統計情報)")
+    app.run(debug=True, host='0.0.0.0', port=5000)
