@@ -262,13 +262,24 @@ function checkBattleEnd() {
     if (playerHP <= 0) {
         battleEnded = true;
         setTimeout(() => {
-            alert("あなたはやられてしまいました…");
             // ゲームオーバー処理
             localStorage.removeItem('playerHP');
             localStorage.removeItem('enemyHP');
-            window.location.href = '/map';  // マップ画面に戻る
+            // ゲームオーバー画面に遷移
+            showGameOverScreen();
         }, 1000);
     }
+}
+
+function showGameOverScreen() {
+    // ゲームオーバー画面を表示する関数
+    // 方法1: 別のHTMLページに遷移
+    window.location.href = '/gameover';
+
+    // 方法2: 同じページ内でゲームオーバー画面を表示
+    // document.getElementById('battle-container').style.display = 'none';
+    // document.getElementById('gameover-container').style.display = 'block';
+}
     if (enemyHP <= 0) {
         battleEnded = true;
         setTimeout(() => {
