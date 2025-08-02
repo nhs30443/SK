@@ -56,6 +56,7 @@ html, body {
     justify-content: center;
     text-decoration: none;
     box-shadow: 0 0.3vw 0.6vw rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
 }
 
 .movement-button:hover {
@@ -73,5 +74,204 @@ html, body {
 }
 
 .item-button {
-    background: linear-gradient(145deg, #63c9f5, #63c9f5);
+    background: linear-gradient(145deg, #63c9f5, #4a90e2);
+}
+
+/* アイテム選択モーダル */
+.item-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.item-modal.show {
+    display: flex;
+}
+
+.item-window {
+    background: linear-gradient(145deg, #f0f8ff, #e6f3ff);
+    border: 0.3vw solid #4a90e2;
+    border-radius: 2vw;
+    width: 60vw;
+    max-width: 500px;
+    padding: 3vw;
+    box-shadow: 0 1vw 2vw rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+.item-header {
+    text-align: center;
+    font-size: 2.5vw;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2vw;
+    border-bottom: 0.2vw solid #4a90e2;
+    padding-bottom: 1vw;
+}
+
+.item-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5vw;
+    margin-bottom: 2vw;
+}
+
+.item-slot {
+    aspect-ratio: 1;
+    border: 0.2vw solid #666;
+    border-radius: 1vw;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(145deg, #ffffff, #f5f5f5);
+    position: relative;
+}
+
+.item-slot:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0.5vw 1vw rgba(74, 144, 226, 0.3);
+    border-color: #4a90e2;
+}
+
+.item-slot.empty {
+    background: linear-gradient(145deg, #f0f0f0, #e0e0e0);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.item-icon {
+    font-size: 2.5vw;
+    margin-bottom: 0.5vw;
+}
+
+.item-count {
+    font-size: 1.2vw;
+    font-weight: bold;
+    color: #333;
+}
+
+.item-name {
+    font-size: 1vw;
+    color: #666;
+    text-align: center;
+    margin-top: 0.3vw;
+}
+
+/* 閉じるボタン */
+.close-button {
+    position: absolute;
+    top: 1vw;
+    right: 1.5vw;
+    background: #ff6b6b;
+    border: none;
+    border-radius: 50%;
+    width: 3vw;
+    height: 3vw;
+    color: white;
+    font-size: 1.5vw;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s ease;
+}
+
+.close-button:hover {
+    background: #ff5252;
+}
+
+/* キャンセルボタン */
+.cancel-button {
+    width: 100%;
+    padding: 1.5vw;
+    background: linear-gradient(145deg, #ff9999, #ff6b6b);
+    border: 0.15vw solid #cc0000;
+    border-radius: 1vw;
+    font-size: 1.8vw;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    font-family: 'DotGothic16', monospace;
+    transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+    transform: translateY(-0.2vw);
+    box-shadow: 0 0.4vw 0.8vw rgba(0,0,0,0.3);
+}
+
+/* アイテム使用確認 */
+.use-confirm {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 1100;
+    justify-content: center;
+    align-items: center;
+}
+
+.use-confirm.show {
+    display: flex;
+}
+
+.confirm-window {
+    background: white;
+    border: 0.3vw solid #333;
+    border-radius: 1.5vw;
+    padding: 3vw;
+    text-align: center;
+    max-width: 40vw;
+}
+
+.confirm-text {
+    font-size: 2vw;
+    margin-bottom: 2vw;
+    color: #333;
+    white-space: pre-line;
+}
+
+.confirm-buttons {
+    display: flex;
+    gap: 2vw;
+    justify-content: center;
+}
+
+.confirm-button {
+    padding: 1vw 2vw;
+    border: 0.15vw solid #333;
+    border-radius: 0.8vw;
+    font-size: 1.5vw;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: 'DotGothic16', monospace;
+    transition: all 0.2s ease;
+}
+
+.confirm-yes {
+    background: linear-gradient(145deg, #90EE90, #32CD32);
+    color: #333;
+}
+
+.confirm-no {
+    background: linear-gradient(145deg, #FFB6C1, #FF69B4);
+    color: #333;
+}
+
+.confirm-button:hover {
+    transform: translateY(-0.2vw);
+    box-shadow: 0 0.3vw 0.6vw rgba(0,0,0,0.2);
 }
