@@ -1,0 +1,77 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100dvh;
+  background-color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  font-family: 'DotGothic16', monospace; /* DotGothic16を追加 */
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: 16 / 9;
+  background-color: white;
+  overflow: hidden;
+}
+
+/* 背景画像だけの要素 */
+.background {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: url('../images/top.png') no-repeat center center;
+  background-size: cover;
+}
+
+/* ボタンコンテナ */
+.button-container {
+    position: absolute;
+    bottom: 8%;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 5vw; /* 画面幅の3% */
+    z-index: 10;
+}
+
+/* ボタンスタイル */
+.movement-button {
+    width: 20vw; /* 画面幅の15% */
+    height: 10vw; /* 画面幅の7.5% */
+    border: 0.15vw solid #333; /* 画面幅の0.15% */
+    border-radius: 1.2vw; /* 画面幅の1.2% */
+    font-size: 2.3vw; /* 画面幅の1.8% */
+    font-weight: bold;
+    font-family: 'DotGothic16', monospace; /* ボタンにもDotGothic16を明示的に指定 */
+    color: #333;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 0.3vw 0.6vw rgba(0,0,0,0.2);
+}
+
+.movement-button:hover {
+    transform: translateY(-0.3vw);
+    box-shadow: 0 0.6vw 1.2vw rgba(0,0,0,0.3);
+}
+
+.movement-button:active {
+    transform: translateY(0);
+    box-shadow: 0 0.2vw 0.4vw rgba(0,0,0,0.2);
+}
+
+.attack-button {
+    background: linear-gradient(145deg, #FFB6C1, #e35067);
+}
+
+.item-button {
+    background: linear-gradient(145deg, #63c9f5, #63c9f5);
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>行動選択</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/move-select.css') }}">
+    <!-- DotGothic16フォントを読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container">
+        <div class="background"></div> <!-- 背景用の要素 -->
+
+        <div class="button-container">
+            <button class="movement-button attack-button" onclick="selectMovement('attack')">たたかう</button>
+            <button class="movement-button item-button" onclick="selectMovement('item')">アイテム</button>
+        </div>
+
+    </div>
+
+    <script>
+        function selectMovement(movement) {
+            console.log('選択された行動:', movement);
+
+            // 科目選択時の処理
+            const movementNames = {
+                'attack': 'たたかう',
+                'item': 'アイテム',
+            };
+
+            // 確認ダイアログ
+            if (confirm(movementNames[movement] + 'でいい？')) {
+                // 問題画面に遷移
+                window.location.href = '/question/' + movement;
+            }
+        }
+    </script>
+
+</body>
+
+</html>
