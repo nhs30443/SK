@@ -931,6 +931,12 @@ def result():
 
 
 
+@app.route('/move-select')
+def move():
+    return render_template("move-select.html")
+
+
+
 # gaeover
 @app.route('/gameover')
 def gameover():
