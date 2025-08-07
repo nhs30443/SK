@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
@@ -7,17 +8,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/in_bag.css') }}">
 </head>
+
 <body>
     <div class="container">
         <a href="/" class="backTop"></a>
-            <div class="header">
-                <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
-                <div class="right-elements">
-                    <img src="static/images/coin.png" class="coinImg" alt="コイン">
-                    <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
-                    <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+        <div class="header">
+            <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+            <div class="exp-container">
+                <div class="exp-label">ランク 2</div>
+                <div class="exp-bar">
+                    <div class="exp-fill" style="width: 80%;"></div>
                 </div>
             </div>
+            <div class="right-elements">
+                <img src="static/images/coin.png" class="coinImg" alt="コイン">
+                <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
+                <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+            </div>
+        </div>
         <div class="background">
             <img src="static/images/background.png" class="backgroundImg" alt="背景">
         </div>
@@ -34,7 +42,8 @@
                         <button><span class="btn-text">強化</span></button>
                     </div>
                     <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/mannnennhitu.png" class="haste-item" alt="アイテム"></a>
+                        <a href="/weapon-detail"><img src="static/images/mannnennhitu.png" class="haste-item"
+                                alt="アイテム"></a>
                         <button><span class="btn-text">強化</span></button>
                     </div>
                 </div>
@@ -44,4 +53,5 @@
     </div>
 
 </body>
+
 </html>

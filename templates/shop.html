@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
@@ -7,17 +8,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
 </head>
+
 <body>
     <div class="container">
         <a href="/" class="backTop"></a>
-            <div class="header">
-                <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
-                <div class="right-elements">
-                    <img src="static/images/coin.png" class="coinImg" alt="コイン">
-                    <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
-                    <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+        <div class="header">
+            <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+            <div class="exp-container">
+                <div class="exp-label">ランク 2</div>
+                <div class="exp-bar">
+                    <div class="exp-fill" style="width: 80%;"></div>
                 </div>
             </div>
+            <div class="right-elements">
+                <img src="static/images/coin.png" class="coinImg" alt="コイン">
+                <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
+                <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+            </div>
+        </div>
         <div class="background">
             <img src="static/images/background.png" class="backgroundImg" alt="背景">
         </div>
@@ -31,7 +39,8 @@
                             <tr class="table-upper">
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_low.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/potion_low.png"
+                                                class="potion-item" alt="アイテム"></a>
                                         <p class="coin">300コイン</p>
                                         <input type="text" value="300" name="potion_low" hidden>
                                         <label class="selectbox-6">
@@ -53,7 +62,8 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_mid.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/potion_mid.png"
+                                                class="potion-item" alt="アイテム"></a>
                                         <p class="coin">1000コイン</p>
                                         <input type="text" value="1000" name="potion_mid" hidden>
                                         <label class="selectbox-6">
@@ -75,7 +85,8 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_high.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/potion_high.png"
+                                                class="potion-item" alt="アイテム"></a>
                                         <p class="coin">2000コイン</p>
                                         <input type="text" value="2000" name="potion_high" hidden>
                                         <label class="selectbox-6">
@@ -99,7 +110,8 @@
                             <tr class="table-lower">
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                                alt="アイテム"></a>
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="800" name="buf_jp" hidden>
                                         <label class="selectbox-6">
@@ -121,7 +133,8 @@
                                 </td>
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                                alt="アイテム"></a>
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="800" name="buf_mt" hidden>
                                         <label class="selectbox-6">
@@ -143,7 +156,8 @@
                                 </td>
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                                alt="アイテム"></a>
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="300" name="buf_en" hidden>
                                         <label class="selectbox-6">
@@ -167,9 +181,9 @@
                         </table>
                     </div>
                     {% if messages and messages.poor %}
-                        <p class="messages_log">{{ messages.poor }}</p>
+                    <p class="messages_log">{{ messages.poor }}</p>
                     {% elif messages and message.comp %}
-                        <p class="messages_log">{{ messages.comp }}</p>
+                    <p class="messages_log">{{ messages.comp }}</p>
                     {% endif %}
 
                     <button class="buy-btn"><span class="btn-back">購入</span></button>
@@ -180,7 +194,6 @@
     </div>
 
     <script>
-
         const itemPrices = {
             potionLow: 300,
             potionMid: 1000,
@@ -217,4 +230,5 @@
         calculateTotalPrice();
     </script>
 </body>
+
 </html>
