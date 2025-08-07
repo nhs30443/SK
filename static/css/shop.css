@@ -20,22 +20,21 @@ h2{
     width: 7vw;
     height: 16vh;
     align-items: center;
-    gap: 10px;
     padding: 3vh 5vw 0 2vw;
 }
 
 .coin{
+    position: relative;
     font-size: clamp(4px, 1vw, 90px);
+    top: -1vh;
 }
 
 .buffer{
     display: flex;
     flex-direction: column;
     width: 7vw;
-    height: 20vh;
     align-items: center;
-    gap: 10px;
-    padding: 0 5vw 0 2vw;
+    padding: 1vh 5vw 0 2vw;
 }
 
 .haste-content{
@@ -157,4 +156,30 @@ button{
     top: 3vh;
     left: 47vw;
     font-size: clamp(8px, 2vw, 180px);
+}
+
+.messages_log_poor{
+    position: absolute;
+    z-index: 10000;
+    top: 15.5vh;
+    left: 46vw;
+    color: red;
+    font-weight: bold;
+    font-size: clamp(4px, 1.3vw, 45px);
+}
+
+.messages_log_comp{
+    position: absolute;
+    z-index: 10000;
+    top: 15.5vh;
+    left: 48vw;
+    font-weight: bold;
+    font-size: clamp(4px, 1.5vw, 45px);
+}
+
+.quantity_item{
+    position: relative;
+    top: -3vh;
+    left: 3.5vw;
+    font-size: clamp(4px, 1vw, 40px);
 }

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, json, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, json, redirect, url_for, jsonify , flash
 import mysql.connector
 import re
 from functools import wraps
@@ -564,10 +564,10 @@ def main():
 
     coin = result[0] if result else 0
     total_experience = result[1] if result else 0
-    
+
     cur.close()
     con.close()
-    
+
     rank, exp, next_exp = calculate_rank_and_exp(total_experience)
 
     return render_template("main.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
@@ -585,15 +585,57 @@ def shop():
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
+    quantity = {}
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 1"
+    cur.execute(sql, (accountId,))
+    potion_low_re = cur.fetchone()
+    potion_low = potion_low_re[0] if potion_low_re else 0
+    quantity["potion_low"] = potion_low
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 2"
+    cur.execute(sql, (accountId,))
+    potion_mid_re = cur.fetchone()
+    potion_mid = potion_mid_re[0] if potion_mid_re else 0
+    quantity["potion_mid"] = potion_mid
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 3"
+    cur.execute(sql, (accountId,))
+    potion_high_re = cur.fetchone()
+    potion_high = potion_high_re[0] if potion_high_re else 0
+    quantity["potion_high"] = potion_high
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 4"
+    cur.execute(sql, (accountId,))
+    buf_jp_re = cur.fetchone()
+    buf_jp = buf_jp_re[0] if buf_jp_re else 0
+    quantity["buf_jp"] = buf_jp
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 5"
+    cur.execute(sql, (accountId,))
+    buf_en_re = cur.fetchone()
+    buf_en = buf_en_re[0] if buf_en_re else 0
+    quantity["buf_en"] = buf_en
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 5"
+    cur.execute(sql, (accountId,))
+    buf_mt_re = cur.fetchone()
+    buf_mt = buf_mt_re[0] if buf_mt_re else 0
+    quantity["buf_mt"] = buf_mt
+
+    print(quantity)
+
+
+
     coin = result[0] if result else 0
     total_experience = result[1] if result else 0
-    
+
     cur.close()
     con.close()
-    
+
     rank, exp, next_exp = calculate_rank_and_exp(total_experience)
-    
-    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
+
+    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp,quantity=quantity)
 
 
 # ショップアイテム購入
@@ -602,28 +644,95 @@ def shop():
 def buy_shop():
     con = conn_db()
     cur = con.cursor()
+    try:
+        accountId = session.get("login_id")
+        if not accountId:
+            return {"error": "ログインが必要です"}
 
-    potion_low = request.form.get('potion_low')
-    potion_mid = request.form.get('potion_mid')
-    potion_high = request.form.get('potion_high')
-    buf_jp = request.form.get('buf_jp')
-    buf_mt = request.form.get('buf_mt')
-    buf_en = request.form.get('buf_en')
+        # --- アイテム情報の定義 ---
+        items_info = {
+            'low': {'itemId': 1, 'price_key': 'potion_low', 'quantity_key': 'quantity_low'},
+            'mid': {'itemId': 2, 'price_key': 'potion_mid', 'quantity_key': 'quantity_mid'},
+            'high': {'itemId': 3, 'price_key': 'potion_high', 'quantity_key': 'quantity_high'},
+            'jp': {'itemId': 4, 'price_key': 'buf_jp', 'quantity_key': 'quantity_jp'},
+            'mt': {'itemId': 5, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
+            'en': {'itemId': 6, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
+        }
 
-    accountId = session.get("login_id")
-    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
+        items_to_purchase = []
+        total_all = 0
 
-    coin = result[0] if result else 0
-    total_experience = result[1] if result else 0
-    
-    cur.close()
-    con.close()
-    
-    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
-    
-    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
+        # --- 合計金額の計算と購入リストの作成 ---
+        for key, info in items_info.items():
+            price_str = request.form.get(info['price_key'], '0')
+            quantity_str = request.form.get(info['quantity_key'], '0')
+
+            price = int(price_str) if price_str.isdigit() else 0
+            quantity = int(quantity_str) if quantity_str.isdigit() else 0
+
+            if price > 0 and quantity > 0:
+                total_all += price * quantity
+                items_to_purchase.append({
+                    'itemId': info['itemId'],
+                    'quantity': quantity
+                })
+
+        # --- 所持コインの確認 ---
+        sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+        cur.execute(sql_select_coin, (accountId,))
+        result = cur.fetchone()
+        coin = result[0] if result else 0
+
+        messages = {}
+
+        # --- 購入処理 ---
+        if coin < total_all:
+            flash("コインが足りません", "poor")
+            print("合計金額" + str(total_all) + "に対して所持コイン" + str(coin) + " " + str(messages))
+            return redirect(url_for('shop'))
+        else:
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (total_all, accountId))
+
+            for item in items_to_purchase:
+                itemId_to_buy = item['itemId']
+                quantity_to_add = item['quantity']
+
+                sql_check_item = "SELECT itemOwnershipId, ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = %s"
+                cur.execute(sql_check_item, (accountId, itemId_to_buy))
+                ownership_result = cur.fetchone()
+
+                if ownership_result:
+                    itemOwnershipId, current_quantity = ownership_result
+                    new_quantity = current_quantity + quantity_to_add
+                    sql_update_item = "UPDATE t_itemOwnership SET ownedQuantity = %s WHERE itemOwnershipId = %s"
+                    cur.execute(sql_update_item, (new_quantity, itemOwnershipId))
+                else:
+                    cur.execute("SELECT MAX(itemOwnershipId) FROM t_itemOwnership")
+                    max_id_result = cur.fetchone()
+
+                    next_id = 1
+                    if max_id_result and max_id_result[0] is not None:
+                        next_id = max_id_result[0] + 1
+
+                    sql_insert_item = "INSERT INTO t_itemOwnership (itemOwnershipId, accountId, itemId, ownedQuantity) VALUES (%s, %s, %s, %s)"
+                    cur.execute(sql_insert_item, (next_id, accountId, itemId_to_buy, quantity_to_add))
+
+            con.commit()
+
+            flash("購入完了", "comp")
+            print("合計金額" + str(total_all) + "を支払い、購入が完了しました。" + str(messages))
+            return redirect(url_for('shop'))
+    except Exception as e:
+        con.rollback()
+        print(f"エラーが発生したため、処理をロールバックしました: {e}")
+        return {"error": "購入処理中にエラーが発生しました。"}
+    finally:
+        if cur:
+            cur.close()
+        if con:
+            con.close()
+
 
 
 # バッグ内
@@ -640,12 +749,12 @@ def in_bag():
 
     coin = result[0] if result else 0
     total_experience = result[1] if result else 0
-    
+
     cur.close()
     con.close()
-    
+
     rank, exp, next_exp = calculate_rank_and_exp(total_experience)
-    
+
     return render_template("in_bag.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
