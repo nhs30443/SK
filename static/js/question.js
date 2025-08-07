@@ -344,9 +344,8 @@ $(document).on('click', '#next-question-btn', async function() {
     $('.next-question-container').hide();
 
     try {
-        // 新しい問題を読み込み
-        await loadQuestion();
-        console.log('次の問題の読み込みが完了しました');
+        $('#quiz-area').hide();
+        $('#move-select-area').show();
     } catch (error) {
         console.error('次の問題の読み込みでエラーが発生しました:', error);
         // エラー時はフォールバック問題を表示
@@ -371,3 +370,19 @@ $(function() {
         $('#overlay').fadeOut();
     });
 });
+
+
+
+
+
+function selectMovement(action) {
+    console.log('選択された行動:', action);
+
+    if (action === 'attack') {
+        $('#move-select-area').hide();
+        $('#subject-area').show();
+    } else if (action === 'item') {
+        $('#move-select-area').hide();
+        $('#item-area').show();
+    }
+}

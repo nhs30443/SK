@@ -408,7 +408,7 @@ def index():
 
 
 # ログアウト
-@app.route('/logout')
+@app.route('/clear')
 def clear():
     session.clear()
     return redirect(url_for("index"))

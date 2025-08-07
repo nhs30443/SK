@@ -331,3 +331,31 @@ body {
     text-align: right;
     z-index: 4;
 }
+
+.character-container {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* キャラ画像がクリックを邪魔しないように */
+    z-index: 0;
+}
+
+/* 共通キャラクター画像スタイル */
+.character {
+    position: absolute;
+    height: 28vh;
+    width: auto;
+    image-rendering: pixelated;
+}
+
+/* プレイヤー：左下に固定 */
+.character.player {
+    bottom: 40vh;
+    left: 5vw;
+}
+
+/* 敵：右下に固定 */
+.character.enemy {
+    bottom: 40vh;
+    right: 5vw;
+}

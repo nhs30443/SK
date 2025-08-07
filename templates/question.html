@@ -4,13 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <title>クイズ画面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/question.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/move-select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css') }}">
     <!-- RPGっぽい漢字対応フォントを読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 </head>
 
 <body>
@@ -32,23 +36,74 @@
     <div class="game-container">
         <img src="{{ url_for('static', filename='images/background2.png') }}" alt="背景です" class="background">
 
-        <div class="question-box">
-            <p id="question-text">問題を読み込み中...</p>
+        <div id="quiz-area">
+            <div class="question-box">
+                <p id="question-text">問題を読み込み中...</p>
+            </div>
+
+            <div class="choices">
+                <div class="choice" data-index="0">選択肢 1</div>
+                <div class="choice" data-index="1">選択肢 2</div>
+                <div class="choice" data-index="2">選択肢 3</div>
+                <div class="choice" data-index="3">選択肢 4</div>
+            </div>
+
+            <div class="result" id="result-box"></div>
+
+            <!-- 次の問題ボタン -->
+            <div class="next-question-container" style="display: none;">
+                <button id="next-question-btn" class="next-question-btn">次の問題</button>
+            </div>
         </div>
 
-        <div class="choices">
-            <div class="choice" data-index="0">選択肢 1</div>
-            <div class="choice" data-index="1">選択肢 2</div>
-            <div class="choice" data-index="2">選択肢 3</div>
-            <div class="choice" data-index="3">選択肢 4</div>
+
+
+        <div id="move-select-area" style="display: none;">
+            <div class="button-container">
+                <button class="movement-button attack-button" onclick="selectMovement('attack')">たたかう</button>
+                <button class="movement-button item-button" onclick="selectMovement('item')">アイテム</button>
+            </div>
         </div>
 
-        <div class="result" id="result-box"></div>
 
-        <!-- 次の問題ボタン -->
-        <div class="next-question-container" style="display: none;">
-            <button id="next-question-btn" class="next-question-btn">次の問題</button>
+
+        <div id="subject-area" style="display: none;">
+            <div class="button-container">
+                <button class="subject-button math-button" onclick="selectSubject('math')">算数</button>
+                <button class="subject-button kanji-button" onclick="selectSubject('kanji')">漢字</button>
+                <button class="subject-button english-button" onclick="selectSubject('english')">英語</button>
+            </div>
         </div>
+
+
+
+        <div id="item-area" style="display: none;">
+            <!-- アイテム選択モーダル -->
+            <div class="item-modal" id="itemModal">
+                <div class="item-window">
+                    <button class="close-button" onclick="closeItemModal()">&times;</button>
+                    <div class="item-header">アイテムを選択</div>
+
+                    <div class="item-grid" id="itemGrid">
+                        <!-- アイテムスロットがJavaScriptで生成される -->
+                    </div>
+
+                    <button class="cancel-button" onclick="closeItemModal()">キャンセル</button>
+                </div>
+            </div>
+
+            <!-- アイテム使用確認モーダル -->
+            <div class="use-confirm" id="useConfirm">
+                <div class="confirm-window">
+                    <div class="confirm-text" id="confirmText"></div>
+                    <div class="confirm-buttons">
+                        <button class="confirm-button confirm-yes" onclick="confirmUse(true)">はい</button>
+                        <button class="confirm-button confirm-no" onclick="confirmUse(false)">いいえ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <!-- HPバー（画面の外側に配置） -->
@@ -66,9 +121,34 @@
         </div>
     </div>
 
+    <div class="character-container">
+        <img src="{{ url_for('static', filename='images/player.png') }}" alt="プレイヤー" class="character player">
+        <img src="{{ url_for('static', filename='images/suraimu.png') }}" alt="敵" class="character enemy">
+    </div>
+
+
     <!-- 科目情報を隠しデータとして埋め込み -->
     <script>
         window.currentSubject = "{{ subject if subject else 'math' }}";
+    </script>
+
+    <script>
+        function selectSubject(subject) {
+            console.log('選択された科目:', subject);
+
+            // 科目選択時の処理
+            const subjectNames = {
+                'math': '算数',
+                'kanji': '漢字',
+                'english': '英語'
+            };
+
+            // 確認ダイアログ
+            if (confirm(subjectNames[subject] + 'の問題に挑戦しますか？')) {
+                // 問題画面に遷移
+                window.location.href = '/question/' + subject;
+            }
+        }
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
