@@ -397,6 +397,21 @@ def validate_question_quality(question_data):
     return issues
 
 
+# rank計算
+def calculate_rank_and_exp(total_exp, base_exp=500, exp_multiplier=1.2):
+    rank = 1
+    required_exp = base_exp
+
+    while total_exp >= required_exp:
+        total_exp -= required_exp
+        rank += 1
+        required_exp = int(required_exp * exp_multiplier)
+
+    current_exp = total_exp
+    next_exp = required_exp
+    return rank, current_exp, next_exp
+
+
 ############################################################################
 ### パスの定義
 ############################################################################
@@ -543,15 +558,19 @@ def main():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+    
     cur.close()
     con.close()
+    
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
 
-    return render_template("main.html", coin=coin)
+    return render_template("main.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
 # ショップ
@@ -562,14 +581,19 @@ def shop():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+    
     cur.close()
     con.close()
-    return render_template("shop.html", coin=coin)
+    
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+    
+    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
 # ショップアイテム購入
@@ -587,14 +611,19 @@ def buy_shop():
     buf_en = request.form.get('buf_en')
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+    
     cur.close()
     con.close()
-    return render_template("shop.html", coin=coin)
+    
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+    
+    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
 # バッグ内
@@ -605,14 +634,19 @@ def in_bag():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+    
     cur.close()
     con.close()
-    return render_template("in_bag.html", coin=coin)
+    
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+    
+    return render_template("in_bag.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
 # 設定画面

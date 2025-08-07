@@ -15,9 +15,9 @@
         <div class="header">
             <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
             <div class="exp-container">
-                <div class="exp-label">ランク 2</div>
+                <div class="exp-label">ランク {{ rank }}</div>
                 <div class="exp-bar">
-                    <div class="exp-fill" style="width: 80%;"></div>
+                    <div class="exp-fill" style="width: {{ (exp / next_exp) * 100 }}%;"></div>
                 </div>
             </div>
             <div class="right-elements">
