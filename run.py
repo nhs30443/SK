@@ -16,6 +16,23 @@ GEMINI_API_KEY = "AIzaSyBI4JzjwaPUV38U6DxbcUi5J5BKdN-cS3o"
 genai.configure(api_key=GEMINI_API_KEY)
 
 
+
+# 敵データ（例）
+ENEMY_DATA = {
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 50, "attack": -5},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 50, "attack": -10},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 50, "attack": -25},
+    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -250},
+}
+
+
+
 # db接続用関数
 def conn_db():
     conn = mysql.connector.connect(
@@ -995,11 +1012,19 @@ def equip_equipment():
         pass
 
     return redirect(url_for('in_bag'))
+
+
 # 問題画面（従来）
 @app.route('/question')
 @login_required
 def question():
-    return render_template("question.html")
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", stage=stage, enemy=enemy, start_phase="move_select")
 
 
 # 科目指定付きの問題画面（新規）
@@ -1007,7 +1032,13 @@ def question():
 @login_required
 def question_with_subject(subject):
     """科目指定付きの問題画面"""
-    return render_template("question.html", subject=subject)
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
 
 
 # 問題生成API（高度版）

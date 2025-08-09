@@ -3,13 +3,14 @@ let currentQuestion = null;
 let isAnswering = false;
 let questionCount = 0; // 問題数をカウント
 
-// プレイヤーの最大HPと現在HP
+// プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
 
-// 敵の最大HPと現在HP
-const maxEnemyHP = 120;
-let enemyHP = 120;
+// 敵のパラメータ
+const maxEnemyHP = window.enemyData?.hp ?? 100;
+let enemyHP = window.enemyData?.hp ?? 100;
+const EnemyAT = window.enemyData?.attack ?? 10;
 
 let battleEnded = false;
 
@@ -22,6 +23,19 @@ function getHPColor(hpPercent) {
         return '#e60000';  // 赤
     }
 }
+
+
+$(document).ready(function() {
+    if (startPhase === "move_select") {
+        // 行動選択フェーズ表示
+        $('#move-select-area').show();
+        $('#quiz-area').hide();
+        $('#subject-area').hide();
+        $('#item-area').hide();
+    }
+});
+
+
 
 // 問題を読み込む関数（改善版）
 async function loadQuestion() {
@@ -211,7 +225,7 @@ async function checkAnswer(selectedIndex) {
         setTimeout(showNextQuestionButton, 1000);
     } else {
         // 不正解時はプレイヤーにダメージ
-        updatePlayerHP(-10);
+        updatePlayerHP(-EnemyAT);
         // HPアニメーション完了後に次の問題ボタンを表示
         $('#player-hp').one('transitionend', function() {
             showNextQuestionButton();
