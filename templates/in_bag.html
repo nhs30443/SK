@@ -32,22 +32,88 @@
         <main>
             <div class="in_bag">
                 <h2>武器</h2>
-                <div class="haste-content">
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/ennpitu.png" class="haste-item" alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
+                    <div class="haste-content">
+
+                        <div class="haste">
+                            <a href="/weapon-detail"><img src="static/images/ennpitu.png" class="haste-item" alt="アイテム"></a>
+                            {% if 1 in equipment %}
+                                <form action="/enhance-weapon" method="post">
+                                    <input type="hidden" name="equipment_price" value="{{ calculated_prices[1] }}">
+                                    <p>{{ calculated_prices[1] }}コイン</p>
+                                    <input type="hidden" name="equipment_id" value="1">
+                                    <button><span class="btn-text">強化</span></button>
+                                </form>
+                                <form action="/equip-equipment" method="post">
+                                    <input type="hidden" name="equipment_id" value="1">
+                                    {% if not equipment[1].inUse %}
+                                        <button><span class="btn-text">装備</span></button>
+                                    {% else %}
+                                        <button><span class="btn-text">装備中</span></button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <form action="/equipment-unlock" method="post">
+                                    <input type="hidden" name="equipment_id" value="1">
+                                    <input type="hidden" name="unlock_price" value="{{ equipment_price[1].equipmentPrice }}">
+                                    <p>{{ equipment_price[1].equipmentPrice }}コイン</p>
+                                    <button><span class="btn-text">開放</span></button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div class="haste">
+                            <a href="/weapon-detail"><img src="static/images/syapenn.png" class="haste-item" alt="アイテム"></a>
+                            {% if 2 in equipment %}
+                                <form action="/enhance-weapon" method="post">
+                                    <input type="hidden" name="equipment_id" value="2">
+                                    <input type="hidden" name="equipment_price" value="{{ calculated_prices[2] }}">
+                                    <p>{{ calculated_prices[2] }}コイン</p>
+                                    <button><span class="btn-text">強化</span></button>
+                                </form>
+                                <form action="/equip-equipment" method="post">
+                                    <input type="hidden" name="equipment_id" value="2">
+                                    {% if not equipment[2].inUse %}
+                                        <button><span class="btn-text">装備</span></button>
+                                    {% else %}
+                                        <button><span class="btn-text">装備中</span></button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <form action="/equipment-unlock" method="post">
+                                    <input type="hidden" name="equipment_id" value="2">
+                                    <input type="hidden" name="unlock_price" value="{{ equipment_price[2].equipmentPrice }}">
+                                    <p>{{ equipment_price[2].equipmentPrice }}コイン</p>
+                                    <button><span class="btn-text">開放</span></button>
+                                </form>
+                            {% endif %}
+                        </div>
+                        <div class="haste">
+                            <a href="/weapon-detail"><img src="static/images/mannnennhitu.png" class="haste-item" alt="アイテム"></a>
+                            {% if 3 in equipment %}
+                                <form action="/enhance-weapon" method="post">
+                                    <input type="hidden" name="equipment_id" value="3">
+                                    <input type="hidden" name="equipment_price" value="{{ calculated_prices[3] }}">
+                                    <p>{{ calculated_prices[3] }}コイン</p>
+                                    <button><span class="btn-text">強化</span></button>
+                                </form>
+                                <form action="/equip-equipment" method="post">
+                                    <input type="hidden" name="equipment_id" value="3">
+                                    {% if not equipment[3].inUse %}
+                                        <button><span class="btn-text">装備</span></button>
+                                    {% else %}
+                                        <button><span class="btn-text">装備中</span></button>
+                                    {% endif %}
+                                </form>
+                            {% else %}
+                                <form action="/equipment-unlock" method="post">
+                                    <input type="hidden" name="equipment_id" value="3">
+                                    <input type="hidden" name="unlock_price" value="{{ equipment_price[3].equipmentPrice }}">
+                                    <p>{{ equipment_price[3].equipmentPrice }}コイン</p>
+                                    <button><span class="btn-text">開放</span></button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </div>
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/syapenn.png" class="haste-item" alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
-                    </div>
-                    <div class="haste">
-                        <a href="/weapon-detail"><img src="static/images/mannnennhitu.png" class="haste-item"
-                                alt="アイテム"></a>
-                        <button><span class="btn-text">強化</span></button>
-                    </div>
-                </div>
-                <a href="/main" class="back-main"><span class="btn-back">戻る</span></a>
+                    <a href="/main" class="back-main"><span class="btn-back">戻る</span></a>
             </div>
         </main>
     </div>

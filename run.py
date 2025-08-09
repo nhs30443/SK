@@ -623,8 +623,6 @@ def shop():
     buf_mt = buf_mt_re[0] if buf_mt_re else 0
     quantity["buf_mt"] = buf_mt
 
-    print(quantity)
-
 
 
     coin = result[0] if result else 0
@@ -683,12 +681,10 @@ def buy_shop():
         result = cur.fetchone()
         coin = result[0] if result else 0
 
-        messages = {}
 
         # --- 購入処理 ---
         if coin < total_all:
             flash("コインが足りません", "poor")
-            print("合計金額" + str(total_all) + "に対して所持コイン" + str(coin) + " " + str(messages))
             return redirect(url_for('shop'))
         else:
             sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
@@ -721,7 +717,6 @@ def buy_shop():
             con.commit()
 
             flash("購入完了", "comp")
-            print("合計金額" + str(total_all) + "を支払い、購入が完了しました。" + str(messages))
             return redirect(url_for('shop'))
     except Exception as e:
         con.rollback()
@@ -742,6 +737,7 @@ def in_bag():
     con = conn_db()
     cur = con.cursor()
 
+
     accountId = session.get("login_id")
     sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
@@ -750,12 +746,56 @@ def in_bag():
     coin = result[0] if result else 0
     total_experience = result[1] if result else 0
 
+    sql = "SELECT equipmentid , inUse , equipmentLevel FROM t_equipmentOwnership WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    equipment_list = cur.fetchall()
+    equipment = {
+        item[0]: {
+            'inUse': bool(item[1]),
+            'level': item[2]
+        }
+        for item in equipment_list
+    }
+
+    spl ="SELECT equipmentId , equipmentPrice FROM t_equipment "
+    cur.execute(spl)
+    equipment_price_list = cur.fetchall()
+    equipment_price = {
+        item[0]: {
+            'equipmentPrice': item[1],
+        }
+        for item in equipment_price_list
+    }
+    print(equipment_price)
+
+    calculated_prices = {}
+
+    for equipment_id, details in equipment.items():
+
+        if equipment_id in equipment_price:
+
+            level = details['level']
+            base_price = equipment_price[equipment_id]['equipmentPrice']
+
+            if level > 0:
+
+                new_price = base_price * (1.6 ** (level - 1))
+            else:
+                # レベルが0以下の場合は基本価格のまま
+                new_price = base_price
+
+            rounded_price = int((new_price / 10) + 0.5) * 10
+
+            calculated_prices[equipment_id] = rounded_price
+
+    print(calculated_prices)
+
     cur.close()
     con.close()
 
     rank, exp, next_exp = calculate_rank_and_exp(total_experience)
 
-    return render_template("in_bag.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
+    return render_template("in_bag.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp ,equipment=equipment , equipment_price=equipment_price , calculated_prices=calculated_prices)
 
 
 # 設定画面
@@ -845,6 +885,116 @@ def item_detail():
     return render_template("item-detail.html", coin=coin)
 
 
+@app.route('/equipment-unlock', methods=['POST'])
+def unlock_equipment():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    unlock_price = request.form.get('unlock_price')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+    con = conn_db()
+    cur = con.cursor()
+
+    sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+    cur.execute(sql_select_coin, (accountId,))
+    result = cur.fetchone()
+    coin = result[0] if result else 0
+
+    unlock_price = int(unlock_price)
+    if coin < unlock_price:
+        flash("コインが足りません", "poor")
+        return redirect(url_for('in_bag'))
+
+    else:
+        try:
+            sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, %s, 1, 0)"
+            cur.execute(sql, (accountId, equipmentId))
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (unlock_price, accountId))
+            con.commit()
+            flash("強化完了", "comp")
+            print(f"装備ID:{equipmentId} を開放しました！", "success")
+        except Exception as e:
+            con.rollback()
+            print(f"エラーが発生しました: {e}", "error")
+        finally:
+            if cur: cur.close()
+            if con: con.close()
+            pass
+
+    return redirect(url_for('in_bag'))
+
+#武器強化
+@app.route('/enhance-weapon' ,  methods=['POST'])
+@login_required
+def enhance_weapon():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    equipment_price = request.form.get('equipment_price')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+
+    con = conn_db()
+    cur = con.cursor()
+
+    sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+    cur.execute(sql_select_coin, (accountId,))
+    result = cur.fetchone()
+    coin = result[0] if result else 0
+
+    equipment_price = int(equipment_price)
+
+    if coin < equipment_price:
+        flash("コインが足りません", "poor")
+        return redirect(url_for('in_bag'))
+    else:
+        try:
+            sql = "UPDATE t_equipmentOwnership SET equipmentLevel = equipmentLevel + 1 WHERE accountId = %s AND equipmentId = %s AND equipmentLevel < 5"
+            cur.execute(sql, (accountId, equipmentId))
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (equipment_price, accountId))
+            con.commit()
+            if cur.rowcount > 0:
+                print(f"装備ID:{equipmentId} を強化しました！", "success")
+            else:
+                print("すでにレベルが最大です。", "info")
+        except Exception as e:
+            con.rollback()
+            print(f"エラーが発生しました: {e}", "error")
+        finally:
+            if cur: cur.close()
+            if con: con.close()
+            pass
+
+    return redirect(url_for('in_bag'))
+
+@app.route('/equip-equipment', methods=['POST'])
+def equip_equipment():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+
+    con = conn_db()
+    cur = con.cursor()
+    try:
+        sql_unequip = "UPDATE t_equipmentOwnership SET inUse = 0 WHERE accountId = %s"
+        cur.execute(sql_unequip, (accountId,))
+
+        sql_equip = "UPDATE t_equipmentOwnership SET inUse = 1 WHERE accountId = %s AND equipmentId = %s"
+        cur.execute(sql_equip, (accountId, equipmentId))
+
+        con.commit()
+        print(f"装備ID:{equipmentId} を装備しました！", "success")
+    except Exception as e:
+        con.rollback()
+        print(f"エラーが発生しました: {e}", "error")
+    finally:
+        if cur: cur.close()
+        if con: con.close()
+        pass
+
+    return redirect(url_for('in_bag'))
 # 問題画面（従来）
 @app.route('/question')
 @login_required
