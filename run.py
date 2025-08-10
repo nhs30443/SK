@@ -1203,17 +1203,50 @@ def subject():
 
 
 # リザルト画面
-@app.route('/result')
+@app.route('/result', methods=['POST'])
 @login_required
 def result():
-    subjects = [
-        {'name': '漢字', 'score': 80.0},
-        {'name': '英語', 'score': 80.0},
-        {'name': '算数', 'score': 85.0},
-        {'name': '総合', 'score': 85.0}
-    ]
+    history_json = request.form.get('history', '{}')
+    history = json.loads(history_json)
+    
+    subjects = []
+    subjects_map = {
+        'math': '算数',
+        'kanji': '漢字',
+        'english': '英語'
+    }
+
+    total_correct = 0
+    total_total = 0
+
+    for key, display_name in subjects_map.items():
+        correct = history.get('subjects', {}).get(key, {}).get('correct', 0)
+        total = history.get('subjects', {}).get(key, {}).get('total', 0)
+        score = (correct / total * 100) if total > 0 else None
+
+        subjects.append({
+            'name': display_name,
+            'score': f"{round(score, 1)}%" if score is not None else "-"
+        })
+
+        total_correct += correct
+        total_total += total
+
+    # 総合スコア計算
+    total_score = (total_correct / total_total * 100) if total_total > 0 else None
+    subjects.append({
+        'name': '総合',
+        'score': f"{round(total_score, 1)}%" if total_score is not None else "-"
+    })
 
     def calculate_rank(score):
+        try:
+            if isinstance(score, str) and score.endswith('%'):
+                score = score[:-1]  # 末尾の「％」を取り除く
+            score = float(score)
+        except (TypeError, ValueError):
+            return 'E'  # 数値でない場合は最低ランク
+        
         if score is None:
             return 'E'
         elif score >= 95:

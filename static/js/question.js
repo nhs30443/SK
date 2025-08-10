@@ -6,11 +6,12 @@ let questionCount = 0; // 問題数をカウント
 // プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
+const PlayerAT = -20;
 
 // 敵のパラメータ
 const maxEnemyHP = window.enemyData?.hp ?? 100;
 let enemyHP = window.enemyData?.hp ?? 100;
-const EnemyAT = window.enemyData?.attack ?? 10;
+const EnemyAT = window.enemyData?.attack ?? -10;
 
 let battleEnded = false;
 
@@ -193,6 +194,10 @@ async function checkAnswer(selectedIndex) {
 
     const isCorrect = selectedIndex === currentQuestion.correct_answer;
 
+    // 回答結果を記録（科目名と正誤をlocalStorageに保存）
+    const subject = window.currentSubject; 
+    recordAnswer(subject, isCorrect);
+
     // 選択した選択肢をハイライト
     $('.choice').each(function(index) {
         if (index === selectedIndex) {
@@ -216,7 +221,13 @@ async function checkAnswer(selectedIndex) {
     // HPの更新（戦闘終了判定も含む）
     if (isCorrect) {
         // 正解時は敵にダメージ
-        updateEnemyHP(-20);
+        updateEnemyHP(PlayerAT);
+        // 2秒後に敵からの反撃
+        setTimeout(() => {
+            if (!battleEnded) { // 戦闘が終わってなければ攻撃
+                updatePlayerHP(EnemyAT);
+            }
+        }, 1000);
         // HPアニメーション完了後に次の問題ボタンを表示
         $('#enemy-hp').one('transitionend', function() {
             showNextQuestionButton();
@@ -224,8 +235,12 @@ async function checkAnswer(selectedIndex) {
         // transitionendが発火しない場合のフォールバック
         setTimeout(showNextQuestionButton, 1000);
     } else {
-        // 不正解時はプレイヤーにダメージ
-        updatePlayerHP(-EnemyAT);
+        // 2秒後に敵からの反撃
+        setTimeout(() => {
+            if (!battleEnded) { // 戦闘が終わってなければ攻撃
+                updatePlayerHP(EnemyAT);
+            }
+        }, 1000);
         // HPアニメーション完了後に次の問題ボタンを表示
         $('#player-hp').one('transitionend', function() {
             showNextQuestionButton();
@@ -276,21 +291,21 @@ function checkBattleEnd() {
     if (playerHP <= 0) {
         battleEnded = true;
         setTimeout(() => {
-            alert("あなたはやられてしまいました…");
             // ゲームオーバー処理
-            localStorage.removeItem('playerHP');
-            localStorage.removeItem('enemyHP');
-            window.location.href = '/map';  // マップ画面に戻る
+            localStorage.clear();
+            window.location.href = '/gameover';
         }, 1000);
     }
     if (enemyHP <= 0) {
         battleEnded = true;
         setTimeout(() => {
-            alert("敵を倒しました！勝利です！");
             // 勝利処理
-            localStorage.removeItem('playerHP');
-            localStorage.removeItem('enemyHP');
-            window.location.href = '/result';  // リザルト画面に移動
+            const answerHistory = localStorage.getItem('answerHistory') || '{}';
+            const data = {
+                history: answerHistory,
+            };
+
+            postAndRedirect('/result', data);
         }, 1000);
     }
 }
@@ -399,4 +414,52 @@ function selectMovement(action) {
         $('#move-select-area').hide();
         $('#item-area').show();
     }
+}
+
+
+
+
+
+
+
+// 回答結果を保存（subject: 科目名, isCorrect: true/false）
+function recordAnswer(subject, isCorrect) {
+    // 既存データを取得（なければ初期化）
+    let data = localStorage.getItem('answerHistory');
+    data = data ? JSON.parse(data) : { subjects: {} };
+
+    // 科目別のカウント
+    if (!data.subjects[subject]) {
+        data.subjects[subject] = { correct: 0, total: 0 };
+    }
+    data.subjects[subject].total++;
+    if (isCorrect) data.subjects[subject].correct++;
+
+    // 保存
+    localStorage.setItem('answerHistory', JSON.stringify(data));
+}
+
+
+
+function postAndRedirect(url, data) {
+    // localStorageの全削除
+    localStorage.clear();
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    // データをhiddenフィールドでセット
+    for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+    }
+
+    document.body.appendChild(form);
+    form.submit();
 }
