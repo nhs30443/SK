@@ -1,164 +1,86 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>行動選択</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/move-select.css') }}">
-    <!-- DotGothic16フォントを読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="move-select.css">
 </head>
-
 <body>
     <div class="container">
-        <div class="background"></div> <!-- 背景用の要素 -->
+        <!-- 背景 -->
+        <div class="background"></div>
 
+        <!-- ボタンコンテナ -->
         <div class="button-container">
-            <button class="movement-button attack-button" onclick="selectMovement('attack')">たたかう</button>
-            <button class="movement-button item-button" onclick="selectMovement('item')">アイテム</button>
+            <button class="movement-button attack-button" onclick="selectAttack()">攻撃</button>
+            <button class="movement-button item-button" onclick="openItemModal()">アイテム</button>
         </div>
     </div>
 
     <!-- アイテム選択モーダル -->
     <div class="item-modal" id="itemModal">
         <div class="item-window">
-            <button class="close-button" onclick="closeItemModal()">&times;</button>
-            <div class="item-header">アイテムを選択</div>
-
-            <div class="item-grid" id="itemGrid">
-                <!-- アイテムスロットがJavaScriptで生成される -->
+            <button class="close-button" onclick="closeItemModal()">×</button>
+            <div class="item-header">アイテム選択</div>
+            <div class="item-grid">
+                <!-- アイテムスロット（直接HTML記述） -->
+                <div class="item-slot" onclick="selectItem('ポーション')">
+                    <div class="item-icon">🧪</div>
+                    <div class="item-name">ポーション</div>
+                </div>
+                <div class="item-slot" onclick="selectItem('エリクサー')">
+                    <div class="item-icon">✨</div>
+                    <div class="item-name">エリクサー</div>
+                </div>
+                <div class="item-slot" onclick="selectItem('煙玉')">
+                    <div class="item-icon">💨</div>
+                    <div class="item-name">煙玉</div>
+                </div>
+                <div class="item-slot" onclick="selectItem('投げナイフ')">
+                    <div class="item-icon">🗡️</div>
+                    <div class="item-name">投げナイフ</div>
+                </div>
+                <div class="item-slot" onclick="selectItem('爆弾')">
+                    <div class="item-icon">💣</div>
+                    <div class="item-name">爆弾</div>
+                </div>
+                <div class="item-slot empty">
+                    <div class="item-icon">❌</div>
+                    <div class="item-name">空き</div>
+                </div>
             </div>
-
             <button class="cancel-button" onclick="closeItemModal()">キャンセル</button>
         </div>
     </div>
 
-    <!-- アイテム使用確認モーダル -->
-    <div class="use-confirm" id="useConfirm">
-        <div class="confirm-window">
-            <div class="confirm-text" id="confirmText"></div>
-            <div class="confirm-buttons">
-                <button class="confirm-button confirm-yes" onclick="confirmUse(true)">はい</button>
-                <button class="confirm-button confirm-no" onclick="confirmUse(false)">いいえ</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // サンプルアイテムデータ（実際はサーバーから取得）
-        const playerItems = [
-            { id: 1, name: 'かいふく薬', icon: '🧪', count: 3, effect: 'HP回復' },
-            { id: 2, name: 'マナポーション', icon: '💙', count: 2, effect: 'MP回復' },
-            { id: 3, name: '毒消し', icon: '🍀', count: 1, effect: '毒状態回復' },
-            { id: 4, name: '攻撃の書', icon: '📜', count: 1, effect: '攻撃力アップ' },
-            { id: 5, name: '守りの盾', icon: '🛡️', count: 2, effect: '防御力アップ' },
-            // 空のスロット用のnullを追加
-            null
-        ];
-
-        let selectedItem = null;
-
-        function selectMovement(movement) {
-            console.log('選択された行動:', movement);
-
-            if (movement === 'item') {
-                showItemModal();
-            } else {
-                // 従来の処理
-                const movementNames = {
-                    'attack': 'たたかう'
-                };
-
-                if (confirm(movementNames[movement] + 'でいい？')) {
-                    window.location.href = '/question/' + movement;
-                }
-            }
+        function selectAttack() {
+            // 攻撃が選択された時の処理
+            console.log('攻撃が選択されました');
+            // ここでDB連携や次の画面への遷移処理を実装
         }
 
-        function showItemModal() {
-            const modal = document.getElementById('itemModal');
-            const itemGrid = document.getElementById('itemGrid');
-
-            // アイテムグリッドをクリア
-            itemGrid.innerHTML = '';
-
-            // 6個のスロットを作成（3×2のグリッド）
-            for (let i = 0; i < 6; i++) {
-                const item = playerItems[i];
-                const slot = document.createElement('div');
-                slot.className = 'item-slot';
-
-                if (item) {
-                    slot.innerHTML = `
-                        <div class="item-icon">${item.icon}</div>
-                        <div class="item-count">×${item.count}</div>
-                        <div class="item-name">${item.name}</div>
-                    `;
-                    slot.onclick = () => selectItem(item);
-                } else {
-                    slot.className += ' empty';
-                    slot.innerHTML = `
-                        <div class="item-icon">📦</div>
-                        <div class="item-name">空</div>
-                    `;
-                }
-
-                itemGrid.appendChild(slot);
-            }
-
-            modal.classList.add('show');
+        function openItemModal() {
+            document.getElementById('itemModal').classList.add('show');
         }
 
         function closeItemModal() {
-            const modal = document.getElementById('itemModal');
-            modal.classList.remove('show');
-            selectedItem = null;
+            document.getElementById('itemModal').classList.remove('show');
         }
 
-        function selectItem(item) {
-            if (item.count > 0) {
-                selectedItem = item;
-                showUseConfirm(item);
-            }
-        }
+        function selectItem(itemName) {
+            // 空きスロットの場合は何もしない
+            if (itemName === '空き') return;
 
-        function showUseConfirm(item) {
-            const confirmModal = document.getElementById('useConfirm');
-            const confirmText = document.getElementById('confirmText');
-
-            confirmText.textContent = `${item.name}を使用しますか？\n効果: ${item.effect}`;
-            confirmModal.classList.add('show');
-        }
-
-        function confirmUse(useItem) {
-            const confirmModal = document.getElementById('useConfirm');
-            confirmModal.classList.remove('show');
-
-            if (useItem && selectedItem) {
-                // アイテム使用処理
-                useSelectedItem(selectedItem);
-            }
-
-            selectedItem = null;
-        }
-
-        function useSelectedItem(item) {
-            console.log(`${item.name}を使用しました！`);
-
-            // アイテム数を減らす
-            item.count--;
-
-            // アイテム効果の処理をここに実装
-            alert(`${item.name}を使用しました！\n効果: ${item.effect}`);
+            console.log(itemName + 'が選択されました');
+            // ここでDB連携やアイテム使用処理を実装
 
             // モーダルを閉じる
-            closeItemModal();
-
-            // 実際のゲームでは戦闘画面に戻るか、効果を適用する
-            // 例: window.location.href = '/battle-continue';
+            document.getElementById('itemModal').classList.remove('show');
         }
 
         // モーダル外クリックで閉じる
@@ -167,25 +89,6 @@
                 closeItemModal();
             }
         });
-
-        document.getElementById('useConfirm').addEventListener('click', function(e) {
-            if (e.target === this) {
-                confirmUse(false);
-            }
-        });
-
-        // ESCキーでモーダルを閉じる
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                if (document.getElementById('useConfirm').classList.contains('show')) {
-                    confirmUse(false);
-                } else if (document.getElementById('itemModal').classList.contains('show')) {
-                    closeItemModal();
-                }
-            }
-        });
     </script>
-
 </body>
-
 </html>
