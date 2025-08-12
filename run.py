@@ -715,7 +715,6 @@ def buy_shop():
                     cur.execute(sql_insert_item, (next_id, accountId, itemId_to_buy, quantity_to_add))
 
             con.commit()
-
             flash("購入完了", "comp")
             return redirect(url_for('shop'))
     except Exception as e:
@@ -873,18 +872,31 @@ def weapon_detail():
 def item_detail():
     con = conn_db()
     cur = con.cursor()
-
+    itemId = request.args.get('itemId')
     accountId = session.get("login_id")
     sql = " SELECT COIN FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
+    sql = "SELECT * FROM t_item WHERE itemId = %s "
+    cur.execute(sql, (itemId,))
+    item = cur.fetchone()
+    datas = []
+    data = {
+        "itemName": item[1],
+        "itemPrice": item[2],
+        "itemEffect": item[3],
+        "itemImage": item[4],
+    }
+    datas.append(data)
+    print(data)
+
     coin = result[0] if result else 0
     cur.close()
     con.close()
-    return render_template("item-detail.html", coin=coin)
+    return render_template("item-detail.html", coin=coin , item=item , datas=datas)
 
-
+#装備開放
 @app.route('/equipment-unlock', methods=['POST'])
 def unlock_equipment():
     accountId = session.get("login_id")

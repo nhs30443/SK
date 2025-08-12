@@ -23,16 +23,18 @@
         </div>
         <main>
             <div class="in_menu">
-                <div class="weapon-content">
-                    <img src="static/images/bag.png" class="weapon-item" alt="バッグ">
-                    <div class="weapon-text">
-                        <h2 class="weapon-title">アイテム名前</h2>
-                        <p class="weapon-exp">
-                            アイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきますアイテムの説明がきます
-                        </p>
+                {% if datas %}
+                    <div class="weapon-content">
+                        <img src={{ datas[0].itemImage }} class="weapon-item" alt="バッグ">
+                        <div class="weapon-text">
+                            <h2 class="weapon-title">{{ datas[0].itemName }}</h2>
+                            <p class="weapon-exp">
+                                {{ datas[0].itemEffect }}
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <a href="/shop" class="back-main"><span class="btn-back">戻る</span></a>
+                    <a href="/shop" class="back-main"><span class="btn-back">戻る</span></a>
+                {% endif %}
             </div>
         </main>
     </div>
