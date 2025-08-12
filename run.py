@@ -521,6 +521,10 @@ def register():
         }
 
         cur.execute(sql, data)
+
+        sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, 1, 1, 0)"
+        cur.execute(sql, (accountId,))
+
         con.commit()
         con.close()
         cur.close()
