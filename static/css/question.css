@@ -60,7 +60,7 @@ html, body {
 
 .question-box {
     position: absolute;
-    top: 10vh;
+    top: 15vh;
     left: 50%;
     transform: translateX(-50%);
     width: clamp(300px, 60vw, 800px);
@@ -91,7 +91,7 @@ html, body {
 
 .choice {
     width: 25%;
-    aspect-ratio: 199 / 200;
+    aspect-ratio: 200 / 100;
     background: rgba(255, 255, 255, 0.9);
     border-radius: 15px;
     box-shadow: 0 0.3vw 0.6vw rgba(0,0,0,0.2);
@@ -318,19 +318,25 @@ body {
 /* 自分のHPバー（左上） */
 .player-hp-container {
     position: absolute;
-    top: 10%;
+    top: 5%;
     left: 10%;
     z-index: 4;
+    background-color: rgba(25, 25, 25, 0.7);
+    padding: 6px 10px;
+    border-radius: 8px;
 }
 
-/* 敵のHPバー（右上） */
 .enemy-hp-container {
     position: absolute;
-    top: 10%;
+    top: 5%;
     right: 10%;
     text-align: right;
     z-index: 4;
+    background-color: rgba(25, 25, 25, 0.7);
+    padding: 6px 10px;
+    border-radius: 8px;
 }
+
 
 .character-container {
     position: absolute;
@@ -358,4 +364,23 @@ body {
 .character.enemy {
     bottom: 40vh;
     right: 5vw;
+}
+
+/* 初期状態で画面全体にぼかしと黒い背景 */
+#black {
+  position: fixed;
+  inset: 0;
+  background-color: black;
+  backdrop-filter: blur(10px);  /* ぼかし */
+  opacity: 1;
+  transition: opacity 2s ease;
+  z-index: 9999;
+  pointer-events: none; /* クリックを透過 */
+  display: none;
+}
+
+/* フェードアウト時に透明にする */
+#black.fade-out {
+  opacity: 0;
+  backdrop-filter: blur(0);
 }

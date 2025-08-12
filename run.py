@@ -16,6 +16,23 @@ GEMINI_API_KEY = "AIzaSyBI4JzjwaPUV38U6DxbcUi5J5BKdN-cS3o"
 genai.configure(api_key=GEMINI_API_KEY)
 
 
+
+# 敵データ（例）
+ENEMY_DATA = {
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 50, "attack": -5},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 50, "attack": -10},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 50, "attack": -25},
+    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
+    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -250},
+}
+
+
+
 # db接続用関数
 def conn_db():
     conn = mysql.connector.connect(
@@ -1007,11 +1024,19 @@ def equip_equipment():
         pass
 
     return redirect(url_for('in_bag'))
+
+
 # 問題画面（従来）
 @app.route('/question')
 @login_required
 def question():
-    return render_template("question.html")
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", stage=stage, enemy=enemy, start_phase="move_select")
 
 
 # 科目指定付きの問題画面（新規）
@@ -1019,7 +1044,13 @@ def question():
 @login_required
 def question_with_subject(subject):
     """科目指定付きの問題画面"""
-    return render_template("question.html", subject=subject)
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
 
 
 # 問題生成API（高度版）
@@ -1184,17 +1215,50 @@ def subject():
 
 
 # リザルト画面
-@app.route('/result')
+@app.route('/result', methods=['POST'])
 @login_required
 def result():
-    subjects = [
-        {'name': '漢字', 'score': 80.0},
-        {'name': '英語', 'score': 80.0},
-        {'name': '算数', 'score': 85.0},
-        {'name': '総合', 'score': 85.0}
-    ]
+    history_json = request.form.get('history', '{}')
+    history = json.loads(history_json)
+    
+    subjects = []
+    subjects_map = {
+        'math': '算数',
+        'kanji': '漢字',
+        'english': '英語'
+    }
+
+    total_correct = 0
+    total_total = 0
+
+    for key, display_name in subjects_map.items():
+        correct = history.get('subjects', {}).get(key, {}).get('correct', 0)
+        total = history.get('subjects', {}).get(key, {}).get('total', 0)
+        score = (correct / total * 100) if total > 0 else None
+
+        subjects.append({
+            'name': display_name,
+            'score': f"{round(score, 1)}%" if score is not None else "-"
+        })
+
+        total_correct += correct
+        total_total += total
+
+    # 総合スコア計算
+    total_score = (total_correct / total_total * 100) if total_total > 0 else None
+    subjects.append({
+        'name': '総合',
+        'score': f"{round(total_score, 1)}%" if total_score is not None else "-"
+    })
 
     def calculate_rank(score):
+        try:
+            if isinstance(score, str) and score.endswith('%'):
+                score = score[:-1]  # 末尾の「％」を取り除く
+            score = float(score)
+        except (TypeError, ValueError):
+            return 'E'  # 数値でない場合は最低ランク
+        
         if score is None:
             return 'E'
         elif score >= 95:

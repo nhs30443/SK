@@ -18,6 +18,7 @@
 </head>
 
 <body>
+    <div id="black" class="black"></div>
     <div id="overlay" class="overlay"></div>
 
     <header class="header">
@@ -123,32 +124,52 @@
 
     <div class="character-container">
         <img src="{{ url_for('static', filename='images/player.png') }}" alt="プレイヤー" class="character player">
-        <img src="{{ url_for('static', filename='images/suraimu.png') }}" alt="敵" class="character enemy">
+        <img src="{{ url_for('static', filename='images/' + enemy.image) }}" alt="{{ enemy.name }}"
+            class="character enemy">
     </div>
-
 
     <!-- 科目情報を隠しデータとして埋め込み -->
     <script>
         window.currentSubject = "{{ subject if subject else 'math' }}";
+        const startPhase = "{{ start_phase }}";  // "move_select" または "quiz"
     </script>
 
     <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (startPhase === "move_select") {
+                const black = document.getElementById("black");
+                black.style.display = "block";
+
+                // 少し遅らせてフェードアウト開始（2秒かけて）
+                setTimeout(() => {
+                    black.classList.add("fade-out");
+                }, 100);
+
+                // フェードアウト完了後に非表示にしてクリックも透過させる
+                black.addEventListener("transitionend", () => {
+                    black.style.display = "none";
+                });
+            }
+        });
+    </script>
+
+    <script>
+        const currentStage = {{ stage|tojson }};
         function selectSubject(subject) {
             console.log('選択された科目:', subject);
+            console.log('現在のステージ:', currentStage);
 
-            // 科目選択時の処理
-            const subjectNames = {
-                'math': '算数',
-                'kanji': '漢字',
-                'english': '英語'
-            };
-
-            // 確認ダイアログ
-            if (confirm(subjectNames[subject] + 'の問題に挑戦しますか？')) {
-                // 問題画面に遷移
-                window.location.href = '/question/' + subject;
-            }
+            window.location.href = `/question/${subject}?stage=${currentStage}`;
         }
+    </script>
+
+
+    <script>
+        window.enemyData = {
+            name: "{{ enemy.name }}",
+            hp: {{ enemy.hp }},
+            attack: {{ enemy.attack }}
+        };
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

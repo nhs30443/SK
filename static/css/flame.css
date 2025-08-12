@@ -86,9 +86,14 @@ html, body {
   left: 20vh;
 
   border-radius: 1vh;
-  font-family: 'DotGothic16', sans-serif;
+  font-family: 'Mochiy Pop One', cursive; /* かわいい丸文字風 */
+  font-weight: bold; /* 太字 */
   z-index: 10;
   gap: 1vw;
+}
+
+.rank-value {
+  color: #e09d18; /* 好きな色に変更 */
 }
 
 .exp-label {
