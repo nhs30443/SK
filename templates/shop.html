@@ -39,7 +39,7 @@
                             <tr class="table-upper">
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_low.png"
+                                        <a href="/item-detail?itemId=1"><img src="static/images/potion_low.png"
                                                 class="potion-item" alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.potion_low }}</p>
                                         <p class="coin">300コイン</p>
@@ -63,7 +63,7 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_mid.png"
+                                        <a href="/item-detail?itemId=2"><img src="static/images/potion_mid.png"
                                                 class="potion-item" alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.potion_mid }}</p>
                                         <p class="coin">1000コイン</p>
@@ -87,7 +87,7 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_high.png"
+                                        <a href="/item-detail?itemId=3"><img src="static/images/potion_high.png"
                                                 class="potion-item" alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.potion_high }}</p>
                                         <p class="coin">2000コイン</p>
@@ -113,7 +113,7 @@
                             <tr class="table-lower">
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                        <a href="/item-detail?itemId=4"><img src="static/images/buf-jp.png" class="haste-item"
                                                 alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.buf_jp }}</p>
                                         <p class="coin">800コイン</p>
@@ -137,7 +137,7 @@
                                 </td>
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                        <a href="/item-detail?itemId=5"><img src="static/images/buf-en.png" class="haste-item"
                                                 alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.buf_en }}</p>
                                         <p class="coin">800コイン</p>
@@ -161,7 +161,7 @@
                                 </td>
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item"
+                                        <a href="/item-detail?itemId=6"><img src="static/images/buf-mt.png" class="haste-item"
                                                 alt="アイテム"></a>
                                         <p class="quantity_item">×{{ quantity.buf_mt }}</p>
                                         <p class="coin">800コイン</p>
@@ -188,9 +188,8 @@
                     </div>
                         {% with flashed_messages = get_flashed_messages(with_categories=true) %}
                           {% if flashed_messages %}
-                            {% for category, message in flashed_messages %}
-                              <p class="messages_log_{{ category }}">{{ message }}</p>
-                            {% endfor %}
+                            {% set category, message = flashed_messages[-1] %}
+                            <p class="messages_log_{{ category }}">{{ message }}</p>
                           {% endif %}
                         {% endwith %}
                     <button class="buy-btn" disabled><span class="btn-back">購入</span></button>

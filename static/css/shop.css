@@ -17,8 +17,8 @@ h2{
 .potion {
     display: flex;
     flex-direction: column;
-    width: 7vw;
-    height: 16vh;
+    width: 50%;
+    height: 70%;
     align-items: center;
     padding: 3vh 5vw 0 2vw;
 }
@@ -31,8 +31,12 @@ h2{
 
 .buffer{
     display: flex;
+    position: relative;
+    top: -5vh;
+    left: 0.3vw;
     flex-direction: column;
-    width: 7vw;
+    width: 50%;
+    height: 10%;
     align-items: center;
     padding: 1vh 5vw 0 2vw;
 }
@@ -42,13 +46,13 @@ h2{
 }
 
 .haste-item{
-    width: 7vw;
-    height: auto;
+    width: auto;
+    height: 6vw;
 }
 
 .potion-item{
-    height: 13vh;
-    width: auto;
+    height: auto;
+    width: 5vw;
 }
 
 button{
@@ -70,12 +74,13 @@ button{
 
 .back-main{
     position: relative;
-    top: -21.5vh;
+    top: -24.5vh;
     left: 44.5vw;
     color: #ffffff;
     text-decoration: none;
     font-size: clamp(8px, 2vw, 32px);
     margin-left: 0.9vw;
+    padding: 0.5% 0 0.5% 0;
     width: 12vw;
     height: 13%;
     border-radius: 15px;
@@ -89,7 +94,7 @@ button{
 
 .buy-btn{
     position: relative;
-    top: -25vh;
+    top: -28vh;
     left: 44.5vw;
     color: #ffffff;
     text-decoration: none;
@@ -142,7 +147,7 @@ button{
     appearance: none;
     height: 5vh;
     width: auto;
-    padding: .4em calc(.8em + 30px) .4em .8em;
+    padding: 2% calc(1.5% + 2vw) 2% 10%;
     border: 1px solid #d0d0d0;
     border-radius: 3px;
     background-color: #fff;
