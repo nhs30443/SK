@@ -6,7 +6,6 @@ let questionCount = 0; // 問題数をカウント
 // プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
-const PlayerAT = -20;
 
 // 敵のパラメータ
 const maxEnemyHP = window.enemyData?.hp ?? 100;
@@ -417,6 +416,41 @@ function selectMovement(action) {
 }
 
 
+function closeItemModal() {
+    $('#item-area').hide();
+    $('#move-select-area').show();
+}
+
+
+function selectItem(item) {
+    console.log('選択されたアイテム:', item);
+
+    if (item === '1') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '2') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '3') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '4') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '5') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '6') {
+
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    }
+}
 
 
 
