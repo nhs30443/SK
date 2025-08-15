@@ -86,27 +86,27 @@
                     <div class="item-grid">
                         <!-- アイテムスロット（直接HTML記述） -->
                         <div class="item-slot" onclick="selectItem('1')">
-                            <div class="item-icon"><img src="static/images/potion_low.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_low.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">初級ポーション</div>
                         </div>
                         <div class="item-slot" onclick="selectItem('2')">
-                            <div class="item-icon"><img src="static/images/potion_mid.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_mid.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">中級ポーション</div>
                         </div>
                         <div class="item-slot" onclick="selectItem('3')">
-                            <div class="item-icon"><img src="static/images/potion_high.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_high.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">上級ポーション</div>
                         </div>
                         <div class="item-slot" onclick="selectItem('4')">
-                            <div class="item-icon"><img src="static/images/buf-mt.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-mt.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">投げナイフ</div>
                         </div>
                         <div class="item-slot" onclick="selectItem('5')">
-                            <div class="item-icon"><img src="static/images/buf-jp.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-jp.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">爆弾</div>
                         </div>
                         <div class="item-slot" onclick="selectItem('6')">
-                            <div class="item-icon"><img src="static/images/buf-en.png" class="potion-item" alt="アイテム"></div>
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-en.png') }}" class="potion-item" alt="アイテム"></div>
                             <div class="item-name">空き</div>
                         </div>
                     </div>
@@ -163,7 +163,7 @@
     </script>
 
     <script>
-        const PlayerAT = -{{ at }};
+        window.PlayerAT = -{{ at }};
         const currentStage = {{ stage|tojson }};
         function selectSubject(subject) {
             console.log('選択された科目:', subject);

@@ -6,6 +6,7 @@ let questionCount = 0; // 問題数をカウント
 // プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
+const PlayerAT = window.PlayerAT;
 
 // 敵のパラメータ
 const maxEnemyHP = window.enemyData?.hp ?? 100;
