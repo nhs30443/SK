@@ -638,7 +638,7 @@ def shop():
     buf_en = buf_en_re[0] if buf_en_re else 0
     quantity["buf_en"] = buf_en
 
-    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 5"
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 6"
     cur.execute(sql, (accountId,))
     buf_mt_re = cur.fetchone()
     buf_mt = buf_mt_re[0] if buf_mt_re else 0
@@ -674,8 +674,8 @@ def buy_shop():
             'mid': {'itemId': 2, 'price_key': 'potion_mid', 'quantity_key': 'quantity_mid'},
             'high': {'itemId': 3, 'price_key': 'potion_high', 'quantity_key': 'quantity_high'},
             'jp': {'itemId': 4, 'price_key': 'buf_jp', 'quantity_key': 'quantity_jp'},
-            'mt': {'itemId': 5, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
-            'en': {'itemId': 6, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
+            'en': {'itemId': 5, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
+            'mt': {'itemId': 6, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
         }
 
         items_to_purchase = []
@@ -786,7 +786,7 @@ def in_bag():
         }
         for item in equipment_price_list
     }
-    print(equipment_price)
+    print(equipment)
 
     calculated_prices = {}
 
