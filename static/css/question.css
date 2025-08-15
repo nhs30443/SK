@@ -139,7 +139,7 @@ html, body {
     width: 60px;
     height:40px;
     cursor: pointer;
-    z-index: 11;
+    z-index: 9999;
 }
 
 .hamburger span {
@@ -197,7 +197,7 @@ li a {
     border: 4px double #fff;
     padding: 20px;
     color: #fff;
-    z-index: 10;
+    z-index: 9999;
     box-shadow: 6px 6px 0 #444;
     height: 300px;
 }
@@ -383,4 +383,14 @@ body {
 #black.fade-out {
   opacity: 0;
   backdrop-filter: blur(0);
+}
+
+
+
+.potion-item {
+    max-width: 100%;       /* 親の幅を超えない */
+    max-height: 80px;      /* 高さを制限 */
+    object-fit: contain;   /* 縦横比を崩さずに収める */
+    display: block;
+    margin: 0 auto;        /* 中央寄せ */
 }

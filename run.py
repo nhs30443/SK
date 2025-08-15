@@ -429,6 +429,28 @@ def calculate_rank_and_exp(total_exp, base_exp=500, exp_multiplier=1.2):
     return rank, current_exp, next_exp
 
 
+def equipmentAT(id, level):
+    if id == 1:
+        at = 60
+        while level > 1:
+            at += 10
+            level -= 1
+            
+    elif id == 2:
+        at = 90
+        while level > 1:
+            at += 15
+            level -= 1
+            
+    elif id == 3:
+        at = 140
+        while level > 1:
+            at += 20
+            level -= 1
+            
+    return at
+
+
 ############################################################################
 ### パスの定義
 ############################################################################
@@ -522,7 +544,7 @@ def register():
 
         cur.execute(sql, data)
 
-        sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, 1, 1, 1)"
+        sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, 1, 1, 0)"
         cur.execute(sql, (accountId,))
 
         con.commit()
@@ -799,7 +821,7 @@ def in_bag():
 
             if level > 0:
 
-                new_price = base_price * (1.6 ** (level))
+                new_price = base_price * (1.6 ** (level - 1))
             else:
                 # レベルが0以下の場合は基本価格のまま
                 new_price = base_price
@@ -1038,9 +1060,23 @@ def question():
         stage = int(request.args.get('stage', 1))
     except ValueError:
         stage = 1
-
+        
+    con = conn_db()
+    cur = con.cursor()
+    sql = "select equipmentId, equipmentLevel from t_equipmentOwnership where accountId = %s and inUse = 1"
+    cur.execute(sql)
+    row = cur.fetchone()
+    
+    if row:
+        equipmentId = row[0]
+        equipmentLevel = row[1]
+    
+    cur.close()
+    con.close()
+    
+    at = equipmentAT(equipmentId, equipmentLevel)
     enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
-    return render_template("question.html", stage=stage, enemy=enemy, start_phase="move_select")
+    return render_template("question.html", at=at, stage=stage, enemy=enemy, start_phase="move_select")
 
 
 # 科目指定付きの問題画面（新規）
