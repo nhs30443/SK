@@ -19,17 +19,18 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # 敵データ（例）
 ENEMY_DATA = {
-    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6},
-    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8},
-    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10},
-    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12},
-    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14},
-    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18},
-    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20},
-    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22},
-    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26},
-    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30},
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6, "coin": 210, "exp": 560},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8, "coin": 270, "exp": 730},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10, "coin": 350, "exp": 945},
+    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12, "coin": 460, "exp": 1230},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14, "coin": 600, "exp": 1600},
+    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18, "coin": 770, "exp": 2085},
+    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20, "coin": 1000, "exp": 2700},
+    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22, "coin": 1300, "exp": 3520},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26, "coin": 1690, "exp": 4570},
+    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30, "coin": 3500, "exp": 8910}
 }
+
 
 
 
@@ -415,7 +416,7 @@ def validate_question_quality(question_data):
 
 
 # rank計算
-def calculate_rank_and_exp(total_exp, base_exp=500, exp_multiplier=1.2):
+def calculate_rank_and_exp(total_exp, base_exp=1000, exp_multiplier=1.2):
     rank = 1
     required_exp = base_exp
 
@@ -1363,14 +1364,58 @@ def result():
     rank_order = ['S', 'A', 'B', 'C', 'D', 'E']
     rank = rank_score if rank_order.index(rank_score) < rank_order.index(rank_mistakes) else rank_mistakes
     rank_color = get_rank_color(rank)
+    
+    stage = int(request.form.get('stage', 1))
+    # ENEMY_DATAから該当ステージの敵情報を取得
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])
+    
+    # ランク補正倍率
+    rank_multiplier = {
+        'S': 1.5,
+        'A': 1.2,
+        'B': 1.1,
+        'C': 1.0,
+        'D': 0.9,
+        'E': 0.8
+    }
+    
+    # 経験値変化
+    exp = enemy['exp']
+    exp = int(exp * rank_multiplier.get(rank, 1.0) * (1 + total_correct / 10))
+        
+    # コイン変化
+    coin = enemy['coin']
+    coin = int(coin * rank_multiplier.get(rank, 1.0) * (1 + total_correct / 10))
 
     results_data = {
         'subjects': subjects,
         'rank': rank,
         'rank_color': rank_color,
-        'experience': 125000,
-        'coins': 800
+        'experience': exp,
+        'coins': coin
     }
+    
+    con = conn_db()
+    cur = con.cursor()
+
+    accountId = session.get("login_id")
+    cur.execute("SELECT totalExperience, coin FROM t_account WHERE accountId = %s", (accountId,))
+    result = cur.fetchone()
+    
+    if result:
+        current_exp, current_coin = result
+        new_exp = current_exp + exp
+        new_coin = current_coin + coin
+
+        # 更新
+        cur.execute(
+            "UPDATE t_account SET totalExperience = %s, coin = %s WHERE accountId = %s",
+            (new_exp, new_coin, accountId)
+        )
+        con.commit()
+
+    cur.close()
+    con.close()
 
     return render_template("result.html", data=results_data)
 
