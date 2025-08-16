@@ -19,15 +19,15 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # 敵データ（例）
 ENEMY_DATA = {
-    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -5},
-    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -7},
-    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -9},
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10},
     4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12},
-    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -15},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14},
     6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18},
     7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20},
     8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22},
-    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -25},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26},
     10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30},
 }
 
@@ -1388,9 +1388,10 @@ def item_select():
 
 
 # gaeover
-@app.route('/gameover')
+@app.route('/gameover', methods=['POST'])
 def gameover():
-    return render_template("gameover.html")
+    stage = request.form.get('stage', 1)
+    return render_template("gameover.html", stage=stage)
 
 
 # デバッグ用
