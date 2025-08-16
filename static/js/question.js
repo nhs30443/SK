@@ -282,8 +282,7 @@ $(document).ready(async function () {
     // 問題数をリセット
     questionCount = 0;
 
-    updatePlayerHP(0);  // 表示更新（変化量0で現在値反映）
-    updateEnemyHP(0);
+    initHPBars();
 
     // 初回問題読み込み
     try {
@@ -361,6 +360,26 @@ function updateEnemyHP(amount) {
     setTimeout(() => {
         checkBattleEnd();
     }, 300);
+}
+
+function initHPBars() {
+    const $player = $('#player-hp');
+    const $enemy = $('#enemy-hp');
+
+    $player.css('transition', 'none');
+    $enemy.css('transition', 'none');
+
+    // 初期値を反映（アニメーションなし）
+    $player.css('width', (playerHP / maxPlayerHP) * 100 + '%')
+           .css('background-color', getHPColor((playerHP / maxPlayerHP) * 100));
+    $enemy.css('width', (enemyHP / maxEnemyHP) * 100 + '%')
+          .css('background-color', getHPColor((enemyHP / maxEnemyHP) * 100));
+
+    // 0.1秒後にアニメーション有効
+    setTimeout(() => {
+        $player.css('transition', 'width 0.3s ease-in-out');
+        $enemy.css('transition', 'width 0.3s ease-in-out');
+    }, 100);
 }
 
 // 選択肢クリック時の処理
