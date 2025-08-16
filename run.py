@@ -1417,19 +1417,17 @@ def result():
     cur.close()
     con.close()
 
-    return render_template("result.html", data=results_data)
+    # 結果をセッションに保存してリダイレクト
+    session['results_data'] = results_data
+    return redirect(url_for('result_get'))
 
-
-
-@app.route('/move-select')
-def move():
-    return render_template("move-select.html")
-
-
-@app.route('/item-select')
-def item_select():
-    return render_template("item-select.html")
-
+@app.route('/result', methods=['GET'])
+@login_required
+def result_get():
+    data = session.pop('results_data', None)  # 一度取り出すと消えるので再表示しても加算されない
+    if not data:
+        return redirect(url_for('main'))  # 不正アクセス対策
+    return render_template("result.html", data=data)
 
 
 # gaeover
@@ -1443,6 +1441,26 @@ def gameover():
 @app.route('/test')
 def test():
     return render_template("xxx.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 実行制御
