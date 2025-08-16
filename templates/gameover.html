@@ -24,7 +24,7 @@
         <div class="game-over-title">GAME OVER</div>
         
         <div class="actions">
-            <a href="{{ url_for('question') }}" class="action-btn retry">もう一度挑戦</a>
+            <a href="{{ url_for('question', stage=stage) }}" class="action-btn retry">もう一度挑戦</a>
             <a href="{{ url_for('main') }}" class="action-btn home">ホームに戻る</a>
         </div>
     </div>

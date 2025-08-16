@@ -19,16 +19,16 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # 敵データ（例）
 ENEMY_DATA = {
-    1: {"name": "スライム", "image": "suraimu.png", "hp": 50, "attack": -5},
-    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 50, "attack": -10},
-    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 50, "attack": -25},
-    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -25},
-    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 50, "attack": -250},
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10},
+    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14},
+    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18},
+    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20},
+    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26},
+    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30},
 }
 
 
@@ -429,6 +429,7 @@ def calculate_rank_and_exp(total_exp, base_exp=500, exp_multiplier=1.2):
     return rank, current_exp, next_exp
 
 
+# 攻撃力計算
 def equipmentAT(id, level):
     if id == 1:
         at = 60
@@ -1056,6 +1057,8 @@ def equip_equipment():
 @app.route('/question')
 @login_required
 def question():
+    accountId = session.get("login_id")
+    
     try:
         stage = int(request.args.get('stage', 1))
     except ValueError:
@@ -1064,7 +1067,7 @@ def question():
     con = conn_db()
     cur = con.cursor()
     sql = "select equipmentId, equipmentLevel from t_equipmentOwnership where accountId = %s and inUse = 1"
-    cur.execute(sql)
+    cur.execute(sql, (accountId,))
     row = cur.fetchone()
     
     if row:
@@ -1084,13 +1087,29 @@ def question():
 @login_required
 def question_with_subject(subject):
     """科目指定付きの問題画面"""
+    accountId = session.get("login_id")
+    
     try:
         stage = int(request.args.get('stage', 1))
     except ValueError:
         stage = 1
-
+        
+    con = conn_db()
+    cur = con.cursor()
+    sql = "select equipmentId, equipmentLevel from t_equipmentOwnership where accountId = %s and inUse = 1"
+    cur.execute(sql, (accountId,))
+    row = cur.fetchone()
+    
+    if row:
+        equipmentId = row[0]
+        equipmentLevel = row[1]
+    
+    cur.close()
+    con.close()
+    
+    at = equipmentAT(equipmentId, equipmentLevel)
     enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
-    return render_template("question.html", subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
+    return render_template("question.html", at=at, subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
 
 
 # 問題生成API（高度版）
@@ -1313,6 +1332,15 @@ def result():
             return 'D'
         else:
             return 'E'
+        
+    def calculate_rank_by_mistakes(total_correct, total_questions):
+        rank_order = ['S', 'A', 'B', 'C', 'D', 'E']
+        rank_index = 0
+        mistakes = total_questions - total_correct
+        rank_index += mistakes
+        if rank_index >= len(rank_order):
+            rank_index = len(rank_order) - 1
+        return rank_order[rank_index]
 
     def get_rank_color(rank):
         return {
@@ -1324,8 +1352,16 @@ def result():
             'E': 'gray'
         }.get(rank, 'black')
 
-    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
-    rank = calculate_rank(total_score)
+    # 総合スコア計算
+    total_score = (total_correct / total_total * 100) if total_total > 0 else None
+
+    # 2つのランクを計算
+    rank_score = calculate_rank(total_score)
+    rank_mistakes = calculate_rank_by_mistakes(total_correct, total_total)
+
+    # 高い方を適用
+    rank_order = ['S', 'A', 'B', 'C', 'D', 'E']
+    rank = rank_score if rank_order.index(rank_score) < rank_order.index(rank_mistakes) else rank_mistakes
     rank_color = get_rank_color(rank)
 
     results_data = {
@@ -1352,9 +1388,10 @@ def item_select():
 
 
 # gaeover
-@app.route('/gameover')
+@app.route('/gameover', methods=['POST'])
 def gameover():
-    return render_template("gameover.html")
+    stage = request.form.get('stage', 1)
+    return render_template("gameover.html", stage=stage)
 
 
 # デバッグ用

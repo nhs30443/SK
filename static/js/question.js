@@ -6,6 +6,7 @@ let questionCount = 0; // 問題数をカウント
 // プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
+const PlayerAT = window.PlayerAT;
 
 // 敵のパラメータ
 const maxEnemyHP = window.enemyData?.hp ?? 100;
@@ -219,12 +220,21 @@ async function checkAnswer(selectedIndex) {
 
     // HPの更新（戦闘終了判定も含む）
     if (isCorrect) {
+        // URLパスから科目を取り出す
+        const pathParts = window.location.pathname.split('/');
+        const subject = pathParts[2];
+        const buf = localStorage.getItem('selectedSubject')
         // 正解時は敵にダメージ
-        updateEnemyHP(PlayerAT);
+        if (buf === subject) {
+            updateEnemyHP(PlayerAT * 2);
+            localStorage.removeItem('selectedSubject');  // buf を削除
+        } else {
+            updateEnemyHP(PlayerAT);
+        }
         // 2秒後に敵からの反撃
         setTimeout(() => {
             if (!battleEnded) { // 戦闘が終わってなければ攻撃
-                updatePlayerHP(EnemyAT);
+                updatePlayerHP(EnemyAT/2);
             }
         }, 1000);
         // HPアニメーション完了後に次の問題ボタンを表示
@@ -291,8 +301,16 @@ function checkBattleEnd() {
         battleEnded = true;
         setTimeout(() => {
             // ゲームオーバー処理
+            // URLクエリから stage を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage') || 1;
+
+            const data = {
+                stage: stage, 
+            };
+
             localStorage.clear();
-            window.location.href = '/gameover';
+            postAndRedirect('/gameover', data);
         }, 1000);
     }
     if (enemyHP <= 0) {
@@ -300,10 +318,16 @@ function checkBattleEnd() {
         setTimeout(() => {
             // 勝利処理
             const answerHistory = localStorage.getItem('answerHistory') || '{}';
+            // URLクエリから stage を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage') || 1;
+
             const data = {
                 history: answerHistory,
+                stage: stage, 
             };
 
+            localStorage.clear();
             postAndRedirect('/result', data);
         }, 1000);
     }
@@ -426,27 +450,27 @@ function selectItem(item) {
     console.log('選択されたアイテム:', item);
 
     if (item === '1') {
-
+        updatePlayerHP(4);
         $('#item-area').hide();
         $('#move-select-area').show();
     } else if (item === '2') {
-
+        updatePlayerHP(15);
         $('#item-area').hide();
         $('#move-select-area').show();
     } else if (item === '3') {
-
+        updatePlayerHP(40);
         $('#item-area').hide();
         $('#move-select-area').show();
     } else if (item === '4') {
-
+        localStorage.setItem('selectedSubject', 'math');
         $('#item-area').hide();
         $('#move-select-area').show();
     } else if (item === '5') {
-
+        localStorage.setItem('selectedSubject', 'kanji');
         $('#item-area').hide();
         $('#move-select-area').show();
     } else if (item === '6') {
-
+        localStorage.setItem('selectedSubject', 'english');
         $('#item-area').hide();
         $('#move-select-area').show();
     }
