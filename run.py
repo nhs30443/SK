@@ -1501,11 +1501,11 @@ def result():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    cur.execute("SELECT totalExperience, coin FROM t_account WHERE accountId = %s", (accountId,))
+    cur.execute("SELECT totalExperience, coin, stage FROM t_account WHERE accountId = %s", (accountId,))
     result = cur.fetchone()
     
     if result:
-        current_exp, current_coin = result
+        current_exp, current_coin, db_stage = result
         new_exp = current_exp + exp
         new_coin = current_coin + coin
 
@@ -1514,6 +1514,13 @@ def result():
             "UPDATE t_account SET totalExperience = %s, coin = %s WHERE accountId = %s",
             (new_exp, new_coin, accountId)
         )
+        
+        if db_stage < stage:
+            cur.execute(
+                "UPDATE t_account SET stage = %s WHERE accountId = %s",
+                (stage, accountId)
+            )
+        
         con.commit()
 
     cur.close()
