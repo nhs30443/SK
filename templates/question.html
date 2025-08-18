@@ -4,16 +4,21 @@
 <head>
     <meta charset="UTF-8">
     <title>クイズ画面</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/question.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/move-select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css') }}">
     <!-- RPGっぽい漢字対応フォントを読み込み -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
         href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap"
         rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DotGothic16&display=swap" rel="stylesheet">
 </head>
 
 <body>
+    <div id="black" class="black"></div>
     <div id="overlay" class="overlay"></div>
 
     <header class="header">
@@ -23,7 +28,6 @@
         <nav>
             <ul id="header-menu">
                 <li><a href="{{ url_for('main') }}">ホームに戻る</a></li>
-                <li><a href="{{ url_for('config') }}">設定</a></li>
                 <li><a href="{{ url_for('map') }}">ステージを出る</a></li>
             </ul>
         </nav>
@@ -32,23 +36,83 @@
     <div class="game-container">
         <img src="{{ url_for('static', filename='images/background2.png') }}" alt="背景です" class="background">
 
-        <div class="question-box">
-            <p id="question-text">問題を読み込み中...</p>
+        <div id="quiz-area">
+            <div class="question-box">
+                <p id="question-text">問題を読み込み中...</p>
+            </div>
+
+            <div class="choices">
+                <div class="choice" data-index="0">選択肢 1</div>
+                <div class="choice" data-index="1">選択肢 2</div>
+                <div class="choice" data-index="2">選択肢 3</div>
+                <div class="choice" data-index="3">選択肢 4</div>
+            </div>
+
+            <div class="result" id="result-box"></div>
+
+            <!-- 次の問題ボタン -->
+            <div class="next-question-container" style="display: none;">
+                <button id="next-question-btn" class="next-question-btn">次の問題</button>
+            </div>
         </div>
 
-        <div class="choices">
-            <div class="choice" data-index="0">選択肢 1</div>
-            <div class="choice" data-index="1">選択肢 2</div>
-            <div class="choice" data-index="2">選択肢 3</div>
-            <div class="choice" data-index="3">選択肢 4</div>
+
+
+        <div id="move-select-area" style="display: none;">
+            <div class="button-container">
+                <button class="movement-button attack-button" onclick="selectMovement('attack')">たたかう</button>
+                <button class="movement-button item-button" onclick="selectMovement('item')">アイテム</button>
+            </div>
         </div>
 
-        <div class="result" id="result-box"></div>
 
-        <!-- 次の問題ボタン -->
-        <div class="next-question-container" style="display: none;">
-            <button id="next-question-btn" class="next-question-btn">次の問題</button>
+
+        <div id="subject-area" style="display: none;">
+            <div class="button-container">
+                <button class="subject-button math-button" onclick="selectSubject('math')">算数</button>
+                <button class="subject-button kanji-button" onclick="selectSubject('kanji')">漢字</button>
+                <button class="subject-button english-button" onclick="selectSubject('english')">英語</button>
+            </div>
         </div>
+
+
+
+        <div id="item-area" style="display: none;">
+            <!-- アイテム選択モーダル -->
+            <div class="item-modal" id="itemModal">
+                <div class="item-window">
+                    <div class="item-header">アイテム選択</div>
+                    <div class="item-grid">
+                        <!-- アイテムスロット（直接HTML記述） -->
+                        <div class="item-slot" onclick="selectItem('1')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_low.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">初級ポーション</div>
+                        </div>
+                        <div class="item-slot" onclick="selectItem('2')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_mid.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">中級ポーション</div>
+                        </div>
+                        <div class="item-slot" onclick="selectItem('3')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/potion_high.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">上級ポーション</div>
+                        </div>
+                        <div class="item-slot" onclick="selectItem('4')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-mt.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">算数の書</div>
+                        </div>
+                        <div class="item-slot" onclick="selectItem('5')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-jp.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">国語の書</div>
+                        </div>
+                        <div class="item-slot" onclick="selectItem('6')">
+                            <div class="item-icon"><img src="{{ url_for('static', filename='images/buf-en.png') }}" class="potion-item" alt="アイテム"></div>
+                            <div class="item-name">英語の書</div>
+                        </div>
+                    </div>
+                    <button class="cancel-button" onclick="closeItemModal()">キャンセル</button>
+                </div>
+        </div>
+
     </div>
 
     <!-- HPバー（画面の外側に配置） -->
@@ -66,9 +130,55 @@
         </div>
     </div>
 
+    <div class="character-container">
+        <img src="{{ url_for('static', filename='images/player.png') }}" alt="プレイヤー" class="character player">
+        <img src="{{ url_for('static', filename='images/' + enemy.image) }}" alt="{{ enemy.name }}"
+            class="character enemy">
+    </div>
+
     <!-- 科目情報を隠しデータとして埋め込み -->
     <script>
         window.currentSubject = "{{ subject if subject else 'math' }}";
+        const startPhase = "{{ start_phase }}";  // "move_select" または "quiz"
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            if (startPhase === "move_select") {
+                const black = document.getElementById("black");
+                black.style.display = "block";
+
+                // 少し遅らせてフェードアウト開始（2秒かけて）
+                setTimeout(() => {
+                    black.classList.add("fade-out");
+                }, 100);
+
+                // フェードアウト完了後に非表示にしてクリックも透過させる
+                black.addEventListener("transitionend", () => {
+                    black.style.display = "none";
+                });
+            }
+        });
+    </script>
+
+    <script>
+        window.PlayerAT = -{{ at }};
+        const currentStage = {{ stage|tojson }};
+        function selectSubject(subject) {
+            console.log('選択された科目:', subject);
+            console.log('現在のステージ:', currentStage);
+
+            window.location.href = `/question/${subject}?stage=${currentStage}`;
+        }
+    </script>
+
+
+    <script>
+        window.enemyData = {
+            name: "{{ enemy.name }}",
+            hp: {{ enemy.hp }},
+            attack: {{ enemy.attack }}
+        };
     </script>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>

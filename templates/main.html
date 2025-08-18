@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
@@ -7,11 +8,18 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
 </head>
+
 <body>
     <div class="container">
         <a href="/" class="backTop"></a>
         <div class="header">
             <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+            <div class="exp-container">
+                <div class="exp-label">ランク <span class="rank-value">{{ rank }}</span></div>
+                <div class="exp-bar">
+                    <div class="exp-fill" style="width: {{ (exp / next_exp) * 100 }}%;"></div>
+                </div>
+            </div>
             <div class="right-elements">
                 <img src="static/images/coin.png" class="coinImg" alt="コイン">
                 <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
@@ -23,12 +31,13 @@
         </div>
         <main>
             <div class="selectButton">
-                <a href="#"><button class="selectBtn"><span class="selectFont">マイページ</span></button></a>
-                <a href="#"><button class="selectBtn"><span class="selectFont">クエスト選択</span></button></a>
-                <a href="/shop"><button class="selectBtn"><span class="selectFont">ショップ</span></button></a>
+                <button class="selectBtn"><a href="/map"><span class="selectFont">クエスト選択</span></a></button>
+                <button class="selectBtn"><a href="/shop"><span class="selectFont">ショップ</span></a></button>
+                <button class="selectBtn"><a href="/config"><span class="selectFont">設定</span></a></button>
             </div>
         </main>
     </div>
 
 </body>
+
 </html>

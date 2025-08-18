@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <title>チャレンジクエスト</title>
@@ -7,17 +8,24 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/flame.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
 </head>
+
 <body>
     <div class="container">
         <a href="/" class="backTop"></a>
-            <div class="header">
-                <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
-                <div class="right-elements">
-                    <img src="static/images/coin.png" class="coinImg" alt="コイン">
-                    <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
-                    <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+        <div class="header">
+            <img src="static/images/nav.png" class="navImg" alt="ナビゲーション">
+            <div class="exp-container">
+                <div class="exp-label">ランク <span class="rank-value">{{ rank }}</span></div>
+                <div class="exp-bar">
+                    <div class="exp-fill" style="width: {{ (exp / next_exp) * 100 }}%;"></div>
                 </div>
             </div>
+            <div class="right-elements">
+                <img src="static/images/coin.png" class="coinImg" alt="コイン">
+                <p class="coinNumber"><span class="cross">×</span>{{ coin }}</p>
+                <a href="/in_bag"><img src="static/images/bag.png" class="bagImg" alt="バッグ"></a>
+            </div>
+        </div>
         <div class="background">
             <img src="static/images/background.png" class="backgroundImg" alt="背景">
         </div>
@@ -31,7 +39,9 @@
                             <tr class="table-upper">
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_low.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail?itemId=1"><img src="static/images/potion_low.png"
+                                                class="potion-item" alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.potion_low }}</p>
                                         <p class="coin">300コイン</p>
                                         <input type="text" value="300" name="potion_low" hidden>
                                         <label class="selectbox-6">
@@ -53,7 +63,9 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_mid.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail?itemId=2"><img src="static/images/potion_mid.png"
+                                                class="potion-item" alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.potion_mid }}</p>
                                         <p class="coin">1000コイン</p>
                                         <input type="text" value="1000" name="potion_mid" hidden>
                                         <label class="selectbox-6">
@@ -75,7 +87,9 @@
                                 </td>
                                 <td>
                                     <div class="potion">
-                                        <a href="/item-detail"><img src="static/images/potion_high.png" class="potion-item" alt="アイテム"></a>
+                                        <a href="/item-detail?itemId=3"><img src="static/images/potion_high.png"
+                                                class="potion-item" alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.potion_high }}</p>
                                         <p class="coin">2000コイン</p>
                                         <input type="text" value="2000" name="potion_high" hidden>
                                         <label class="selectbox-6">
@@ -97,31 +111,11 @@
                                 </td>
                             </tr>
                             <tr class="table-lower">
-                                <td>
+                                                                <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
-                                        <p class="coin">800コイン</p>
-                                        <input type="text" value="800" name="buf_jp" hidden>
-                                        <label class="selectbox-6">
-                                            <select name="quantity_jp" id="bufferJp">
-                                                <option value="0">0</option>
-                                                <option value="1">1</option>
-                                                <option value="2">2</option>
-                                                <option value="3">3</option>
-                                                <option value="4">4</option>
-                                                <option value="5">5</option>
-                                                <option value="6">6</option>
-                                                <option value="7">7</option>
-                                                <option value="8">8</option>
-                                                <option value="9">9</option>
-                                                <option value="10">10</option>
-                                            </select>
-                                        </label>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                        <a href="/item-detail?itemId=6"><img src="static/images/buf-mt.png" class="haste-item"
+                                                alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.buf_mt }}</p>
                                         <p class="coin">800コイン</p>
                                         <input type="text" value="800" name="buf_mt" hidden>
                                         <label class="selectbox-6">
@@ -143,9 +137,35 @@
                                 </td>
                                 <td>
                                     <div class="buffer">
-                                        <a href="/item-detail"><img src="static/images/bag.png" class="haste-item" alt="アイテム"></a>
+                                        <a href="/item-detail?itemId=4"><img src="static/images/buf-jp.png" class="haste-item"
+                                                alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.buf_jp }}</p>
                                         <p class="coin">800コイン</p>
-                                        <input type="text" value="300" name="buf_en" hidden>
+                                        <input type="text" value="800" name="buf_jp" hidden>
+                                        <label class="selectbox-6">
+                                            <select name="quantity_jp" id="bufferJp">
+                                                <option value="0">0</option>
+                                                <option value="1">1</option>
+                                                <option value="2">2</option>
+                                                <option value="3">3</option>
+                                                <option value="4">4</option>
+                                                <option value="5">5</option>
+                                                <option value="6">6</option>
+                                                <option value="7">7</option>
+                                                <option value="8">8</option>
+                                                <option value="9">9</option>
+                                                <option value="10">10</option>
+                                            </select>
+                                        </label>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="buffer">
+                                        <a href="/item-detail?itemId=5"><img src="static/images/buf-en.png" class="haste-item"
+                                                alt="アイテム"></a>
+                                        <p class="quantity_item">×{{ quantity.buf_en }}</p>
+                                        <p class="coin">800コイン</p>
+                                        <input type="text" value="800" name="buf_en" hidden>
                                         <label class="selectbox-6">
                                             <select name="quantity_en" id="bufferEn">
                                                 <option value="0">0</option>
@@ -166,13 +186,14 @@
                             </tr>
                         </table>
                     </div>
-                    {% if messages and messages.poor %}
-                        <p class="messages_log">{{ messages.poor }}</p>
-                    {% elif messages and message.comp %}
-                        <p class="messages_log">{{ messages.comp }}</p>
-                    {% endif %}
+                        {% with flashed_messages = get_flashed_messages(with_categories=true) %}
+                          {% if flashed_messages %}
+                            {% set category, message = flashed_messages[-1] %}
+                            <p class="messages_log_{{ category }}">{{ message }}</p>
+                          {% endif %}
+                        {% endwith %}
+                    <button class="buy-btn" disabled><span class="btn-back">購入</span></button>
 
-                    <button class="buy-btn"><span class="btn-back">購入</span></button>
                     <a href="/main" class="back-main"><span class="btn-back">戻る</span></a>
                 </form>
             </div>
@@ -180,41 +201,62 @@
     </div>
 
     <script>
-
+        // アイテムの単価をJavaScriptオブジェクトで定義
         const itemPrices = {
             potionLow: 300,
             potionMid: 1000,
             potionHigh: 2000,
-            bufferLow: 800,
-            bufferMid: 800,
-            bufferHigh: 800
+            bufferJp: 800, // name属性とid属性に合わせて修正
+            bufferMt: 800, // name属性とid属性に合わせて修正
+            bufferEn: 800  // name属性とid属性に合わせて修正。input type="text" value="300" だった部分を800に合わせました
         };
 
-
+        // 全てのselect要素と合計金額表示要素を取得
         const selectElements = document.querySelectorAll('select');
         const totalPriceElement = document.getElementById('totalPrice');
+        const buyButton = document.querySelector('.buy-btn'); // 購入ボタンを取得
 
-        function calculateTotalPrice() {
+        /**
+         * 合計金額を計算し、購入ボタンの有効/無効を切り替える関数
+         */
+        function calculateTotalPriceAndToggleBuyButton() {
             let total = 0;
+            let allQuantitiesAreZero = true; // 全ての数量が0かどうかのフラグ
+
             selectElements.forEach(select => {
-                const itemId = select.id;
-                const quantity = parseInt(select.value);
+                const itemId = select.id; // select要素のIDを取得
+                const quantity = parseInt(select.value); // 選択された数量を整数に変換
 
+                // quantity_enのinput type="text" valueが300でしたが、pタグの800と合わせました
+                // もしIDとitemPricesのキーが対応していなければ、name属性を使うなど調整してください
+                const price = itemPrices[itemId];
 
-                if (itemPrices[itemId] && !isNaN(quantity)) {
-                    total += itemPrices[itemId] * quantity;
+                if (!isNaN(quantity) && quantity > 0 && price) { // 数量が有効で0より大きく、価格も存在する場合
+                    total += price * quantity;
+                    allQuantitiesAreZero = false; // 1つでも0より大きい数量があればフラグをfalseに
                 }
+                // isNaN(quantity) は、quantityが「NaN」でないことを確認します。
+                // price が undefined になる可能性があるので、price も存在するか確認します。
             });
+
             totalPriceElement.textContent = total; // 合計金額を更新
+
+            // 購入ボタンの有効/無効を切り替える
+            // 全ての数量が0の場合、または合計金額が0の場合はボタンを無効にする
+            if (allQuantitiesAreZero || total === 0) {
+                buyButton.disabled = true;
+            } else {
+                buyButton.disabled = false;
+            }
         }
 
-
+        // 各select要素に変更イベントリスナーを追加
         selectElements.forEach(select => {
-            select.addEventListener('change', calculateTotalPrice);
+            select.addEventListener('change', calculateTotalPriceAndToggleBuyButton);
         });
 
-
-        calculateTotalPrice();
+        // ページロード時に一度計算を実行し、ボタンの状態を初期設定
+        calculateTotalPriceAndToggleBuyButton();
     </script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, json, redirect, url_for, jsonify
+from flask import Flask, render_template, request, session, json, redirect, url_for, jsonify , flash
 import mysql.connector
 import re
 from functools import wraps
@@ -14,6 +14,24 @@ app.secret_key = "qawsedrftgyhujikolp"
 # Gemini API設定
 GEMINI_API_KEY = "AIzaSyBI4JzjwaPUV38U6DxbcUi5J5BKdN-cS3o"
 genai.configure(api_key=GEMINI_API_KEY)
+
+
+
+# 敵データ（例）
+ENEMY_DATA = {
+    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6, "coin": 210, "exp": 560},
+    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8, "coin": 270, "exp": 730},
+    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10, "coin": 350, "exp": 945},
+    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12, "coin": 460, "exp": 1230},
+    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14, "coin": 600, "exp": 1600},
+    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18, "coin": 770, "exp": 2085},
+    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20, "coin": 1000, "exp": 2700},
+    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22, "coin": 1300, "exp": 3520},
+    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26, "coin": 1690, "exp": 4570},
+    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30, "coin": 3500, "exp": 8910}
+}
+
+
 
 
 # db接続用関数
@@ -397,6 +415,44 @@ def validate_question_quality(question_data):
     return issues
 
 
+# rank計算
+def calculate_rank_and_exp(total_exp, base_exp=1000, exp_multiplier=1.2):
+    rank = 1
+    required_exp = base_exp
+
+    while total_exp >= required_exp:
+        total_exp -= required_exp
+        rank += 1
+        required_exp = int(required_exp * exp_multiplier)
+
+    current_exp = total_exp
+    next_exp = required_exp
+    return rank, current_exp, next_exp
+
+
+# 攻撃力計算
+def equipmentAT(id, level):
+    if id == 1:
+        at = 60
+        while level > 1:
+            at += 10
+            level -= 1
+            
+    elif id == 2:
+        at = 90
+        while level > 1:
+            at += 15
+            level -= 1
+            
+    elif id == 3:
+        at = 140
+        while level > 1:
+            at += 20
+            level -= 1
+            
+    return at
+
+
 ############################################################################
 ### パスの定義
 ############################################################################
@@ -408,7 +464,7 @@ def index():
 
 
 # ログアウト
-@app.route('/logout')
+@app.route('/clear')
 def clear():
     session.clear()
     return redirect(url_for("index"))
@@ -489,6 +545,10 @@ def register():
         }
 
         cur.execute(sql, data)
+
+        sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, 1, 1, 0)"
+        cur.execute(sql, (accountId,))
+
         con.commit()
         con.close()
         cur.close()
@@ -543,15 +603,19 @@ def main():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+
     cur.close()
     con.close()
 
-    return render_template("main.html", coin=coin)
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+
+    return render_template("main.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp)
 
 
 # ショップ
@@ -562,14 +626,59 @@ def shop():
     cur = con.cursor()
 
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
+    quantity = {}
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 1"
+    cur.execute(sql, (accountId,))
+    potion_low_re = cur.fetchone()
+    potion_low = potion_low_re[0] if potion_low_re else 0
+    quantity["potion_low"] = potion_low
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 2"
+    cur.execute(sql, (accountId,))
+    potion_mid_re = cur.fetchone()
+    potion_mid = potion_mid_re[0] if potion_mid_re else 0
+    quantity["potion_mid"] = potion_mid
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 3"
+    cur.execute(sql, (accountId,))
+    potion_high_re = cur.fetchone()
+    potion_high = potion_high_re[0] if potion_high_re else 0
+    quantity["potion_high"] = potion_high
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 4"
+    cur.execute(sql, (accountId,))
+    buf_jp_re = cur.fetchone()
+    buf_jp = buf_jp_re[0] if buf_jp_re else 0
+    quantity["buf_jp"] = buf_jp
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 5"
+    cur.execute(sql, (accountId,))
+    buf_en_re = cur.fetchone()
+    buf_en = buf_en_re[0] if buf_en_re else 0
+    quantity["buf_en"] = buf_en
+
+    sql = " SELECT ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = 6"
+    cur.execute(sql, (accountId,))
+    buf_mt_re = cur.fetchone()
+    buf_mt = buf_mt_re[0] if buf_mt_re else 0
+    quantity["buf_mt"] = buf_mt
+
+
+
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+
     cur.close()
     con.close()
-    return render_template("shop.html", coin=coin)
+
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+
+    return render_template("shop.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp,quantity=quantity)
 
 
 # ショップアイテム購入
@@ -578,23 +687,91 @@ def shop():
 def buy_shop():
     con = conn_db()
     cur = con.cursor()
+    try:
+        accountId = session.get("login_id")
+        if not accountId:
+            return {"error": "ログインが必要です"}
 
-    potion_low = request.form.get('potion_low')
-    potion_mid = request.form.get('potion_mid')
-    potion_high = request.form.get('potion_high')
-    buf_jp = request.form.get('buf_jp')
-    buf_mt = request.form.get('buf_mt')
-    buf_en = request.form.get('buf_en')
+        # --- アイテム情報の定義 ---
+        items_info = {
+            'low': {'itemId': 1, 'price_key': 'potion_low', 'quantity_key': 'quantity_low'},
+            'mid': {'itemId': 2, 'price_key': 'potion_mid', 'quantity_key': 'quantity_mid'},
+            'high': {'itemId': 3, 'price_key': 'potion_high', 'quantity_key': 'quantity_high'},
+            'jp': {'itemId': 4, 'price_key': 'buf_jp', 'quantity_key': 'quantity_jp'},
+            'en': {'itemId': 5, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
+            'mt': {'itemId': 6, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
+        }
 
-    accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
-    cur.execute(sql, (accountId,))
-    result = cur.fetchone()
+        items_to_purchase = []
+        total_all = 0
 
-    coin = result[0] if result else 0
-    cur.close()
-    con.close()
-    return render_template("shop.html", coin=coin)
+        # --- 合計金額の計算と購入リストの作成 ---
+        for key, info in items_info.items():
+            price_str = request.form.get(info['price_key'], '0')
+            quantity_str = request.form.get(info['quantity_key'], '0')
+
+            price = int(price_str) if price_str.isdigit() else 0
+            quantity = int(quantity_str) if quantity_str.isdigit() else 0
+
+            if price > 0 and quantity > 0:
+                total_all += price * quantity
+                items_to_purchase.append({
+                    'itemId': info['itemId'],
+                    'quantity': quantity
+                })
+
+        # --- 所持コインの確認 ---
+        sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+        cur.execute(sql_select_coin, (accountId,))
+        result = cur.fetchone()
+        coin = result[0] if result else 0
+
+
+        # --- 購入処理 ---
+        if coin < total_all:
+            flash("コインが足りません", "poor")
+            return redirect(url_for('shop'))
+        else:
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (total_all, accountId))
+
+            for item in items_to_purchase:
+                itemId_to_buy = item['itemId']
+                quantity_to_add = item['quantity']
+
+                sql_check_item = "SELECT itemOwnershipId, ownedQuantity FROM t_itemOwnership WHERE accountId = %s AND itemId = %s"
+                cur.execute(sql_check_item, (accountId, itemId_to_buy))
+                ownership_result = cur.fetchone()
+
+                if ownership_result:
+                    itemOwnershipId, current_quantity = ownership_result
+                    new_quantity = current_quantity + quantity_to_add
+                    sql_update_item = "UPDATE t_itemOwnership SET ownedQuantity = %s WHERE itemOwnershipId = %s"
+                    cur.execute(sql_update_item, (new_quantity, itemOwnershipId))
+                else:
+                    cur.execute("SELECT MAX(itemOwnershipId) FROM t_itemOwnership")
+                    max_id_result = cur.fetchone()
+
+                    next_id = 1
+                    if max_id_result and max_id_result[0] is not None:
+                        next_id = max_id_result[0] + 1
+
+                    sql_insert_item = "INSERT INTO t_itemOwnership (itemOwnershipId, accountId, itemId, ownedQuantity) VALUES (%s, %s, %s, %s)"
+                    cur.execute(sql_insert_item, (next_id, accountId, itemId_to_buy, quantity_to_add))
+
+            con.commit()
+            flash("購入完了", "comp")
+            return redirect(url_for('shop'))
+    except Exception as e:
+        con.rollback()
+        print(f"エラーが発生したため、処理をロールバックしました: {e}")
+        return {"error": "購入処理中にエラーが発生しました。"}
+    finally:
+        if cur:
+            cur.close()
+        if con:
+            con.close()
+
 
 
 # バッグ内
@@ -604,15 +781,65 @@ def in_bag():
     con = conn_db()
     cur = con.cursor()
 
+
     accountId = session.get("login_id")
-    sql = " SELECT COIN FROM t_account WHERE accountId = %s "
+    sql = " SELECT COIN, totalExperience FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
     coin = result[0] if result else 0
+    total_experience = result[1] if result else 0
+
+    sql = "SELECT equipmentid , inUse , equipmentLevel FROM t_equipmentOwnership WHERE accountId = %s "
+    cur.execute(sql, (accountId,))
+    equipment_list = cur.fetchall()
+    equipment = {
+        item[0]: {
+            'inUse': bool(item[1]),
+            'level': item[2]
+        }
+        for item in equipment_list
+    }
+
+    spl ="SELECT equipmentId , equipmentPrice FROM t_equipment "
+    cur.execute(spl)
+    equipment_price_list = cur.fetchall()
+    equipment_price = {
+        item[0]: {
+            'equipmentPrice': item[1],
+        }
+        for item in equipment_price_list
+    }
+    print(equipment)
+
+    calculated_prices = {}
+
+    for equipment_id, details in equipment.items():
+
+        if equipment_id in equipment_price:
+
+            level = details['level']
+            base_price = equipment_price[equipment_id]['equipmentPrice']
+
+            if level > 0:
+
+                new_price = base_price * (1.6 ** (level - 1))
+            else:
+                # レベルが0以下の場合は基本価格のまま
+                new_price = base_price
+
+            rounded_price = int((new_price / 10) + 0.5) * 10
+
+            calculated_prices[equipment_id] = rounded_price
+
+    print(calculated_prices)
+
     cur.close()
     con.close()
-    return render_template("in_bag.html", coin=coin)
+
+    rank, exp, next_exp = calculate_rank_and_exp(total_experience)
+
+    return render_template("in_bag.html", coin=coin, rank=rank, exp=exp, next_exp=next_exp ,equipment=equipment , equipment_price=equipment_price , calculated_prices=calculated_prices)
 
 
 # 設定画面
@@ -690,23 +917,170 @@ def weapon_detail():
 def item_detail():
     con = conn_db()
     cur = con.cursor()
-
+    itemId = request.args.get('itemId')
     accountId = session.get("login_id")
     sql = " SELECT COIN FROM t_account WHERE accountId = %s "
     cur.execute(sql, (accountId,))
     result = cur.fetchone()
 
+    sql = "SELECT * FROM t_item WHERE itemId = %s "
+    cur.execute(sql, (itemId,))
+    item = cur.fetchone()
+    datas = []
+    data = {
+        "itemName": item[1],
+        "itemPrice": item[2],
+        "itemEffect": item[3],
+        "itemImage": item[4],
+    }
+    datas.append(data)
+    print(data)
+
     coin = result[0] if result else 0
     cur.close()
     con.close()
-    return render_template("item-detail.html", coin=coin)
+    return render_template("item-detail.html", coin=coin , item=item , datas=datas)
+
+#装備開放
+@app.route('/equipment-unlock', methods=['POST'])
+def unlock_equipment():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    unlock_price = request.form.get('unlock_price')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+    con = conn_db()
+    cur = con.cursor()
+
+    sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+    cur.execute(sql_select_coin, (accountId,))
+    result = cur.fetchone()
+    coin = result[0] if result else 0
+
+    unlock_price = int(unlock_price)
+    if coin < unlock_price:
+        flash("コインが足りません", "poor")
+        return redirect(url_for('in_bag'))
+
+    else:
+        try:
+            sql = "INSERT INTO t_equipmentOwnership (accountId, equipmentId, equipmentLevel, inUse) VALUES (%s, %s, 1, 0)"
+            cur.execute(sql, (accountId, equipmentId))
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (unlock_price, accountId))
+            con.commit()
+            flash("強化完了", "comp")
+            print(f"装備ID:{equipmentId} を開放しました！", "success")
+        except Exception as e:
+            con.rollback()
+            print(f"エラーが発生しました: {e}", "error")
+        finally:
+            if cur: cur.close()
+            if con: con.close()
+            pass
+
+    return redirect(url_for('in_bag'))
+
+#武器強化
+@app.route('/enhance-weapon' ,  methods=['POST'])
+@login_required
+def enhance_weapon():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    equipment_price = request.form.get('equipment_price')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+
+    con = conn_db()
+    cur = con.cursor()
+
+    sql_select_coin = "SELECT coin FROM t_account WHERE accountId = %s"
+    cur.execute(sql_select_coin, (accountId,))
+    result = cur.fetchone()
+    coin = result[0] if result else 0
+
+    equipment_price = int(equipment_price)
+
+    if coin < equipment_price:
+        flash("コインが足りません", "poor")
+        return redirect(url_for('in_bag'))
+    else:
+        try:
+            sql = "UPDATE t_equipmentOwnership SET equipmentLevel = equipmentLevel + 1 WHERE accountId = %s AND equipmentId = %s AND equipmentLevel < 5"
+            cur.execute(sql, (accountId, equipmentId))
+            sql_update_coin = "UPDATE t_account SET coin = coin - %s WHERE accountId = %s"
+            cur.execute(sql_update_coin, (equipment_price, accountId))
+            con.commit()
+            if cur.rowcount > 0:
+                print(f"装備ID:{equipmentId} を強化しました！", "success")
+            else:
+                print("すでにレベルが最大です。", "info")
+        except Exception as e:
+            con.rollback()
+            print(f"エラーが発生しました: {e}", "error")
+        finally:
+            if cur: cur.close()
+            if con: con.close()
+            pass
+
+    return redirect(url_for('in_bag'))
+
+@app.route('/equip-equipment', methods=['POST'])
+def equip_equipment():
+    accountId = session.get("login_id")
+    equipmentId = request.form.get('equipment_id')
+    if not accountId or not equipmentId:
+        return redirect(url_for('in_bag'))
+
+    con = conn_db()
+    cur = con.cursor()
+    try:
+        sql_unequip = "UPDATE t_equipmentOwnership SET inUse = 0 WHERE accountId = %s"
+        cur.execute(sql_unequip, (accountId,))
+
+        sql_equip = "UPDATE t_equipmentOwnership SET inUse = 1 WHERE accountId = %s AND equipmentId = %s"
+        cur.execute(sql_equip, (accountId, equipmentId))
+
+        con.commit()
+        print(f"装備ID:{equipmentId} を装備しました！", "success")
+    except Exception as e:
+        con.rollback()
+        print(f"エラーが発生しました: {e}", "error")
+    finally:
+        if cur: cur.close()
+        if con: con.close()
+        pass
+
+    return redirect(url_for('in_bag'))
 
 
 # 問題画面（従来）
 @app.route('/question')
 @login_required
 def question():
-    return render_template("question.html")
+    accountId = session.get("login_id")
+    
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+        
+    con = conn_db()
+    cur = con.cursor()
+    sql = "select equipmentId, equipmentLevel from t_equipmentOwnership where accountId = %s and inUse = 1"
+    cur.execute(sql, (accountId,))
+    row = cur.fetchone()
+    
+    if row:
+        equipmentId = row[0]
+        equipmentLevel = row[1]
+    
+    cur.close()
+    con.close()
+    
+    at = equipmentAT(equipmentId, equipmentLevel)
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", at=at, stage=stage, enemy=enemy, start_phase="move_select")
 
 
 # 科目指定付きの問題画面（新規）
@@ -714,7 +1088,29 @@ def question():
 @login_required
 def question_with_subject(subject):
     """科目指定付きの問題画面"""
-    return render_template("question.html", subject=subject)
+    accountId = session.get("login_id")
+    
+    try:
+        stage = int(request.args.get('stage', 1))
+    except ValueError:
+        stage = 1
+        
+    con = conn_db()
+    cur = con.cursor()
+    sql = "select equipmentId, equipmentLevel from t_equipmentOwnership where accountId = %s and inUse = 1"
+    cur.execute(sql, (accountId,))
+    row = cur.fetchone()
+    
+    if row:
+        equipmentId = row[0]
+        equipmentLevel = row[1]
+    
+    cur.close()
+    con.close()
+    
+    at = equipmentAT(equipmentId, equipmentLevel)
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
+    return render_template("question.html", at=at, subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
 
 
 # 問題生成API（高度版）
@@ -879,17 +1275,50 @@ def subject():
 
 
 # リザルト画面
-@app.route('/result')
+@app.route('/result', methods=['POST'])
 @login_required
 def result():
-    subjects = [
-        {'name': '漢字', 'score': 80.0},
-        {'name': '英語', 'score': 80.0},
-        {'name': '算数', 'score': 85.0},
-        {'name': '総合', 'score': 85.0}
-    ]
+    history_json = request.form.get('history', '{}')
+    history = json.loads(history_json)
+    
+    subjects = []
+    subjects_map = {
+        'math': '算数',
+        'kanji': '漢字',
+        'english': '英語'
+    }
+
+    total_correct = 0
+    total_total = 0
+
+    for key, display_name in subjects_map.items():
+        correct = history.get('subjects', {}).get(key, {}).get('correct', 0)
+        total = history.get('subjects', {}).get(key, {}).get('total', 0)
+        score = (correct / total * 100) if total > 0 else None
+
+        subjects.append({
+            'name': display_name,
+            'score': f"{round(score, 1)}%" if score is not None else "-"
+        })
+
+        total_correct += correct
+        total_total += total
+
+    # 総合スコア計算
+    total_score = (total_correct / total_total * 100) if total_total > 0 else None
+    subjects.append({
+        'name': '総合',
+        'score': f"{round(total_score, 1)}%" if total_score is not None else "-"
+    })
 
     def calculate_rank(score):
+        try:
+            if isinstance(score, str) and score.endswith('%'):
+                score = score[:-1]  # 末尾の「％」を取り除く
+            score = float(score)
+        except (TypeError, ValueError):
+            return 'E'  # 数値でない場合は最低ランク
+        
         if score is None:
             return 'E'
         elif score >= 95:
@@ -904,6 +1333,15 @@ def result():
             return 'D'
         else:
             return 'E'
+        
+    def calculate_rank_by_mistakes(total_correct, total_questions):
+        rank_order = ['S', 'A', 'B', 'C', 'D', 'E']
+        rank_index = 0
+        mistakes = total_questions - total_correct
+        rank_index += mistakes
+        if rank_index >= len(rank_order):
+            rank_index = len(rank_order) - 1
+        return rank_order[rank_index]
 
     def get_rank_color(rank):
         return {
@@ -915,26 +1353,88 @@ def result():
             'E': 'gray'
         }.get(rank, 'black')
 
-    total_score = next((s['score'] for s in subjects if s['name'] == '総合'), None)
-    rank = calculate_rank(total_score)
+    # 総合スコア計算
+    total_score = (total_correct / total_total * 100) if total_total > 0 else None
+
+    # 2つのランクを計算
+    rank_score = calculate_rank(total_score)
+    rank_mistakes = calculate_rank_by_mistakes(total_correct, total_total)
+
+    # 高い方を適用
+    rank_order = ['S', 'A', 'B', 'C', 'D', 'E']
+    rank = rank_score if rank_order.index(rank_score) < rank_order.index(rank_mistakes) else rank_mistakes
     rank_color = get_rank_color(rank)
+    
+    stage = int(request.form.get('stage', 1))
+    # ENEMY_DATAから該当ステージの敵情報を取得
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])
+    
+    # ランク補正倍率
+    rank_multiplier = {
+        'S': 1.5,
+        'A': 1.2,
+        'B': 1.1,
+        'C': 1.0,
+        'D': 0.9,
+        'E': 0.8
+    }
+    
+    # 経験値変化
+    exp = enemy['exp']
+    exp = int(exp * rank_multiplier.get(rank, 1.0) * (1 + total_correct / 10))
+        
+    # コイン変化
+    coin = enemy['coin']
+    coin = int(coin * rank_multiplier.get(rank, 1.0) * (1 + total_correct / 10))
 
     results_data = {
         'subjects': subjects,
         'rank': rank,
         'rank_color': rank_color,
-        'experience': 125000,
-        'coins': 800
+        'experience': exp,
+        'coins': coin
     }
+    
+    con = conn_db()
+    cur = con.cursor()
 
-    return render_template("result.html", data=results_data)
+    accountId = session.get("login_id")
+    cur.execute("SELECT totalExperience, coin FROM t_account WHERE accountId = %s", (accountId,))
+    result = cur.fetchone()
+    
+    if result:
+        current_exp, current_coin = result
+        new_exp = current_exp + exp
+        new_coin = current_coin + coin
 
+        # 更新
+        cur.execute(
+            "UPDATE t_account SET totalExperience = %s, coin = %s WHERE accountId = %s",
+            (new_exp, new_coin, accountId)
+        )
+        con.commit()
+
+    cur.close()
+    con.close()
+
+    # 結果をセッションに保存してリダイレクト
+    session['results_data'] = results_data
+    return redirect(url_for('result_get'))
+
+@app.route('/result', methods=['GET'])
+@login_required
+def result_get():
+    data = session.pop('results_data', None)  # 一度取り出すと消えるので再表示しても加算されない
+    if not data:
+        return redirect(url_for('main'))  # 不正アクセス対策
+    return render_template("result.html", data=data)
 
 
 # gaeover
-@app.route('/gameover')
+@app.route('/gameover', methods=['POST'])
 def gameover():
-    return render_template("gameover.html")
+    stage = request.form.get('stage', 1)
+    return render_template("gameover.html", stage=stage)
 
 
 # clear
@@ -947,6 +1447,26 @@ def clear_screen():
 @app.route('/test')
 def test():
     return render_template("xxx.html")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # 実行制御

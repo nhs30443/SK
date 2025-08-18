@@ -17,28 +17,25 @@ h2{
 .potion {
     display: flex;
     flex-direction: column;
-    width: 50%;
-    height: 70%;
+    width: 7vw;
+    height: 16vh;
     align-items: center;
+    gap: 10px;
     padding: 3vh 5vw 0 2vw;
 }
 
 .coin{
-    position: relative;
     font-size: clamp(4px, 1vw, 90px);
-    top: -1vh;
 }
 
 .buffer{
     display: flex;
-    position: relative;
-    top: -5vh;
-    left: 0.3vw;
     flex-direction: column;
-    width: 50%;
-    height: 10%;
+    width: 7vw;
+    height: 20vh;
     align-items: center;
-    padding: 1vh 5vw 0 2vw;
+    gap: 10px;
+    padding: 0 5vw 0 2vw;
 }
 
 .haste-content{
@@ -46,13 +43,13 @@ h2{
 }
 
 .haste-item{
-    width: auto;
-    height: 6vw;
+    width: 7vw;
+    height: auto;
 }
 
 .potion-item{
-    height: auto;
-    width: 5vw;
+    height: 13vh;
+    width: auto;
 }
 
 button{
@@ -74,13 +71,12 @@ button{
 
 .back-main{
     position: relative;
-    top: -24.5vh;
+    top: -21.5vh;
     left: 44.5vw;
     color: #ffffff;
     text-decoration: none;
     font-size: clamp(8px, 2vw, 32px);
     margin-left: 0.9vw;
-    padding: 0.5% 0 0.5% 0;
     width: 12vw;
     height: 13%;
     border-radius: 15px;
@@ -94,7 +90,7 @@ button{
 
 .buy-btn{
     position: relative;
-    top: -28vh;
+    top: -25vh;
     left: 44.5vw;
     color: #ffffff;
     text-decoration: none;
@@ -147,7 +143,7 @@ button{
     appearance: none;
     height: 5vh;
     width: auto;
-    padding: 2% calc(1.5% + 2vw) 2% 10%;
+    padding: .4em calc(.8em + 30px) .4em .8em;
     border: 1px solid #d0d0d0;
     border-radius: 3px;
     background-color: #fff;
@@ -161,30 +157,4 @@ button{
     top: 3vh;
     left: 47vw;
     font-size: clamp(8px, 2vw, 180px);
-}
-
-.messages_log_poor{
-    position: absolute;
-    z-index: 10000;
-    top: 15.5vh;
-    left: 46vw;
-    color: red;
-    font-weight: bold;
-    font-size: clamp(4px, 1.3vw, 45px);
-}
-
-.messages_log_comp{
-    position: absolute;
-    z-index: 10000;
-    top: 15.5vh;
-    left: 48vw;
-    font-weight: bold;
-    font-size: clamp(4px, 1.5vw, 45px);
-}
-
-.quantity_item{
-    position: relative;
-    top: -3vh;
-    left: 3.5vw;
-    font-size: clamp(4px, 1vw, 40px);
 }

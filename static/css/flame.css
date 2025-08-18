@@ -67,11 +67,53 @@ html, body {
 .coinNumber{
   font-size: clamp(8px, 1.6vw, 24px);
   position: absolute;
-  top: 3%;
+  top: 3.5%;
   left: 80vw;
   z-index: 4;
 }
 
 .cross{
     font-size: clamp(6px, 1.2vw, 18px);
+}
+
+.exp-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+
+  position: absolute;
+  top: 3.5%;
+  left: 20vh;
+
+  border-radius: 1vh;
+  font-family: 'Mochiy Pop One', cursive; /* かわいい丸文字風 */
+  font-weight: bold; /* 太字 */
+  z-index: 10;
+  gap: 1vw;
+}
+
+.rank-value {
+  color: #e09d18; /* 好きな色に変更 */
+}
+
+.exp-label {
+  font-size: clamp(8px, 1.6vw, 24px);
+  color: #000;
+  white-space: nowrap;
+}
+
+.exp-bar {
+  width: 15vw; /* ← 横幅を明示的に指定 */
+  min-width: 80px; /* スマホ対応も兼ねる */
+  height: clamp(8px, 1.4vw, 24px);
+  background-color: #444;
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.exp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ffcc00, #ffaa00);
+  width: 80%; /* or inline styleで動的に調整 */
+  transition: width 0.4s ease;
 }

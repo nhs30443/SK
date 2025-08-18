@@ -15,14 +15,14 @@ h2{
     padding: 3vh 0 0 3vw;
 }
 .haste:first-child{
-    padding: 5vh 5vw 0 2vw;
+    padding: 1vh 5vw 0 2vw;
 }
 .haste {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    padding: 5vh 5vw 0 0;
+    padding: 1vh 5vw 0 0;
     width: fit-content;
 }
 
@@ -41,6 +41,20 @@ button{
     color: white;
     background: linear-gradient(90deg, #6a11cb, #2575fc);
     box-shadow: 0 0 8px #2575fc;
+    display: flex;
+    justify-content: center;  /* 水平方向中央 */
+    align-items: center;      /* 垂直方向中央 */
+    margin: 3vh 0 0 0;
+}
+
+.equipment-af{
+    width: 6vw;
+    height: 6vh;
+    border-radius: 15px;
+    border: white;
+    color: white;
+    background: linear-gradient(90deg, #cbac11, #fca625);
+    box-shadow: 0 0 8px #fca625;
     display: flex;
     justify-content: center;  /* 水平方向中央 */
     align-items: center;      /* 垂直方向中央 */
@@ -73,4 +87,22 @@ button{
 .btn-back{
     font-size: clamp(8px, 1.8vw, 32px);
     padding: 5% 0;
+}
+
+.coin-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    width: 85%;
+
+    font-size: clamp(6px, 2vw, 18px);
+    font-weight: bold;
+    color: #fff7d1;
+
+    background: linear-gradient(145deg, #f5c542, #d4a017);
+    padding: 0.3em 0.6em;
+    border-radius: 999px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
 }

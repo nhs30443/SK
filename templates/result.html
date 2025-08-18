@@ -15,22 +15,12 @@
                     <h2 class="section-title">正答率</h2>
                     <div class="subject-scores">
                         {% for subject in data.subjects %}
-                        <div class="score-row {% if subject.name == '総合' %}total{% endif %}">
+                        <div class="score-row">
                             <span class="subject">{{ subject.name }}</span>
-                            <div class="score-details">
-                                <span class="percentage">{{ subject.score }}%</span>
-                                {% if subject.get('total_questions', 0) > 0 %}
-                                <span class="question-count">
-                                    {{ subject.get('correct_answers', 0) }}/{{ subject.get('total_questions', 0) }}問正解
-                                </span>
-                                {% else %}
-                                <span class="question-count">未実施</span>
-                                {% endif %}
-                            </div>
+                            <span class="percentage">{{ subject.score }}</span>
                         </div>
                         {% endfor %}
                     </div>
-                    <div class="period-info">{{ data.period_info }}</div>
                 </div>
 
                 <div class="result-section">
@@ -45,11 +35,7 @@
             </div>
 
             <div class="footer-section">
-                <div class="stats-grid">
-                    <div class="stat-item">
-                        <span class="stat-label">総問題数</span>
-                        <span class="stat-value">{{ data.total_questions }}問</span>
-                    </div>
+                <div class="stats">
                     <div class="stat-item">
                         <span class="stat-label">経験値</span>
                         <span class="stat-value">{{ "{:,}".format(data.experience) }}</span>
@@ -59,36 +45,8 @@
                         <span class="stat-value">{{ data.coins }}</span>
                     </div>
                 </div>
-
-                {% if data.get('accuracy_trends') %}
-                <div class="trends-section">
-                    <h3 class="trends-title">正答率の推移</h3>
-                    <div class="trends-grid">
-                        <div class="trend-item">
-                            <div class="trend-period">過去7日間</div>
-                            <div class="trend-score">{{ data.accuracy_trends.7_days }}%</div>
-                        </div>
-                        <div class="trend-item">
-                            <div class="trend-period">過去30日間</div>
-                            <div class="trend-score">{{ data.accuracy_trends.30_days }}%</div>
-                        </div>
-                        <div class="trend-item">
-                            <div class="trend-period">全期間</div>
-                            <div class="trend-score">{{ data.accuracy_trends.all_time }}%</div>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="action-buttons">
-                    <a href="{{ url_for('subject') }}" class="btn btn-primary">もう一度挑戦</a>
-                    <a href="{{ url_for('main') }}" class="btn btn-secondary">メインに戻る</a>
-                </div>
             </div>
         </div>
     </div>
-
-    <!-- 外部JavaScriptファイルの読み込み -->
-    <script src="{{ url_for('static', filename='js/result.js') }}"></script>
 </body>
 </html>

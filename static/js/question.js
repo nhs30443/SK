@@ -265,14 +265,6 @@ function checkBattleEnd() {
             // ゲームオーバー処理
             localStorage.removeItem('playerHP');
             localStorage.removeItem('enemyHP');
-            function checkBattleEnd() {
-    if (battleEnded) return;  // すでに終了してたら何もしない
-    if (playerHP <= 0) {
-        battleEnded = true;
-        setTimeout(() => {
-            // ゲームオーバー処理
-            localStorage.removeItem('playerHP');
-            localStorage.removeItem('enemyHP');
             // ゲームオーバー画面に遷移
             showGameOverScreen();
         }, 1000);
@@ -287,6 +279,17 @@ function showGameOverScreen() {
     // 方法2: 同じページ内でゲームオーバー画面を表示
     // document.getElementById('battle-container').style.display = 'none';
     // document.getElementById('gameover-container').style.display = 'block';
+}
+    if (enemyHP <= 0) {
+        battleEnded = true;
+        setTimeout(() => {
+            alert("敵を倒しました！勝利です！");
+            // 勝利処理
+            localStorage.removeItem('playerHP');
+            localStorage.removeItem('enemyHP');
+            window.location.href = '/result';  // リザルト画面に移動
+        }, 1000);
+    }
 }
 
 function updatePlayerHP(amount) {
