@@ -1,9 +1,10 @@
 .in_bag{
-    position: absolute;
-    top: 30%;
-    left: 20vw;
-    width: 60vw;
-    height: 45%;
+    position: fixed;
+    bottom: 30%;
+    left: 20%;
+    width: 60%;
+    max-height: 420px;
+    aspect-ratio: 8 / 3;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.85), rgba(230, 230, 250, 0.85));
     z-index: 100;
     border-radius: 20px;
@@ -35,29 +36,26 @@ h2{
 }
 
 button{
-    width: 6vw;
-    height: 6vh;
+    width: 7vw;
+    aspect-ratio: 3 / 1;
     border-radius: 15px;
-    color: white;
-    background: linear-gradient(90deg, #6a11cb, #2575fc);
-    box-shadow: 0 0 8px #2575fc;
     display: flex;
     justify-content: center;  /* 水平方向中央 */
     align-items: center;      /* 垂直方向中央 */
-    margin: 3vh 0 0 0;
+    margin-top: clamp(2px, 2vh, 30px);
+}
+
+.btn{
+    color: white;
+    background: linear-gradient(90deg, #6a11cb, #2575fc);
+    box-shadow: 0 0 8px #2575fc;
 }
 
 .equipment-af{
-    width: 6vw;
-    height: 6vh;
-    border-radius: 15px;
     border: white;
     color: white;
     background: linear-gradient(90deg, #cbac11, #fca625);
     box-shadow: 0 0 8px #fca625;
-    display: flex;
-    justify-content: center;  /* 水平方向中央 */
-    align-items: center;      /* 垂直方向中央 */
 }
 
 .btn-text{
@@ -93,12 +91,11 @@ button{
     display: inline-flex;
     align-items: center;
     gap: 0.4em;
-    width: 85%;
-
-    font-size: clamp(6px, 2vw, 18px);
+    width: 6vw;
+    height: auto;
+    font-size: clamp(3px, 1vw, 18px);
     font-weight: bold;
     color: #fff7d1;
-
     background: linear-gradient(145deg, #f5c542, #d4a017);
     padding: 0.3em 0.6em;
     border-radius: 999px;
