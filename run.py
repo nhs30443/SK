@@ -19,16 +19,16 @@ genai.configure(api_key=GEMINI_API_KEY)
 
 # 敵データ（例）
 ENEMY_DATA = {
-    1: {"name": "スライム", "image": "suraimu.png", "hp": 100, "attack": -6, "coin": 210, "exp": 560},
-    2: {"name": "ゴブリン", "image": "goburinn.png", "hp": 130, "attack": -8, "coin": 270, "exp": 730},
-    3: {"name": "ゴブリン2", "image": "goburinn2.png", "hp": 150, "attack": -10, "coin": 350, "exp": 945},
-    4: {"name": "ドラゴン", "image": "doragon.png", "hp": 180, "attack": -12, "coin": 460, "exp": 1230},
-    5: {"name": "ドラゴン", "image": "doragon.png", "hp": 210, "attack": -14, "coin": 600, "exp": 1600},
-    6: {"name": "ドラゴン", "image": "doragon.png", "hp": 250, "attack": -18, "coin": 770, "exp": 2085},
-    7: {"name": "ドラゴン", "image": "doragon.png", "hp": 300, "attack": -20, "coin": 1000, "exp": 2700},
-    8: {"name": "ドラゴン", "image": "doragon.png", "hp": 450, "attack": -22, "coin": 1300, "exp": 3520},
-    9: {"name": "ドラゴン", "image": "doragon.png", "hp": 650, "attack": -26, "coin": 1690, "exp": 4570},
-    10: {"name": "ドラゴン", "image": "doragon.png", "hp": 1000, "attack": -30, "coin": 3500, "exp": 8910}
+    1: {"name": "スライム", "image": "01_.png", "hp": 100, "attack": -6, "coin": 210, "exp": 560},
+    2: {"name": "ゴースト", "image": "02_.png", "hp": 130, "attack": -8, "coin": 270, "exp": 730},
+    3: {"name": "ゴブリン", "image": "03_.png", "hp": 150, "attack": -10, "coin": 350, "exp": 945},
+    4: {"name": "ウルフ", "image": "04_.png", "hp": 180, "attack": -12, "coin": 460, "exp": 1230},
+    5: {"name": "ミミック", "image": "05_.png", "hp": 210, "attack": -14, "coin": 600, "exp": 1600},
+    6: {"name": "スケルトン", "image": "06_.png", "hp": 250, "attack": -18, "coin": 770, "exp": 2085},
+    7: {"name": "じしょモンスター", "image": "07_.png", "hp": 300, "attack": -20, "coin": 1000, "exp": 2700},
+    8: {"name": "さまようよろい", "image": "08_.png", "hp": 450, "attack": -22, "coin": 1300, "exp": 3520},
+    9: {"name": "ゴーレム", "image": "09_.png", "hp": 650, "attack": -26, "coin": 1690, "exp": 4570},
+    10: {"name": "ドラゴン", "image": "10_0.png", "hp": 1000, "attack": -30, "coin": 3500, "exp": 8910}
 }
 
 
@@ -521,7 +521,7 @@ def register():
                                      gradeSetting, \
                                      coin, \
                                      totalExperience, \
-                                     playerImage) \
+                                     stage) \
               VALUES (%(accountId)s, \
                       %(username)s, \
                       %(emailAddress)s, \
@@ -530,7 +530,7 @@ def register():
                       %(gradeSetting)s, \
                       %(coin)s, \
                       %(totalExperience)s, \
-                      %(playerImage)s) \
+                      %(stage)s) \
               """
         data = {
             'accountId': accountId,
@@ -539,9 +539,9 @@ def register():
             'password': password,
             'gender': gender,
             'gradeSetting': gradeSetting,
-            'coin': 0,
+            'coin': 500,
             'totalExperience': 0,
-            'playerImage': None
+            'stage': 0
         }
 
         cur.execute(sql, data)
@@ -697,9 +697,9 @@ def buy_shop():
             'low': {'itemId': 1, 'price_key': 'potion_low', 'quantity_key': 'quantity_low'},
             'mid': {'itemId': 2, 'price_key': 'potion_mid', 'quantity_key': 'quantity_mid'},
             'high': {'itemId': 3, 'price_key': 'potion_high', 'quantity_key': 'quantity_high'},
-            'jp': {'itemId': 4, 'price_key': 'buf_jp', 'quantity_key': 'quantity_jp'},
-            'en': {'itemId': 5, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
-            'mt': {'itemId': 6, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
+            'mt': {'itemId': 4, 'price_key': 'buf_mt', 'quantity_key': 'quantity_mt'},
+            'jp': {'itemId': 5, 'price_key': 'buf_jp', 'quantity_key': 'quantity_jp'},
+            'en': {'itemId': 6, 'price_key': 'buf_en', 'quantity_key': 'quantity_en'},
         }
 
         items_to_purchase = []
@@ -1054,7 +1054,7 @@ def equip_equipment():
     return redirect(url_for('in_bag'))
 
 
-# 問題画面（従来）
+# 問題画面（初回）
 @app.route('/question')
 @login_required
 def question():
@@ -1074,13 +1074,35 @@ def question():
     if row:
         equipmentId = row[0]
         equipmentLevel = row[1]
+        
+    
+    sql = "SELECT itemId, ownedQuantity FROM t_itemOwnership WHERE accountId = %s"
+    cur.execute(sql, (accountId,))
+    items = cur.fetchall()
+    
+    # 辞書に変換
+    item_counts = {str(item[0]): item[1] for item in items}
     
     cur.close()
     con.close()
     
     at = equipmentAT(equipmentId, equipmentLevel)
-    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
-    return render_template("question.html", at=at, stage=stage, enemy=enemy, start_phase="move_select")
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1]).copy()  # 該当がなければ1を返す
+    
+    # 画像名のランダム処理（1～9ステージ）
+    if 1 <= stage <= 9:
+        weak_number = random.randint(1, 3)
+        name, ext = enemy['image'].split('.')  # '01_.png' → ['01_', 'png']
+        enemy['image'] = f"{name}{weak_number}.{ext}"  # '01_' + '2' + '.png' → '01_2.png'
+        session['enemy_weak_number'] = weak_number
+        enemy_weak_number = weak_number
+    else:
+        # ステージ10は固定0
+        session['enemy_weak_number'] = 0
+        enemy_weak_number = 0
+        
+        
+    return render_template("question.html", item_counts=item_counts, at=at, stage=stage, enemy=enemy, enemy_weak_number=enemy_weak_number, start_phase="move_select")
 
 
 # 科目指定付きの問題画面（新規）
@@ -1089,6 +1111,7 @@ def question():
 def question_with_subject(subject):
     """科目指定付きの問題画面"""
     accountId = session.get("login_id")
+    enemy_weak_number = session.get("enemy_weak_number")
     
     try:
         stage = int(request.args.get('stage', 1))
@@ -1104,13 +1127,28 @@ def question_with_subject(subject):
     if row:
         equipmentId = row[0]
         equipmentLevel = row[1]
+        
+    
+    sql = "SELECT itemId, ownedQuantity FROM t_itemOwnership WHERE accountId = %s"
+    cur.execute(sql, (accountId,))
+    items = cur.fetchall()
+    
+    # 辞書に変換
+    item_counts = {str(item[0]): item[1] for item in items}
     
     cur.close()
     con.close()
     
     at = equipmentAT(equipmentId, equipmentLevel)
-    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1])  # 該当がなければ1を返す
-    return render_template("question.html", at=at, subject=subject, stage=stage, enemy=enemy, start_phase="quiz")
+    enemy = ENEMY_DATA.get(stage, ENEMY_DATA[1]).copy()  # 該当がなければ1を返す
+    
+    # 画像名のランダム処理（1～9ステージ）
+    if 1 <= stage <= 9:
+        weak_number = enemy_weak_number
+        name, ext = enemy['image'].split('.')  # '01_.png' → ['01_', 'png']
+        enemy['image'] = f"{name}{weak_number}.{ext}"  # '01_' + '2' + '.png' → '01_2.png'
+        
+    return render_template("question.html", item_counts=item_counts, at=at, subject=subject, stage=stage, enemy=enemy, enemy_weak_number=enemy_weak_number, start_phase="quiz")
 
 
 # 問題生成API（高度版）
@@ -1196,6 +1234,34 @@ def api_check_answer():
         return jsonify({'error': 'エラーが発生しました'}), 500
 
 
+# アイテム使用API
+@app.route('/use-item', methods=['POST'])
+def use_item():
+    data = request.get_json()
+    item_id = data.get('itemId')
+    account_id = session.get("login_id")
+
+    try:
+        con = conn_db()
+        cur = con.cursor()
+        # 所持数が0以上なら1減らす
+        cur.execute(
+            "UPDATE t_itemOwnership SET ownedQuantity = ownedQuantity - 1 "
+            "WHERE accountId=%s AND itemId=%s AND ownedQuantity > 0",
+            (account_id, item_id)
+        )
+        con.commit()
+        success = cur.rowcount > 0
+    except Exception as e:
+        print(e)
+        success = False
+    finally:
+        cur.close()
+        con.close()
+
+    return jsonify({"success": success})
+
+
 # デバッグ用エンドポイント（開発時のみ使用）
 @app.route('/api/debug/question-stats')
 @login_required
@@ -1264,7 +1330,43 @@ def refresh_question(subject):
 @app.route('/map')
 @login_required
 def map():
-    return render_template("map.html")
+    accountId = session.get("login_id")
+    # DB からステージ進行度を取得
+    con = conn_db()
+    cur = con.cursor()
+    sql = "SELECT stage FROM t_account WHERE accountId = %s"
+    cur.execute(sql, (accountId,))
+    row = cur.fetchone()
+    cur.close()
+    con.close()
+
+    stage = row[0] if row else 0  # デフォルト0
+
+    # stageStatus を作成
+    if stage == 0:
+        stage_status = [1,0,0,0,0,0,0,0,0,0]
+    elif stage == 1:
+        stage_status = [2,1,0,0,0,0,0,0,0,0]
+    elif stage == 2:
+        stage_status = [2,2,1,0,0,0,0,0,0,0]
+    elif stage == 3:
+        stage_status = [2,2,2,1,0,0,0,0,0,0]
+    elif stage == 4:
+        stage_status = [2,2,2,2,1,0,0,0,0,0]
+    elif stage == 5:
+        stage_status = [2,2,2,2,2,1,0,0,0,0]
+    elif stage == 6:
+        stage_status = [2,2,2,2,2,2,1,0,0,0]
+    elif stage == 7:
+        stage_status = [2,2,2,2,2,2,2,1,0,0]
+    elif stage == 8:
+        stage_status = [2,2,2,2,2,2,2,2,1,0]
+    elif stage == 9:
+        stage_status = [2,2,2,2,2,2,2,2,2,1]
+    elif stage == 10:
+        stage_status = [2,2,2,2,2,2,2,2,2,2]
+        
+    return render_template("map.html", stage_status=stage_status)
 
 
 # 科目選択画面

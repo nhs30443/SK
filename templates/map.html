@@ -23,6 +23,9 @@
     <script>
         // 背景画像のURLをJavaScriptに渡す
         window.backgroundImageUrl = "{{ url_for('static', filename='images/top.png') }}";
+
+        // Flask から渡された stage_status を JS 変数に
+        window.stageStatus = {{ stage_status | tojson }};
     </script>
     <script src="{{ url_for('static', filename='js/map.js') }}"></script>
 </body>

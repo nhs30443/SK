@@ -25,6 +25,25 @@ function getHPColor(hpPercent) {
     }
 }
 
+function updateItemCounts() {
+    const itemSlots = document.querySelectorAll(".item-slot");
+
+    itemSlots.forEach((slot, index) => {
+        const itemId = (index + 1).toString();  // 1~6のアイテムIDに対応
+        let count = window.itemCounts[itemId] || 0;
+
+        let countEl = slot.querySelector(".item-count");
+        if (!countEl) {
+            countEl = document.createElement("div");
+            countEl.className = "item-count";
+            slot.appendChild(countEl);
+        }
+        countEl.textContent = `所持: ${count}`;
+    });
+}
+
+document.addEventListener("DOMContentLoaded", updateItemCounts);
+
 
 $(document).ready(function() {
     if (startPhase === "move_select") {
@@ -223,13 +242,23 @@ async function checkAnswer(selectedIndex) {
         // URLパスから科目を取り出す
         const pathParts = window.location.pathname.split('/');
         const subject = pathParts[2];
-        const buf = localStorage.getItem('selectedSubject')
+        const buf = localStorage.getItem('selectedSubject');
+
+        // 基本攻撃力
+        let attackPower = window.PlayerAT;
+
+        // 弱点属性なら1.5倍
+        const subjectMap = { 'kanji': 1, 'math': 2, 'english': 3 };
+        if (subjectMap[subject] === window.enemyWeakNumber) {
+            attackPower *= 1.5;
+        }
+
         // 正解時は敵にダメージ
         if (buf === subject) {
-            updateEnemyHP(PlayerAT * 2);
+            updateEnemyHP(attackPower * 2);
             localStorage.removeItem('selectedSubject');  // buf を削除
         } else {
-            updateEnemyHP(PlayerAT);
+            updateEnemyHP(attackPower);
         }
         // 2秒後に敵からの反撃
         setTimeout(() => {
@@ -465,8 +494,39 @@ function closeItemModal() {
 }
 
 
-function selectItem(item) {
+async function selectItem(item) {
     console.log('選択されたアイテム:', item);
+
+    // アイテム個数を減らす
+    if (!window.itemCounts) window.itemCounts = {};
+    if (!window.itemCounts[item]) window.itemCounts[item] = 0;
+    if (window.itemCounts[item] > 0) {
+        window.itemCounts[item]--;
+    } else {
+        console.log('所持数がありません');
+        return; // 所持数ゼロなら処理を止める
+    }
+
+    // アイテム使用のサーバー更新
+    try {
+        const response = await fetch('/use-item', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ itemId: item })
+        });
+        const result = await response.json();
+
+        if (!result.success) {
+            console.error('DBの更新に失敗しました');
+            return;
+        }
+    } catch (error) {
+        console.error('DB更新リクエストでエラー:', error);
+        return;
+    }
+
+    // 個数表示更新
+    updateItemCounts();
 
     if (item === '1') {
         updatePlayerHP(4);
