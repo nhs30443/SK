@@ -822,8 +822,10 @@ def in_bag():
             base_price = equipment_price[equipment_id]['equipmentPrice']
 
             if level > 0:
-
-                new_price = base_price * (1.6 ** (level - 1))
+                if equipment_id == 1:
+                    new_price = base_price * (1.6 ** (level - 1))
+                else:
+                    new_price = base_price * (1.6 ** (level))
             else:
                 # レベルが0以下の場合は基本価格のまま
                 new_price = base_price
