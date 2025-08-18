@@ -3,13 +3,15 @@ let currentQuestion = null;
 let isAnswering = false;
 let questionCount = 0; // 問題数をカウント
 
-// プレイヤーの最大HPと現在HP
+// プレイヤーのパラメータ
 const maxPlayerHP = 40;
 let playerHP = 40;
+const PlayerAT = window.PlayerAT;
 
-// 敵の最大HPと現在HP
-const maxEnemyHP = 120;
-let enemyHP = 120;
+// 敵のパラメータ
+const maxEnemyHP = window.enemyData?.hp ?? 100;
+let enemyHP = window.enemyData?.hp ?? 100;
+const EnemyAT = window.enemyData?.attack ?? -10;
 
 let battleEnded = false;
 
@@ -22,6 +24,19 @@ function getHPColor(hpPercent) {
         return '#e60000';  // 赤
     }
 }
+
+
+$(document).ready(function() {
+    if (startPhase === "move_select") {
+        // 行動選択フェーズ表示
+        $('#move-select-area').show();
+        $('#quiz-area').hide();
+        $('#subject-area').hide();
+        $('#item-area').hide();
+    }
+});
+
+
 
 // 問題を読み込む関数（改善版）
 async function loadQuestion() {
@@ -179,6 +194,10 @@ async function checkAnswer(selectedIndex) {
 
     const isCorrect = selectedIndex === currentQuestion.correct_answer;
 
+    // 回答結果を記録（科目名と正誤をlocalStorageに保存）
+    const subject = window.currentSubject; 
+    recordAnswer(subject, isCorrect);
+
     // 選択した選択肢をハイライト
     $('.choice').each(function(index) {
         if (index === selectedIndex) {
@@ -201,8 +220,23 @@ async function checkAnswer(selectedIndex) {
 
     // HPの更新（戦闘終了判定も含む）
     if (isCorrect) {
+        // URLパスから科目を取り出す
+        const pathParts = window.location.pathname.split('/');
+        const subject = pathParts[2];
+        const buf = localStorage.getItem('selectedSubject')
         // 正解時は敵にダメージ
-        updateEnemyHP(-20);
+        if (buf === subject) {
+            updateEnemyHP(PlayerAT * 2);
+            localStorage.removeItem('selectedSubject');  // buf を削除
+        } else {
+            updateEnemyHP(PlayerAT);
+        }
+        // 2秒後に敵からの反撃
+        setTimeout(() => {
+            if (!battleEnded) { // 戦闘が終わってなければ攻撃
+                updatePlayerHP(EnemyAT/2);
+            }
+        }, 1000);
         // HPアニメーション完了後に次の問題ボタンを表示
         $('#enemy-hp').one('transitionend', function() {
             showNextQuestionButton();
@@ -210,8 +244,12 @@ async function checkAnswer(selectedIndex) {
         // transitionendが発火しない場合のフォールバック
         setTimeout(showNextQuestionButton, 1000);
     } else {
-        // 不正解時はプレイヤーにダメージ
-        updatePlayerHP(-10);
+        // 2秒後に敵からの反撃
+        setTimeout(() => {
+            if (!battleEnded) { // 戦闘が終わってなければ攻撃
+                updatePlayerHP(EnemyAT);
+            }
+        }, 1000);
         // HPアニメーション完了後に次の問題ボタンを表示
         $('#player-hp').one('transitionend', function() {
             showNextQuestionButton();
@@ -244,8 +282,7 @@ $(document).ready(async function () {
     // 問題数をリセット
     questionCount = 0;
 
-    updatePlayerHP(0);  // 表示更新（変化量0で現在値反映）
-    updateEnemyHP(0);
+    initHPBars();
 
     // 初回問題読み込み
     try {
@@ -263,31 +300,34 @@ function checkBattleEnd() {
         battleEnded = true;
         setTimeout(() => {
             // ゲームオーバー処理
-            localStorage.removeItem('playerHP');
-            localStorage.removeItem('enemyHP');
-            // ゲームオーバー画面に遷移
-            showGameOverScreen();
+            // URLクエリから stage を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage') || 1;
+
+            const data = {
+                stage: stage, 
+            };
+
+            localStorage.clear();
+            postAndRedirect('/gameover', data);
         }, 1000);
     }
-}
-
-function showGameOverScreen() {
-    // ゲームオーバー画面を表示する関数
-    // 方法1: 別のHTMLページに遷移
-    window.location.href = '/gameover';
-
-    // 方法2: 同じページ内でゲームオーバー画面を表示
-    // document.getElementById('battle-container').style.display = 'none';
-    // document.getElementById('gameover-container').style.display = 'block';
-}
     if (enemyHP <= 0) {
         battleEnded = true;
         setTimeout(() => {
-            alert("敵を倒しました！勝利です！");
             // 勝利処理
-            localStorage.removeItem('playerHP');
-            localStorage.removeItem('enemyHP');
-            window.location.href = '/result';  // リザルト画面に移動
+            const answerHistory = localStorage.getItem('answerHistory') || '{}';
+            // URLクエリから stage を取得
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage') || 1;
+
+            const data = {
+                history: answerHistory,
+                stage: stage, 
+            };
+
+            localStorage.clear();
+            postAndRedirect('/result', data);
         }, 1000);
     }
 }
@@ -320,6 +360,26 @@ function updateEnemyHP(amount) {
     setTimeout(() => {
         checkBattleEnd();
     }, 300);
+}
+
+function initHPBars() {
+    const $player = $('#player-hp');
+    const $enemy = $('#enemy-hp');
+
+    $player.css('transition', 'none');
+    $enemy.css('transition', 'none');
+
+    // 初期値を反映（アニメーションなし）
+    $player.css('width', (playerHP / maxPlayerHP) * 100 + '%')
+           .css('background-color', getHPColor((playerHP / maxPlayerHP) * 100));
+    $enemy.css('width', (enemyHP / maxEnemyHP) * 100 + '%')
+          .css('background-color', getHPColor((enemyHP / maxEnemyHP) * 100));
+
+    // 0.1秒後にアニメーション有効
+    setTimeout(() => {
+        $player.css('transition', 'width 0.3s ease-in-out');
+        $enemy.css('transition', 'width 0.3s ease-in-out');
+    }, 100);
 }
 
 // 選択肢クリック時の処理
@@ -355,9 +415,8 @@ $(document).on('click', '#next-question-btn', async function() {
     $('.next-question-container').hide();
 
     try {
-        // 新しい問題を読み込み
-        await loadQuestion();
-        console.log('次の問題の読み込みが完了しました');
+        $('#quiz-area').hide();
+        $('#move-select-area').show();
     } catch (error) {
         console.error('次の問題の読み込みでエラーが発生しました:', error);
         // エラー時はフォールバック問題を表示
@@ -382,3 +441,102 @@ $(function() {
         $('#overlay').fadeOut();
     });
 });
+
+
+
+
+
+function selectMovement(action) {
+    console.log('選択された行動:', action);
+
+    if (action === 'attack') {
+        $('#move-select-area').hide();
+        $('#subject-area').show();
+    } else if (action === 'item') {
+        $('#move-select-area').hide();
+        $('#item-area').show();
+    }
+}
+
+
+function closeItemModal() {
+    $('#item-area').hide();
+    $('#move-select-area').show();
+}
+
+
+function selectItem(item) {
+    console.log('選択されたアイテム:', item);
+
+    if (item === '1') {
+        updatePlayerHP(4);
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '2') {
+        updatePlayerHP(15);
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '3') {
+        updatePlayerHP(40);
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '4') {
+        localStorage.setItem('selectedSubject', 'math');
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '5') {
+        localStorage.setItem('selectedSubject', 'kanji');
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    } else if (item === '6') {
+        localStorage.setItem('selectedSubject', 'english');
+        $('#item-area').hide();
+        $('#move-select-area').show();
+    }
+}
+
+
+
+
+
+// 回答結果を保存（subject: 科目名, isCorrect: true/false）
+function recordAnswer(subject, isCorrect) {
+    // 既存データを取得（なければ初期化）
+    let data = localStorage.getItem('answerHistory');
+    data = data ? JSON.parse(data) : { subjects: {} };
+
+    // 科目別のカウント
+    if (!data.subjects[subject]) {
+        data.subjects[subject] = { correct: 0, total: 0 };
+    }
+    data.subjects[subject].total++;
+    if (isCorrect) data.subjects[subject].correct++;
+
+    // 保存
+    localStorage.setItem('answerHistory', JSON.stringify(data));
+}
+
+
+
+function postAndRedirect(url, data) {
+    // localStorageの全削除
+    localStorage.clear();
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = url;
+
+    // データをhiddenフィールドでセット
+    for (const key in data) {
+        if (data.hasOwnProperty(key)) {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = key;
+            input.value = data[key];
+            form.appendChild(input);
+        }
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+}

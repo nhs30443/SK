@@ -162,7 +162,9 @@
     </script>
 
     <script>
+        window.itemCounts = {{ item_counts | tojson }};
         window.PlayerAT = -{{ at }};
+        window.enemyWeakNumber = {{ enemy_weak_number }};
         const currentStage = {{ stage|tojson }};
         function selectSubject(subject) {
             console.log('選択された科目:', subject);
