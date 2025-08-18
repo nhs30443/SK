@@ -464,8 +464,8 @@ def index():
 
 
 # ログアウト
-@app.route('/clear')
-def clear():
+@app.route('/logout')
+def logout():
     session.clear()
     return redirect(url_for("index"))
 
@@ -1376,6 +1376,11 @@ def subject():
     return render_template("subject.html")
 
 
+# clear
+@app.route('/clear')
+def clear():
+    return render_template("clear.html")
+
 # リザルト画面
 @app.route('/result', methods=['POST'])
 @login_required
@@ -1528,7 +1533,7 @@ def result():
 
     # 結果をセッションに保存してリダイレクト
     session['results_data'] = results_data
-    return redirect(url_for('result_get'))
+    return redirect(url_for('clear'))
 
 @app.route('/result', methods=['GET'])
 @login_required
@@ -1546,16 +1551,11 @@ def gameover():
     return render_template("gameover.html", stage=stage)
 
 
-# clear
-@app.route('/clear')
-def clear_screen():
-    return render_template("clear.html")
-
 
 # デバッグ用
 @app.route('/test')
 def test():
-    return render_template("xxx.html")
+    return render_template("clear.html")
 
 
 

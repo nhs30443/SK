@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ゲームクリア</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/clear.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;500;600;700&family=DotGothic16&family=Silkscreen:wght@400;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="game-container">
+        <img src="{{ url_for('static', filename='images/background2.png') }}" alt="背景です" class="background">
+
+        <!-- 紙吹雪エフェクト -->
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+        <div class="confetti"></div>
+
+        <div class="game-clear-title">CLEAR</div>
+
+        <div class="actions">
+            <a href="{{ url_for('result_get') }}" class="action-btn home">リザルトへ</a>
+        </div>
+    </div>
+
+  <!-- HPバー（プレイヤーは0、敵は満タン） -->
+    <div class="player-hp-container">
+        <span class="hp-label">あなた</span>
+        <div class="hp-bar">
+            <div class="hp-fill" id="player-hp" style="width: 100%;"></div>
+        </div>
+    </div>
+
+    <div class="enemy-hp-container">
+        <span class="hp-label">敵</span>
+        <div class="hp-bar">
+            <div class="hp-fill" id="enemy-hp" style="width: 0%;"></div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/clear.js') }}"></script>
+</body>
+
+</html>

@@ -114,7 +114,6 @@ async function loadUserStats() {
 
     } catch (error) {
         console.error('統計データの取得に失敗:', error);
-        showError('統計データの取得に失敗しました');
         return null;
     }
 }
@@ -536,3 +535,15 @@ window.addEventListener('beforeunload', function() {
     // 必要に応じてクリーンアップ処理を追加
     console.log('結果画面をアンロード中...');
 });
+
+// 数秒後に「タップでホームに」を表示
+setTimeout(() => {
+    const tapHome = document.getElementById('tap-home');
+    if (tapHome) {
+        tapHome.style.opacity = '1';
+        // タップでトップページへ
+        tapHome.addEventListener('click', () => {
+            window.location.href = '/main';
+        });
+    }
+}, 3000); // 3秒後に表示
