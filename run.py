@@ -20,15 +20,15 @@ genai.configure(api_key=GEMINI_API_KEY)
 # 敵データ（例）
 ENEMY_DATA = {
     1: {"name": "スライム", "image": "01_.png", "hp": 100, "attack": -6, "coin": 210, "exp": 560},
-    2: {"name": "ゴースト", "image": "02_.png", "hp": 130, "attack": -8, "coin": 270, "exp": 730},
-    3: {"name": "ゴブリン", "image": "03_.png", "hp": 150, "attack": -10, "coin": 350, "exp": 945},
-    4: {"name": "ウルフ", "image": "04_.png", "hp": 180, "attack": -12, "coin": 460, "exp": 1230},
-    5: {"name": "ミミック", "image": "05_.png", "hp": 210, "attack": -14, "coin": 600, "exp": 1600},
-    6: {"name": "スケルトン", "image": "06_.png", "hp": 250, "attack": -18, "coin": 770, "exp": 2085},
-    7: {"name": "じしょモンスター", "image": "07_.png", "hp": 300, "attack": -20, "coin": 1000, "exp": 2700},
-    8: {"name": "さまようよろい", "image": "08_.png", "hp": 450, "attack": -22, "coin": 1300, "exp": 3520},
-    9: {"name": "ゴーレム", "image": "09_.png", "hp": 650, "attack": -26, "coin": 1690, "exp": 4570},
-    10: {"name": "ドラゴン", "image": "10_0.png", "hp": 1000, "attack": -30, "coin": 3500, "exp": 8910}
+    2: {"name": "ゴースト", "image": "02_.png", "hp": 160, "attack": -8, "coin": 270, "exp": 730},
+    3: {"name": "ゴブリン", "image": "03_.png", "hp": 220, "attack": -10, "coin": 350, "exp": 945},
+    4: {"name": "ウルフ", "image": "04_.png", "hp": 300, "attack": -12, "coin": 460, "exp": 1230},
+    5: {"name": "ミミック", "image": "05_.png", "hp": 380, "attack": -14, "coin": 600, "exp": 1600},
+    6: {"name": "スケルトン", "image": "06_.png", "hp": 480, "attack": -18, "coin": 770, "exp": 2085},
+    7: {"name": "じしょモンスター", "image": "07_.png", "hp": 580, "attack": -20, "coin": 1000, "exp": 2700},
+    8: {"name": "さまようよろい", "image": "08_.png", "hp": 700, "attack": -22, "coin": 1300, "exp": 3520},
+    9: {"name": "ゴーレム", "image": "09_.png", "hp": 820, "attack": -26, "coin": 1690, "exp": 4570},
+    10: {"name": "ドラゴン", "image": "10_0.png", "hp": 1000, "attack": -38, "coin": 3500, "exp": 8910}
 }
 
 
