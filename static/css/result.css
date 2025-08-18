@@ -166,3 +166,59 @@ body {
     font-weight: bold;
     color: #444;
 }
+
+
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 表示とバウンス */
+#tap-home {
+    opacity: 0;
+    position: fixed;
+    bottom: 20px;
+    right: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1000;
+    color: #555; /* 文字色はお好みで */
+}
+
+#tap-home.show {
+    animation: fadeIn 1s ease forwards, floatLoop 1.5s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes floatLoop {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+

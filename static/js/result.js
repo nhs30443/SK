@@ -539,11 +539,26 @@ window.addEventListener('beforeunload', function() {
 // 数秒後に「タップでホームに」を表示
 setTimeout(() => {
     const tapHome = document.getElementById('tap-home');
+    const resultsPanel = document.querySelector('.results-panel');
     if (tapHome) {
-        tapHome.style.opacity = '1';
-        // タップでトップページへ
-        tapHome.addEventListener('click', () => {
-            window.location.href = '/main';
-        });
+        tapHome.classList.add('show');
     }
-}, 3000); // 3秒後に表示
+}, 3000); // 3秒後
+
+document.addEventListener("DOMContentLoaded", () => {
+    const resultsPanel = document.querySelector('.results-panel');
+    if (resultsPanel) {
+        // 最初は無効化
+        resultsPanel.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            resultsPanel.style.pointerEvents = 'auto';
+            resultsPanel.style.cursor = 'pointer';
+
+            resultsPanel.addEventListener('click', () => {
+                window.location.href = '/main';
+            });
+        }, 3000); // 3秒後に有効化
+    }
+});
+
