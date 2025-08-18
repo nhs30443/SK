@@ -1546,6 +1546,12 @@ def gameover():
     return render_template("gameover.html", stage=stage)
 
 
+# clear
+@app.route('/clear')
+def clear_screen():
+    return render_template("clear.html")
+
+
 # デバッグ用
 @app.route('/test')
 def test():
